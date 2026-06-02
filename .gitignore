@@ -1,5 +1,7 @@
 # Editor backups
 *~
+\#*\#
+.\#*
 *.swp
 *.swo
 *.orig
