@@ -5,7 +5,6 @@ LARGE   := $(wildcard ../cases/??_large_*.in)
 
 fmt:
 	uv run --with ruff ruff format .
-	uv run --with ruff ruff check --select I --fix .
 
 lint:
 	uv run --with ruff ruff check .

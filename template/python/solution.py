@@ -1,8 +1,9 @@
-import json, sys
+import json
+import sys
 
 
 def solve(n, data):
-    # TODO
+    # TODO: implement
     pass
 
 
