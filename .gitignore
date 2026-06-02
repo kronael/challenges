@@ -1,0 +1,54 @@
+# Editor backups
+*~
+*.swp
+*.swo
+*.orig
+*.bak
+
+# OS
+.DS_Store
+.DS_Store?
+Thumbs.db
+ehthumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.iml
+.project
+.classpath
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.venv/
+venv/
+.pytest_cache/
+*.egg-info/
+dist/
+*.egg
+.ruff_cache/
+
+# uv
+uv.lock
+
+# Go
+*.exe
+*.test
+*.out
+/tmp/
+
+# Rust
+target/
+Cargo.lock
+
+# Benchmark artefacts
+*.prof
+*.trace
+perf.data
+
+# Large generated inputs (regenerate with the reference impl)
+cases/??_large_*.in
+cases/??_large_*.out
