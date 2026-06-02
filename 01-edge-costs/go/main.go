@@ -14,29 +14,51 @@ type input struct {
 	Loads []*int   `json:"loads"` // nil = missing
 }
 
-type vertex struct {
-	I int
-	V int
-}
-
 func solve(n int, edges [][2]int, loads []*int) []int {
 
-	vis := []vertex{}
-	for i := 0; i < len(loads); i++ {
-		if *loads[i] == -1 {
-			vis = append(vis, vertex{i, *loads[i]})
+	vis := []int{}
+	for i, v := range loads {
+		if v != nil {
+			vis = append(vis, i)
 		}
 	}
 
-	for {
-		slices.SortFunc(vis, func(a, b vertex) int {
-			return b.V - a.V
-		})
-		vertex := vis[len(vis)-1]
-
+	for _, v := range slices.Clone(edges) {
+		edges = append(edges, [2]int{v[1], v[0]})
 	}
 
-	return []int{1, 2}
+	for {
+		slices.Sort(vis)
+		if len(vis) == 0 {
+			break
+		}
+		vertex := vis[len(vis)-1]
+		vis = vis[:len(vis)-1]
+		fmt.Println(*loads[vertex])
+		for _, edge := range edges {
+			max_load := 1
+			if vertex == edge[0] && loads[edge[1]] == nil {
+				for _, other := range edges {
+					if edge[1] == other[0] {
+						v := loads[other[1]]
+						if v != nil && *v > max_load {
+							max_load = *v
+						}
+					}
+				}
+				v := max_load - 1
+				loads[edge[1]] = &v
+				vis = append(vis, edge[1])
+			}
+		}
+	}
+
+	ans := []int{}
+	for _, v := range loads {
+		ans = append(ans, *v)
+	}
+
+	return ans
 }
 
 func main() {
