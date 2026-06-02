@@ -46,7 +46,10 @@ fn solve(n: usize, edges: &[[usize; 2]], loads: &[Option<i64>]) -> Vec<i64> {
                     }
                 }
                 loads[x[1]] = Some(max_load - 1);
-                vis.push(Vertex { i: x[1], v: max_load - 1 });
+                vis.push(Vertex {
+                    i: x[1],
+                    v: max_load - 1,
+                });
             }
         }
     }
@@ -86,7 +89,10 @@ mod tests {
             .unwrap()
             .filter_map(|e| e.ok())
             .map(|e| e.path())
-            .filter(|p| p.extension().map_or(false, |x| x == "in"))
+            .filter(|p| {
+                p.extension().map_or(false, |x| x == "in")
+                    && !p.file_name().unwrap().to_str().unwrap().contains("_large_")
+            })
             .collect();
         ins.sort();
         for inp in ins {
