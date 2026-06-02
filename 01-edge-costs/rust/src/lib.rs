@@ -17,10 +17,6 @@ pub fn solve(n: usize, edges: &[[usize; 2]], loads: &[Option<i64>]) -> Vec<i64> 
 
     let mut vis: BinaryHeap<Vertex> = loads.iter().enumerate().filter_map(|(i, v)| v.map(|v| Vertex { i, v })).collect();
 
-    for x in vis.clone() {
-        println!("{}", x.v);
-    }
-
     while let Some(vertex) = vis.pop() {
         println!("{}={}", vertex.i, vertex.v);
         for x in &edges {

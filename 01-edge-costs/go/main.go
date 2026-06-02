@@ -8,14 +8,14 @@ import (
 )
 
 type input struct {
-	N     int     `json:"n"`
+	N     int      `json:"n"`
 	Edges [][2]int `json:"edges"`
-	Loads []*int  `json:"loads"` // nil = missing
+	Loads []*int   `json:"loads"` // nil = missing
 }
 
 func solve(n int, edges [][2]int, loads []*int) []int {
 	// TODO: return loads slice with nil values filled in
-	return nil
+	return {}
 }
 
 func main() {
