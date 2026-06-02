@@ -1,0 +1,1 @@
+{"n": 3, "initial": [5, 5, 5], "queries": [["sum", 3], ["update", 1, -5], ["sum", 1], ["sum", 3]]}
