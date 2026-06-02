@@ -16,28 +16,30 @@ type input struct {
 
 func solve(n int, edges [][2]int, loads []*int) []int {
 
-	vis := []int{}
+	vis := [][2]int{}
 	for i, v := range loads {
 		if v != nil {
-			vis = append(vis, i)
+			vis = append(vis, [2]int{i, *v})
 		}
 	}
 
-	for _, v := range slices.Clone(edges) {
+	for _, v := range edges {
 		edges = append(edges, [2]int{v[1], v[0]})
 	}
 
 	for {
-		slices.Sort(vis)
+		slices.SortFunc(vis, func(a, b [2]int) int {
+			return a[1] - b[1]
+		})
 		if len(vis) == 0 {
 			break
 		}
-		vertex := vis[len(vis)-1]
+		vx := vis[len(vis)-1]
+		vertex := vx[0]
 		vis = vis[:len(vis)-1]
-		fmt.Println(*loads[vertex])
 		for _, edge := range edges {
-			max_load := 1
 			if vertex == edge[0] && loads[edge[1]] == nil {
+				max_load := 1
 				for _, other := range edges {
 					if edge[1] == other[0] {
 						v := loads[other[1]]
@@ -48,13 +50,17 @@ func solve(n int, edges [][2]int, loads []*int) []int {
 				}
 				v := max_load - 1
 				loads[edge[1]] = &v
-				vis = append(vis, edge[1])
+				vis = append(vis, [2]int{edge[1], v})
 			}
 		}
 	}
 
 	ans := []int{}
 	for _, v := range loads {
+		if v == nil {
+			x := 0
+			v = &x
+		}
 		ans = append(ans, *v)
 	}
 
