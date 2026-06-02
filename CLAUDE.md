@@ -18,8 +18,8 @@ NN-slug/
   README.md              problem statement, constraints, examples, source link
   cases/                 NN.in / NN.out          (io only)
   python/  solution.py · test_solution.py · Makefile
-  go/      solution.go · solution_test.go · go.mod · Makefile
-  rust/    src/lib.rs · src/main.rs · src/bin/bench.rs · tests/ · Cargo.toml · Makefile
+  go/      main.go · solution_test.go · go.mod · Makefile
+  rust/    src/lib.rs · src/main.rs · tests/ · Cargo.toml · Makefile
 ```
 
 sys challenges have no `python/`; rust-only sys challenges (04, 06) have no `go/`.
@@ -64,7 +64,7 @@ are timed by `bench`; the `??_large_` glob is what selects them.
 
 - **py** — `uv run` (pytest, ruff); no venv to manage.
 - **go** — stdlib `go test`.
-- **rs** — `cargo test`; `src/bin/bench.rs` is the timed binary.
+- **rs** — `cargo test`. io: `src/main.rs` is the timed binary; sys: `src/bin/bench.rs`.
 
 Per-challenge language set is in the README catalog (most are `py go rs`; some
 hard io and the sys ones drop a language).
