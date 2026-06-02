@@ -95,12 +95,19 @@ write a Python reference, scaffold Go and Rust stubs in challenges/31-slug/."
 | [28](28-prime-pair-sets/) | Prime Pair Sets | Miller-Rabin + clique search | hard | [PE #60](https://projecteuler.net/problem=60) | py go rs |
 | [29](29-distinct-substrings/) | Distinct Substrings | suffix array + LCP | hard | [CSES #2105](https://cses.fi/problemset/task/2105) | py go rs |
 | [30](30-max-flow/) | Max Flow / Min Cut | Dinic's algorithm | hard | [CSES #1694](https://cses.fi/problemset/task/1694) | py go rs |
+| [31](31-go-memory-model/) | Go Memory Model Quizzes | happens-before, atomics, false sharing | hard | go.dev/ref/mem | go |
 | [32](32-prolog-thinking/) | Relational Programming | logic/CSP, run predicates backward | med | Prolog / python-constraint | py |
 | [33](33-haskell-thinking/) | Lazy Eval & Corecursion | infinite generators, pipelines | med | Haskell / itertools | py |
+| [34](34-trie-autocomplete/) | Trie + Autocomplete | trie, DFS, lexicographic order | med | [LeetCode 1268](https://leetcode.com/problems/search-suggestions-system/) | py go rs |
+| [35](35-lru-cache/) | LRU Cache | doubly-linked list + hashmap, O(1) | med | [LeetCode 146](https://leetcode.com/problems/lru-cache/) | py go rs |
+| [36](36-running-median/) | Running Median | two heaps, balance invariant | med | [LeetCode 295](https://leetcode.com/problems/find-median-from-data-stream/) | py go rs |
+| [37](37-fenwick-tree/) | Fenwick Tree (BIT) | prefix sums, bit trick i&(-i) | med | [CP-Algorithms](https://cp-algorithms.com/data_structures/fenwick.html) | py go rs |
+| [38](38-skip-list/) | Skip List | probabilistic linked list, O(log n) | hard | [Pugh 1990](https://15721.courses.cs.cmu.edu/spring2018/papers/08-oltpindexes1/pugh-skiplists-cacm1990.pdf) | py go rs |
+| [39](39-rope/) | Rope (String Builder) | binary tree of fragments, O(log n) concat | hard | [Boehm et al. 1995](https://www.cs.rit.edu/usr/local/pub/jeh/courses/QUARTERS/FP/Labs/CedarRope/rope-paper.pdf) | py go rs |
 
-**Ready (cases or stress tests in place):** 01–20  
-**Scaffolded (README + harness, `cases/` still empty):** 21–30  
-**Paradigm-thinking (Python-only, tests in place):** 32–33
+**Ready (cases or stress tests in place):** 01–20, 31–33  
+**Scaffolded (README + harness, cases empty):** 21–30  
+**Building now:** 34–39 (data structures)
 
 ---
 
