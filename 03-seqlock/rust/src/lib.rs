@@ -1,14 +1,26 @@
 use std::cell::UnsafeCell;
-use std::sync::atomic::fence;
-use std::sync::atomic::AtomicU64;
-use std::sync::atomic::Ordering;
+use std::sync::atomic::{AtomicU64, Ordering};
+
+// TODO: implement write() and read() using the seqlock protocol.
+// The stub compiles but panics at runtime — replace the bodies.
+//
+// Protocol:
+//   write: seq++ (now odd), memcpy data, seq++ (now even), release fences around both.
+//   read:  load seq (must be even), memcpy data, load seq again; if either seq was
+//          odd or the two loads differ, return false (caller must retry).
+//
+// Rules:
+//   - No Mutex or OS primitive.
+//   - read() returning false is correct behaviour — the caller spins.
+//   - Use acquire/release fences; do NOT use SeqCst unless you can justify it.
 
 pub struct Seqlock {
     pub seq: AtomicU64,
     pub data: UnsafeCell<[u8; 64]>,
 }
 
-// SAFETY: the seqlock protocol ensures readers never observe torn data.
+// SAFETY: Seqlock is designed for concurrent access; the seqlock protocol
+// ensures readers never observe torn data when used correctly.
 unsafe impl Send for Seqlock {}
 unsafe impl Sync for Seqlock {}
 
@@ -20,25 +32,19 @@ impl Seqlock {
         }
     }
 
+    /// Write a 64-byte payload. Must be called from exactly one writer thread.
     pub fn write(&self, buf: &[u8; 64]) {
-        let seq = self.seq.load(Ordering::Relaxed);
-        self.seq.store(seq + 1, Ordering::Relaxed);
-        fence(Ordering::Release);
-        // SAFETY: single writer; odd seq tells readers a write is in progress.
-        unsafe { (*self.data.get()).copy_from_slice(buf) };
-        self.seq.store(seq + 2, Ordering::Release);
+        // TODO: implement seqlock write
+        let _ = buf;
+        todo!("implement seqlock write")
     }
 
+    /// Attempt to read the payload into `out`.
+    /// Returns false if a concurrent write was detected — the caller must retry.
     pub fn read(&self, out: &mut [u8; 64]) -> bool {
-        let s1 = self.seq.load(Ordering::Acquire);
-        if s1 & 1 != 0 {
-            return false;
-        }
-        // SAFETY: read into a local; validity is confirmed by the seq recheck.
-        unsafe { *out = *self.data.get() };
-        fence(Ordering::Acquire);
-        let s2 = self.seq.load(Ordering::Relaxed);
-        s1 == s2
+        // TODO: implement seqlock read
+        let _ = out;
+        todo!("implement seqlock read")
     }
 }
 
