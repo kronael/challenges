@@ -78,6 +78,14 @@ hard io and the sys ones drop a language).
 4. Implement `solve()` in each language stub — the harness is already wired.
 5. Add a row to the catalog table in the repo `README.md`.
 
+## No debug prints
+
+Do not add print/println/fmt.Println debug output to solutions. The io test
+harness compares stdout exactly — any extra line breaks the test. More
+importantly: if you need a print to understand what the code does, you don't
+have a mental model of it yet. Build the model first, write the code second.
+The race detector and the stress test are your debugger for sys challenges.
+
 ## State of the repo
 
 - 01, 08–20: full cases + tests (ready to solve).

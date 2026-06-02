@@ -1,33 +1,36 @@
-# NN — Title
+# NN — TODO title
 
-One paragraph problem statement. Be precise about constraints. State what makes it hard.
+TODO: one-paragraph problem statement. State the constraints and what makes it hard.
 
 ## Input
 
 ```json
-{"field": value, ...}
+{"n": 0, "data": []}
 ```
 
-Constraints: `1 ≤ n ≤ 10⁵`, values fit in `i64`.
+TODO: constraints, e.g. `1 ≤ n ≤ 10⁵`.
 
 ## Output
 
 ```
-space-separated values on one line
+TODO: space-separated values on one line
 ```
 
-## Examples
+## Example
 
 ```
-{"n":4,"data":[1,3,2,4]}   →   1 2 3 4
+TODO input   →   TODO output
 ```
+
+Source: TODO url
 
 ## Run
 
 ```
-cd python && make test && make bench
-cd go     && make test && make bench
 cd rust   && make test && make bench
+cd go     && make test && make bench
+cd python && make test && make bench
 ```
 
-Source: [url](url)
+> No debug prints. Extra stdout breaks the test harness and signals you don't
+> have a mental model yet. Build the model, then write the code.
