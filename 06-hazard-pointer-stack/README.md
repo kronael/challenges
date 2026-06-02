@@ -1,7 +1,6 @@
 # 06 — Hazard-Pointer Treiber Stack
 
-Lock-free Treiber stack with hazard-pointer reclamation. No GC, no leaks, no
-use-after-free.
+Lock-free Treiber stack with hazard-pointer reclamation. No GC, no leaks, no UAF.
 
 The ABA trap: `pop` reads `head -> A`, is preempted; another thread pops A, pops
 B, pushes A back. Now `pop` CASes `head` from A to A's stale `next` (pointing at
@@ -18,6 +17,4 @@ freed after a reader published but before it re-checked.
 
 The test: 16 threads each push+pop 10k times on a payload whose `Drop` bumps an
 atomic counter; at the end **constructs == drops, live == 0** — leaks (>0),
-double-frees (<0). A use-after-free trips the counter or segfaults.
-
-`make test` · `make bench` (push+pop throughput, 16 threads)
+double-frees (<0), UAF trips the counter or segfaults. `make test` · `make bench`

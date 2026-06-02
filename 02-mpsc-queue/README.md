@@ -1,6 +1,7 @@
 # 02 — Vyukov MPSC Queue
 
-Intrusive linked-list queue: many producers `push`, one consumer `try_pop`. Atomics only.
+Intrusive linked-list queue: many producers `push`, one consumer `try_pop`.
+Atomics only, no locks on the hot path.
 
 The trap is the broken-link window. `push` does `prev = head.swap(node)` then
 `prev.next = node` as two steps; between them the new node is the head but
