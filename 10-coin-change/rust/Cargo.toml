@@ -1,14 +1,7 @@
 [package]
-name = "10-coin-change"
+name = "coin-change"
 version = "0.1.0"
 edition = "2021"
-
-[[bin]]
-name = "10-coin-change"
-path = "src/main.rs"
-
-[lib]
-path = "src/lib.rs"
 
 [dependencies]
 serde = { version = "1", features = ["derive"] }

@@ -1,3 +1,3 @@
-module 28-josephus
+module prime-pair-sets
 
 go 1.22

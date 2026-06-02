@@ -1,14 +1,7 @@
 [package]
-name = "20-matrix-exp"
+name = "matrix-exp"
 version = "0.1.0"
 edition = "2021"
-
-[[bin]]
-name = "20-matrix-exp"
-path = "src/main.rs"
-
-[lib]
-path = "src/lib.rs"
 
 [dependencies]
 serde = { version = "1", features = ["derive"] }

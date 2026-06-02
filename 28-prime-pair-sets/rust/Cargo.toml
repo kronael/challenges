@@ -1,14 +1,7 @@
 [package]
-name = "28-josephus"
+name = "prime-pair-sets"
 version = "0.1.0"
 edition = "2021"
-
-[[bin]]
-name = "28-josephus"
-path = "src/main.rs"
-
-[lib]
-path = "src/lib.rs"
 
 [dependencies]
 serde = { version = "1", features = ["derive"] }

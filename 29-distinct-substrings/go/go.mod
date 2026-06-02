@@ -1,3 +1,3 @@
-module 29-convex-hull
+module distinct-substrings
 
 go 1.22

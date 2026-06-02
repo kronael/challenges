@@ -1,3 +1,3 @@
-module 30-network-flow
+module max-flow
 
 go 1.22
