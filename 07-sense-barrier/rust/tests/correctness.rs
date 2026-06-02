@@ -77,5 +77,9 @@ fn reusable_two_threads() {
     for handle in handles {
         handle.join().unwrap();
     }
-    assert_eq!(total.load(Ordering::Relaxed), 2 * 10_000, "missed or extra barrier passes");
+    assert_eq!(
+        total.load(Ordering::Relaxed),
+        2 * 10_000,
+        "missed or extra barrier passes"
+    );
 }

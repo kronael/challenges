@@ -12,7 +12,9 @@ struct Node<T> {
 
 impl<T: Send> Stack<T> {
     pub fn new() -> Self {
-        Stack { head: AtomicPtr::new(std::ptr::null_mut()) }
+        Stack {
+            head: AtomicPtr::new(std::ptr::null_mut()),
+        }
     }
 
     pub fn push(&self, val: T) {
@@ -31,5 +33,7 @@ impl<T: Send> Stack<T> {
 }
 
 impl<T: Send> Default for Stack<T> {
-    fn default() -> Self { Self::new() }
+    fn default() -> Self {
+        Self::new()
+    }
 }

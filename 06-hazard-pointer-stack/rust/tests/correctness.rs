@@ -47,13 +47,24 @@ fn no_use_after_free_no_leak() {
             thread::spawn(move || {
                 barrier.wait();
                 let mut local_popped = 0u64;
+                // Mixed pattern: push-heavy threads grow the stack while
+                // pop-heavy threads recycle nodes, maximising the chance that a
+                // node is reclaimed while a peer still holds a hazard pointer
+                // into it (the use-after-free / ABA window).
+                let pop_heavy = thread_id % 2 == 0;
                 for i in 0..OPS {
-                    stack.push(Tracked::new(thread_id as u64 * OPS + i));
-                    // Pop and immediately drop — exercises reclamation while
-                    // other threads may hold a hazard pointer into this node.
-                    if let Some(value) = stack.pop() {
-                        std::hint::black_box(value.0);
-                        local_popped += 1;
+                    if pop_heavy {
+                        if let Some(value) = stack.pop() {
+                            std::hint::black_box(value.0);
+                            local_popped += 1;
+                        }
+                        stack.push(Tracked::new(thread_id as u64 * OPS + i));
+                    } else {
+                        stack.push(Tracked::new(thread_id as u64 * OPS + i));
+                        if let Some(value) = stack.pop() {
+                            std::hint::black_box(value.0);
+                            local_popped += 1;
+                        }
                     }
                 }
                 popped.fetch_add(local_popped, Ordering::Relaxed);
@@ -74,7 +85,10 @@ fn no_use_after_free_no_leak() {
 
     let total_pushed = THREADS as u64 * OPS;
     let total_popped = popped.load(Ordering::Relaxed) + drained;
-    assert_eq!(total_popped, total_pushed, "popped {total_popped} of {total_pushed} — lost or duplicated nodes");
+    assert_eq!(
+        total_popped, total_pushed,
+        "popped {total_popped} of {total_pushed} — lost or duplicated nodes"
+    );
 
     // Drop the stack to flush any retired-but-not-yet-freed nodes.
     drop(Arc::try_unwrap(stack).ok().expect("stack still shared"));
@@ -83,10 +97,16 @@ fn no_use_after_free_no_leak() {
     let drops = DROPS.load(Ordering::Relaxed);
     let live = LIVE.load(Ordering::Relaxed);
 
-    assert_eq!(constructs, total_pushed, "construct count drifted — test harness bug");
+    assert_eq!(
+        constructs, total_pushed,
+        "construct count drifted — test harness bug"
+    );
     assert_eq!(
         drops, constructs,
         "dropped {drops} payloads but constructed {constructs} — leak (too few) or double-free (too many)"
     );
-    assert_eq!(live, 0, "{live} payloads still live — leak (>0) or double-free/use-after-free (<0)");
+    assert_eq!(
+        live, 0,
+        "{live} payloads still live — leak (>0) or double-free/use-after-free (<0)"
+    );
 }

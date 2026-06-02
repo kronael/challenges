@@ -1,5 +1,5 @@
-use std::sync::atomic::{AtomicIsize, AtomicPtr, Ordering};
 use std::cell::UnsafeCell;
+use std::sync::atomic::{AtomicIsize, AtomicPtr, Ordering};
 
 pub enum Steal<T> {
     Empty,
@@ -26,7 +26,9 @@ struct Buffer<T> {
 impl<T> Buffer<T> {
     fn new(cap: usize) -> *mut Self {
         assert!(cap.is_power_of_two());
-        let data = (0..cap).map(|_| UnsafeCell::new(unsafe { std::mem::zeroed() })).collect();
+        let data = (0..cap)
+            .map(|_| UnsafeCell::new(unsafe { std::mem::zeroed() }))
+            .collect();
         Box::into_raw(Box::new(Buffer { cap, data }))
     }
 

@@ -81,11 +81,20 @@ fn stress_work_stealing() {
 
     let mut seen = vec![false; TASKS as usize + 1];
     for value in all {
-        assert!(value >= 1 && value <= TASKS, "value {value} out of range — corrupt read");
-        assert!(!seen[value as usize], "value {value} consumed twice — last-element race lost");
+        assert!(
+            value >= 1 && value <= TASKS,
+            "value {value} out of range — corrupt read"
+        );
+        assert!(
+            !seen[value as usize],
+            "value {value} consumed twice — last-element race lost"
+        );
         seen[value as usize] = true;
     }
     // len == TASKS and all distinct in 1..=TASKS implies full coverage; assert
     // the first/last to make a gap failure legible if the invariants ever drift.
-    assert!(seen[1] && seen[TASKS as usize], "boundary task missing — loss");
+    assert!(
+        seen[1] && seen[TASKS as usize],
+        "boundary task missing — loss"
+    );
 }

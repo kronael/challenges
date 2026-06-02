@@ -43,5 +43,8 @@ fn main() {
     let ops = THREADS as u64 * OPS * 2; // push + pop
     let mops = ops as f64 / elapsed.as_secs_f64() / 1e6;
     println!("hazard-stack: {THREADS} threads, {ops} ops in {elapsed:.3?}");
-    println!("hazard-stack: {mops:.1} Mops/s (popped {})", popped.load(Ordering::Relaxed));
+    println!(
+        "hazard-stack: {mops:.1} Mops/s (popped {})",
+        popped.load(Ordering::Relaxed)
+    );
 }

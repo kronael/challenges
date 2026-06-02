@@ -8,7 +8,11 @@ pub struct Barrier {
 
 impl Barrier {
     pub fn new(n: usize) -> Self {
-        Barrier { n, count: AtomicUsize::new(n), sense: AtomicBool::new(false) }
+        Barrier {
+            n,
+            count: AtomicUsize::new(n),
+            sense: AtomicBool::new(false),
+        }
     }
 
     pub fn wait(&self) {

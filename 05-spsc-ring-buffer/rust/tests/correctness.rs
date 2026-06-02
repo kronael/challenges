@@ -39,7 +39,10 @@ fn ordered_delivery() {
                         None => std::hint::spin_loop(),
                     }
                 };
-                assert_eq!(value, expected, "out-of-order or missing message at position {expected}");
+                assert_eq!(
+                    value, expected,
+                    "out-of-order or missing message at position {expected}"
+                );
             }
             expected_received(&queue);
         })
@@ -52,7 +55,10 @@ fn ordered_delivery() {
 /// After receiving all MESSAGES, the queue must be empty: a stray Some here
 /// would mean a duplicate slipped through that the position check could not see.
 fn expected_received<const N: usize>(queue: &SpscQueue<u64, N>) {
-    assert!(queue.pop().is_none(), "queue not empty after draining all messages — duplicate produced");
+    assert!(
+        queue.pop().is_none(),
+        "queue not empty after draining all messages — duplicate produced"
+    );
 }
 
 #[test]
@@ -66,11 +72,17 @@ fn full_buffer_backpressure() {
         pushed += 1;
         assert!(pushed <= 8, "pushed more than capacity — full not detected");
     }
-    assert!(pushed == 8 || pushed == 7, "expected to fill 7 or 8 slots, filled {pushed}");
+    assert!(
+        pushed == 8 || pushed == 7,
+        "expected to fill 7 or 8 slots, filled {pushed}"
+    );
 
     // Drain in order.
     for expected in 0..pushed {
         assert_eq!(queue.pop(), Some(expected), "out-of-order drain after full");
     }
-    assert!(queue.pop().is_none(), "queue should be empty after full drain");
+    assert!(
+        queue.pop().is_none(),
+        "queue should be empty after full drain"
+    );
 }

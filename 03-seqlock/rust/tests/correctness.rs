@@ -87,9 +87,16 @@ fn no_torn_reads() {
     stop.store(true, Ordering::Relaxed);
     let written = writer.join().unwrap();
 
-    assert_eq!(torn.load(Ordering::Relaxed), 0, "torn reads detected — payload tore between epochs");
+    assert_eq!(
+        torn.load(Ordering::Relaxed),
+        0,
+        "torn reads detected — payload tore between epochs"
+    );
     // Sanity: the writer cycled and readers observed real, advancing values.
     // Guards against a degenerate impl that always reports the same payload.
     assert!(written > 1, "writer never advanced the sequence");
-    assert!(max_seen.load(Ordering::Relaxed) > 0, "readers never observed a written value");
+    assert!(
+        max_seen.load(Ordering::Relaxed) > 0,
+        "readers never observed a written value"
+    );
 }
