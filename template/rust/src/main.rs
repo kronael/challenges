@@ -10,7 +10,7 @@ struct Input {
 fn solve(n: usize, data: &[i64]) -> Vec<i64> {
     // TODO
     let _ = (n, data);
-    vec\![]
+    vec![]
 }
 
 fn main() {
@@ -18,7 +18,14 @@ fn main() {
     io::stdin().read_to_string(&mut buf).unwrap();
     let inp: Input = serde_json::from_str(&buf).unwrap();
     let result = solve(inp.n, &inp.data);
-    println\!("{}", result.iter().map(|v| v.to_string()).collect::<Vec<_>>().join(" "));
+    println!(
+        "{}",
+        result
+            .iter()
+            .map(|v| v.to_string())
+            .collect::<Vec<_>>()
+            .join(" ")
+    );
 }
 
 #[cfg(test)]
@@ -48,7 +55,7 @@ mod tests {
                 .map(|s| s.parse().unwrap())
                 .collect();
             let (n, data) = parse(&src);
-            assert_eq\!(solve(n, &data), want, "{:?}", inp.file_name().unwrap());
+            assert_eq!(solve(n, &data), want, "{:?}", inp.file_name().unwrap());
         }
     }
 }
