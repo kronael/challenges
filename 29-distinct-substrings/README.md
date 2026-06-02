@@ -1,36 +1,35 @@
 # 29 — Distinct Substrings (CSES #2105)
 
-Given a string of length n (1 ≤ n ≤ 10⁵, lowercase a–z), count the number
-of **distinct substrings**.
+Given a lowercase string `s` (length up to 10⁵), count the number of distinct non-empty substrings.
 
 ## Input / Output
 
 ```
-abab
+{"s":<string>}
 ---
-6
+<int>      number of distinct substrings
 ```
 
-(Distinct substrings of "abab": a, ab, aba, abab, b, ba, bab, bab — wait,
-without duplicates: a, ab, aba, abab, b, ba, bab = 7. But "a" appears twice
-as a substring position, counted once.)
-
-## Key idea
-
-Build the suffix array in O(n log n). Compute the LCP array with Kasai's
-algorithm. Answer = n(n+1)/2 − sum(LCP). Each LCP value removes the shared
-prefixes that would otherwise be double-counted as distinct substrings.
-
-## Input / Output format
+## Examples
 
 ```
-Stdin:  one string
-Stdout: one integer
+{"s":"abab"}
+→ 7
+
+{"s":"aaa"}
+→ 3
 ```
 
+## Key insight
+
+Build the suffix array and the LCP array (Kasai). Every substring is a prefix of some suffix; the total number of prefixes is `n(n+1)/2`, and adjacent suffixes in sorted order share `LCP` prefixes that would be double-counted, so the answer is `n(n+1)/2 − Σ LCP`.
+
+## Run
+
 ```
-cd go   && make test
-cd rust && make test
+cd python && make test
+cd go     && make test
+cd rust   && make test
 ```
 
 Source: [cses.fi/problemset/task/2105](https://cses.fi/problemset/task/2105)

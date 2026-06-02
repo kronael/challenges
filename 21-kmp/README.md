@@ -14,7 +14,7 @@ p1 p2 …      1-indexed start positions, ascending (empty line if none)
 
 ```
 {"text":"aababab","pattern":"abab"}
-→ 4
+→ 2 4
 
 {"text":"aaaa","pattern":"aa"}
 → 1 2 3

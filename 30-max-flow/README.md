@@ -1,39 +1,35 @@
-# 30 — Max Flow / Min Cut (CSES #1694 — Download Speed)
+# 30 — Max Flow (CSES #1694)
 
-n computers (1 ≤ n ≤ 500), m directed connections (1 ≤ m ≤ 1000), each with
-integer capacity c (1 ≤ c ≤ 10⁹). Find the **maximum flow** from node 1 to
-node n.
+Given a directed graph on `n` nodes (1-indexed) with integer edge capacities, find the maximum flow from node `1` to node `n`. Parallel edges add their capacities.
 
 ## Input / Output
 
 ```
-4 5
-1 2 3
-2 4 2
-1 3 4
-3 4 5
-4 1 3
+{"n":<int>,"edges":[[u,v,c],…]}      directed edge u→v with capacity c
 ---
-6
+<int>      maximum flow from node 1 to node n
 ```
 
-## Key ideas
-
-- Implement Dinic's algorithm: BFS to build level graph, DFS to push blocking
-  flow. Time O(V² × E), fast in practice.
-- Correctness: max-flow = min-cut (Ford-Fulkerson theorem). The min cut
-  partitions nodes into two sets; verify it equals the flow value.
-
-## Input / Output format
+## Examples
 
 ```
-Stdin:  n m, then m lines: a b c
-Stdout: one integer (max flow)
+{"n":4,"edges":[[1,2,3],[2,4,2],[1,3,4],[3,4,5]]}
+→ 6
+
+{"n":2,"edges":[[1,2,5],[1,2,7]]}
+→ 12
 ```
 
+## Key insight
+
+Dinic's algorithm: repeatedly BFS to build a level graph (shortest layers from the source), then DFS blocking flows along level-respecting edges. Each phase strictly increases the shortest augmenting path length, giving O(V²·E).
+
+## Run
+
 ```
-cd go   && make test
-cd rust && make test
+cd python && make test
+cd go     && make test
+cd rust   && make test
 ```
 
 Source: [cses.fi/problemset/task/1694](https://cses.fi/problemset/task/1694)
