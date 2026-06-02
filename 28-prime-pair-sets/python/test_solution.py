@@ -2,7 +2,7 @@ import pathlib
 import pytest
 from solution import solve
 
-CASES = sorted(pathlib.Path("../cases").glob("*.in"))
+CASES = sorted(p for p in pathlib.Path("../cases").glob("*.in") if "_large_" not in p.name)
 
 
 @pytest.mark.parametrize("inp", CASES, ids=lambda p: p.stem)

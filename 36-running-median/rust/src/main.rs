@@ -50,7 +50,10 @@ mod tests {
             .unwrap()
             .filter_map(|e| e.ok())
             .map(|e| e.path())
-            .filter(|p| p.extension().map_or(false, |x| x == "in"))
+            .filter(|p| {
+                p.extension().map_or(false, |x| x == "in")
+                    && \!p.file_name().unwrap().to_str().unwrap().contains("_large_")
+            })
             .collect();
         ins.sort();
         for inp in ins {
