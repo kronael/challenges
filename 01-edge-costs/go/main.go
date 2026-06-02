@@ -23,8 +23,7 @@ func solve(n int, edges [][2]int, loads []*int) []int {
 		}
 	}
 
-	orig := slices.Clone(edges)
-	for _, v := range orig {
+	for _, v := range edges {
 		edges = append(edges, [2]int{v[1], v[0]})
 	}
 
