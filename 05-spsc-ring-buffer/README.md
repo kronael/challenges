@@ -16,6 +16,5 @@ Put them on separate 64-byte cache lines (`#[repr(align(64))]` + padding).
 
 The test: producer sends 0..10M, consumer asserts each `pop` returns the next
 expected value **in order** — catching any skip, duplicate, reorder, or torn
-index. Backpressure forces the buffer to fill, exercising the full/empty boundary.
-
-`make test` · `make bench` (push+pop throughput, dedicated consumer thread)
+index; backpressure forces the buffer to fill, exercising the full/empty
+boundary. `make test` · `make bench` (push+pop throughput)
