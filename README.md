@@ -95,9 +95,12 @@ write a Python reference, scaffold Go and Rust stubs in challenges/31-slug/."
 | [28](28-prime-pair-sets/) | Prime Pair Sets | Miller-Rabin + clique search | hard | [PE #60](https://projecteuler.net/problem=60) | py go rs |
 | [29](29-distinct-substrings/) | Distinct Substrings | suffix array + LCP | hard | [CSES #2105](https://cses.fi/problemset/task/2105) | py go rs |
 | [30](30-max-flow/) | Max Flow / Min Cut | Dinic's algorithm | hard | [CSES #1694](https://cses.fi/problemset/task/1694) | py go rs |
+| [32](32-prolog-thinking/) | Relational Programming | logic/CSP, run predicates backward | med | Prolog / python-constraint | py |
+| [33](33-haskell-thinking/) | Lazy Eval & Corecursion | infinite generators, pipelines | med | Haskell / itertools | py |
 
 **Ready (cases or stress tests in place):** 01–20  
-**Scaffolded (README + harness, `cases/` still empty):** 21–30
+**Scaffolded (README + harness, `cases/` still empty):** 21–30  
+**Paradigm-thinking (Python-only, tests in place):** 32–33
 
 ---
 
