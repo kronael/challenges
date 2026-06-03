@@ -1,7 +1,7 @@
 import time
 from itertools import islice
 
-from solution import (
+from main import (
     collatz,
     fibonacci,
     naturals,

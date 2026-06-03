@@ -1,7 +1,7 @@
 import json
 import pathlib
 import pytest
-from solution import solve
+from main import solve
 
 CASES = sorted(p for p in pathlib.Path("../cases").glob("*.in") if "_large_" not in p.name)
 

@@ -1,6 +1,6 @@
 import inspect
 
-from solution import (
+from main import (
     enumerate_splits,
     solve_graph_coloring,
     solve_nqueens,
