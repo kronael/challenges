@@ -23,8 +23,18 @@ func solve(n int, edges [][2]int, loads []*int) []int {
 		}
 	}
 
-	for _, v := range edges {
-		edges = append(edges, [2]int{v[1], v[0]})
+	adj := [][]int{}
+	for i := range n {
+		entry := []int{}
+		for _, edge := range edges {
+			if i == edge[0] {
+				entry = append(entry, edge[1])
+			}
+			if i == edge[1] {
+				entry = append(entry, edge[0])
+			}
+		}
+		adj = append(adj, entry)
 	}
 
 	for {
@@ -37,20 +47,18 @@ func solve(n int, edges [][2]int, loads []*int) []int {
 		vx := vis[len(vis)-1]
 		vertex := vx[0]
 		vis = vis[:len(vis)-1]
-		for _, edge := range edges {
-			if vertex == edge[0] && loads[edge[1]] == nil {
+		for _, edge := range adj[vertex] {
+			if loads[edge] == nil {
 				max_load := 1
-				for _, other := range edges {
-					if edge[1] == other[0] {
-						v := loads[other[1]]
-						if v != nil && *v > max_load {
-							max_load = *v
-						}
+				for _, other := range adj[edge] {
+					v := loads[other]
+					if v != nil && *v > max_load {
+						max_load = *v
 					}
 				}
 				v := max_load - 1
-				loads[edge[1]] = &v
-				vis = append(vis, [2]int{edge[1], v})
+				loads[edge] = &v
+				vis = append(vis, [2]int{edge, v})
 			}
 		}
 	}
