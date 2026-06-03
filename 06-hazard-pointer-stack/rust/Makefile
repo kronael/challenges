@@ -1,4 +1,7 @@
-.PHONY: fmt lint check test bench clean
+.PHONY: build fmt lint check test bench
+
+build:
+	cargo build
 
 fmt:
 	cargo fmt
@@ -8,11 +11,15 @@ lint:
 
 check: fmt lint
 
-test: check
-	cargo test --release
+test: build check
+	cargo test
 
 bench:
-	cargo run --release --bin bench
+	cargo bench
 
-clean:
-	cargo clean
+help:
+	@echo "build  — cargo build"
+	@echo "fmt    — cargo fmt"
+	@echo "lint   — cargo clippy"
+	@echo "test   — build + check + cargo test (stress test)"
+	@echo "bench  — cargo bench"
