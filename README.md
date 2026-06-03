@@ -90,6 +90,7 @@ parsing is real work rather than splitting whitespace.
 | [37](37-fenwick-tree/) | Fenwick Tree (BIT) | prefix sums, i&(-i) trick | med | [CP-Algorithms](https://cp-algorithms.com/data_structures/fenwick.html) | py go rs |
 | [38](38-skip-list/) | Skip List | probabilistic linked list | hard | [Pugh CACM 1990](https://dl.acm.org/doi/10.1145/78973.78977) | py rs |
 | [39](39-rope/) | Rope | binary tree of string fragments | hard | [Boehm et al. 1995](https://dl.acm.org/doi/10.1145/214438.214444) | py rs |
+| [40](40-weighted-job-scheduling/) | Weighted Job Scheduling | DP + binary search, O(n log n) | med | [CLRS §16.3](https://en.wikipedia.org/wiki/Introduction_to_Algorithms) · [LC 1235](https://leetcode.com/problems/maximum-profit-in-job-scheduling/) | py go rs |
 
 ---
 
