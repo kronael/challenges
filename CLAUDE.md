@@ -3,6 +3,21 @@
 Personal coding-practice bench. 30 self-contained challenges, one per sitting.
 Harness is **editor + `make test`**. Each challenge has its own dir `NN-slug/`.
 
+## Golden rule — solutions ONLY in golden/
+
+Every challenge has **four** language dirs: `golden/`, `python/`, `go/`, `rust/`.
+
+- **`golden/main.py`** — the optimised reference. Always passes `make test`.
+  Never shown to the solver. Used to generate `.out` files and as the bench target.
+- **`python/main.py`, `go/main.go`, `rust/src/main.rs`** — stubs ONLY.
+  `solve()` must contain only `pass` / `return nil` / `todo!()`.
+
+**Never put a working solution in `python/`, `go/`, or `rust/`.** If you find one,
+move it to `golden/main.py` and replace the original with a stub.
+
+When scaffolding a new challenge: write the reference first in `golden/main.py`,
+verify it passes, then write stubs in the three solver dirs.
+
 ## Two challenge types
 
 - **io** (01, 08–30): program reads JSON from stdin, writes the answer to
