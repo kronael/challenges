@@ -3,21 +3,13 @@ import sys
 
 
 def solve(base, exp, mod):
-    if mod == 1:
-        return 0
-    result = 1
-    base %= mod
-    while exp > 0:
-        if exp & 1:
-            result = result * base % mod
-        base = base * base % mod
-        exp >>= 1
-    return result
+    # TODO: implement
+    pass
 
 
 def main():
     obj = json.load(sys.stdin)
-    print(solve(obj["base"], obj["exp"], obj["mod"]))
+    # TODO: parse obj, call solve, print result
 
 
 if __name__ == "__main__":

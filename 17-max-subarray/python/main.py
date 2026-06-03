@@ -3,16 +3,13 @@ import sys
 
 
 def solve(arr):
-    best = cur = arr[0]
-    for x in arr[1:]:
-        cur = max(x, cur + x)
-        best = max(best, cur)
-    return best
+    # TODO: implement
+    pass
 
 
 def main():
     obj = json.load(sys.stdin)
-    print(solve(obj["arr"]))
+    # TODO: parse obj, call solve, print result
 
 
 if __name__ == "__main__":

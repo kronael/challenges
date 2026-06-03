@@ -1,22 +1,15 @@
-import bisect
 import json
 import sys
 
 
 def solve(seq):
-    tails = []
-    for x in seq:
-        i = bisect.bisect_left(tails, x)
-        if i == len(tails):
-            tails.append(x)
-        else:
-            tails[i] = x
-    return len(tails)
+    # TODO: implement
+    pass
 
 
 def main():
     obj = json.load(sys.stdin)
-    print(solve(obj["seq"]))
+    # TODO: parse obj, call solve, print result
 
 
 if __name__ == "__main__":
