@@ -1,6 +1,6 @@
 # Coding Challenges
 
-39 self-contained algorithm and systems challenges. Each has a problem statement,
+40 self-contained algorithm and systems challenges. Each has a problem statement,
 test cases, a golden reference solution, and stubs to implement in Python, Go,
 and Rust. Run `make` in any language directory to format, build, lint, and test.
 
