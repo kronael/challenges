@@ -1,20 +1,34 @@
 # 18 — Prime Sieve
 
-Count the primes strictly below `n`. The challenge is staying fast as `n` grows to `10^8`, where trial division per number dies.
+**Task**: Count how many prime numbers are strictly less than N.
 
-## Input / Output
+**Difficulty**: easy
+**Time estimate**: ~20 min
 
+## Problem
+
+Count the primes strictly below N. For N around 10^8, testing each number for primality — O(N√N) — is far too slow. The insight: instead of asking "is this number prime?", strike out the multiples of every prime you find, so each composite is marked rather than tested.
+
+## Input
+
+```json
+{"n": 10}
 ```
-{"n":<int>}
----
-<count>      number of primes p with p < n
+
+## Output
+
+A single integer: the number of primes `p` with `p < n`.
+
+## Examples
+
+**Example 1** — small case
+```
+n=10 → 4   (2, 3, 5, 7)
 ```
 
-## Example
-
+**Example 2** — boundary is exclusive, so a prime equal to n is not counted
 ```
-{"n":10}
-→ 4      (2, 3, 5, 7)
+n=2 → 0
 ```
 
 ## Teaches
@@ -23,9 +37,11 @@ Count the primes strictly below `n`. The challenge is staying fast as `n` grows 
 - **Cache- and memory-aware sieving**: an odd-only bytearray halves space, and for very large `n` a segmented sieve keeps the working set in cache.
 
 ## Run
+
 ```
 cd rust && make
 cd go   && make
 cd python && make
 ```
+
 Source: https://projecteuler.net/problem=10

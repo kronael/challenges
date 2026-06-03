@@ -1,31 +1,47 @@
-# 14 — Union-Find (DSU)
+# 14 — Union-Find
 
-Maintain disjoint components over `n` nodes under a stream of merges, then answer connectivity queries. The hard part is making each operation near-constant despite arbitrary merge orders.
+**Task**: Maintain friend groups as friendships form, and answer whether two people are connected.
 
-## Input / Output
+**Difficulty**: medium
+**Time estimate**: ~30 min
 
+## Problem
+
+You're building a social network. As friendships form, you need to instantly answer: are these two people already in the same friend group? Support N people, M friend connections, and K queries — the merges arrive in arbitrary order, so you can't pre-sort. The non-trivial part: keep every operation near-constant no matter how the groups grow.
+
+## Input
+
+```json
+{"n": 5, "unions": [[0,1],[1,2],[3,4]], "queries": [[0,2],[0,3],[3,4]]}
 ```
-{"n":<int>,"unions":[[u,v],…],"queries":[[u,v],…]}
----
-q0 q1 …      one value per query: 1 if same component, else 0
+
+## Output
+
+One value per query on a single line: `1` if the pair shares a component, else `0`.
+
+## Examples
+
+**Example 1** — connectivity is transitive across a chain of merges
+```
+n=5, unions [0,1][1,2][3,4], queries [0,2][0,3][3,4] → 1 0 1
 ```
 
-## Example
-
+**Example 2** — separate components stay separate
 ```
-{"n":5,"unions":[[0,1],[1,2],[3,4]],"queries":[[0,2],[0,3],[3,4]]}
-→ 1 0 1
+n=3, unions [], queries [0,1] → 0
 ```
 
 ## Teaches
 
-- **Amortized O(α(n)) via two tricks together**: path compression flattens trees on `find`, union by rank keeps them shallow; neither alone is enough, but combined they give inverse-Ackermann (effectively constant) per op.
-- **Representative-based equivalence**: connectivity reduces to "same root", turning a relation into pointer chasing.
+- **Disjoint-set union**: connectivity reduces to "same root", turning a relation into pointer chasing.
+- **Two tricks together**: path compression plus union by rank give inverse-Ackermann (effectively constant) per op — neither alone is enough.
 
 ## Run
+
 ```
 cd rust && make
 cd go   && make
 cd python && make
 ```
+
 Source: CLRS §21
