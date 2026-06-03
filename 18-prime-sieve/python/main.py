@@ -6,7 +6,7 @@ def solve(n):
     if n <= 2:
         return 0
     # sieve odd numbers only: index i represents value 2*i+1
-    size = (n + 1) // 2  # covers odds 1,3,5,...,< n
+    size = n // 2  # covers odds 1,3,5,...,< n (excludes n itself)
     sieve = bytearray([1]) * size
     sieve[0] = 0  # value 1 is not prime
     i = 1
