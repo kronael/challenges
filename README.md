@@ -106,11 +106,26 @@ The harness is already wired — `make` will work immediately.
 |--------|-------------|
 | [CSES Problem Set](https://cses.fi/problemset/) | 300 problems, clean I/O, all categories |
 | [Project Euler](https://projecteuler.net) | math-heavy; 1–100 are one afternoon each |
+| [USACO Contests](https://usaco.org/index.php?page=contests) | competitive programming olympiad; Platinum = hard |
+| [USACO Guide](https://usaco.guide) | Bronze → Platinum with explanations |
 | [CP-Algorithms](https://cp-algorithms.com) | reference proofs + implementations |
-| [USACO Guide](https://usaco.guide) | Bronze → Platinum, best graph/DP explanations |
 | [Codeforces EDU](https://codeforces.com/edu/courses) | segment trees, strings, network flows |
 | [LeetCode](https://leetcode.com) | clean single-concept problems |
 | [CLRS](https://en.wikipedia.org/wiki/Introduction_to_Algorithms) | *Introduction to Algorithms* — the canonical reference |
+| [Go Memory Model](https://go.dev/ref/mem) | the formal spec behind challenge 31 |
+
+**Papers cited in the systems challenges (02–07):**
+
+| Paper | Challenge |
+|-------|-----------|
+| Dmitry Vyukov — [Non-intrusive MPSC queue](https://www.1024cores.net/home/lock-free-algorithms/queues/non-intrusive-mpsc-node-based-queue) | 02 |
+| Boehm — [Can Seqlocks Get Along With Programming Language Memory Models?](https://dl.acm.org/doi/10.1145/2247684.2247688) MSPC 2012 | 03 |
+| Chase & Lev — [Dynamic Circular Work-Stealing Deque](https://fzn.fr/readings/ppopp13.pdf) SPAA 2005 | 04 |
+| LMAX — [Disruptor Technical Paper](https://lmax-exchange.github.io/disruptor/disruptor.html) | 05 |
+| Maged Michael — [Hazard Pointers](https://www.cs.otago.ac.nz/cosc440/readings/hazard-pointers.pdf) IEEE TPDS 2004 | 06 |
+| Herlihy & Shavit — [The Art of Multiprocessor Programming](https://dl.acm.org/doi/10.1145/62527.62529) | 07 |
+| Pugh — [Skip Lists: A Probabilistic Alternative](https://dl.acm.org/doi/10.1145/78973.78977) CACM 1990 | 38 |
+| Boehm et al. — [Ropes: An Alternative to Strings](https://dl.acm.org/doi/10.1145/214438.214444) 1995 | 39 |
 
 ---
 
