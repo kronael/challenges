@@ -13,18 +13,10 @@ fn solve(n: usize, edges: &[[usize; 2]], loads: &[Option<i64>]) -> Vec<i64> {
     let _ = n;
     let mut loads = loads.to_vec();
 
-    let mut adj: Vec<usize> = (0..n).iter().collect();
-    for i in 0..n {
-        let mut entry = vec![];
-        for &[a, b] in edges.iter() {
-            if i == a {
-                entry.push(b);
-            }
-            if i == b {
-                entry.push(a);
-            }
-        }
-        adj.push(entry);
+    let mut adj: Vec<Vec<usize>> = (0..n).map(|_| vec![]).collect();
+    for &[a, b] in edges.iter() {
+        adj[a].push(b);
+        adj[b].push(a);
     }
 
     #[derive(Eq, PartialOrd, Ord, PartialEq, Clone)]
