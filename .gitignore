@@ -1,3 +1,6 @@
+# Claude session artefacts
+.claude/
+
 # Editor backups
 *~
 \#*\#
