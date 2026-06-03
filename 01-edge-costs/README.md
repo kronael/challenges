@@ -1,29 +1,45 @@
 # 01 — Vertex Load Assignment
 
-A graph (usually a tree) has integer vertex loads, some missing; adjacent loads may differ by at most 1. Assign non-negative loads to the missing vertices so the total is minimised. The trick: a missing vertex's minimum is the largest lower bound any known vertex forces on it — a shortest-distance question in disguise.
+**Task**: Assign bandwidth to every node in a network so adjacent nodes differ by at most 1, matching the fixed nodes and minimising the total.
 
-**Difficulty: medium** — one non-trivial idea (reframing the constraint as multi-source propagation), solvable in ~30 min.
+**Difficulty**: medium
+**Time estimate**: ~30 min
 
-## Input / Output
+## Problem
 
+You're provisioning a network. Adjacent nodes share a link, so their bandwidth may differ by at most 1. A few nodes have a fixed requirement; the rest (`null`) are yours to set. Assign non-negative loads to the free nodes so the constraint holds everywhere and the sum is as small as possible.
+
+The catch: a node 3 hops from a node fixed at 10 can be no lower than 7 — every fixed node forces a lower bound that fades by 1 per hop. Sounds like a distance problem, doesn't it?
+
+Constraints: graph is usually a tree, n up to a few thousand, loads fit in i64.
+
+## Input
+
+```json
+{"n": 4, "edges": [[0,1],[1,2],[2,3]], "loads": [10, null, null, null]}
 ```
-{"n":<int>,"edges":[[u,v],…],"loads":[<int|null>,…]}
----
-l0 l1 … ln-1      assigned loads, space-separated
+`loads[i]` is the fixed value or `null` if free.
+
+## Output
+
+The assigned loads, space-separated on one line.
+
+## Examples
+
+**Example 1** — one anchor, the bound decays one step per hop and never floors out
+```
+{"n":4,"edges":[[0,1],[1,2],[2,3]],"loads":[10,null,null,null]} → 10 9 8 7
 ```
 
-## Example
-
+**Example 2** — two anchors fight; each node takes the tightest bound, not the nearest
 ```
-{"n":4,"edges":[[0,1],[1,2],[2,3]],"loads":[10,null,null,null]}
-→ 10 9 8 7      a node d hops from load L must be ≥ L-d; max over sources, floored at 0
+{"n":3,"edges":[[0,1],[1,2]],"loads":[5,null,8]} → 5 7 8
 ```
 
 ## Teaches
 
-- **Multi-source max-propagation**: each fixed vertex propagates a lower bound `L - dist` outward; the answer is the pointwise maximum of these fronts.
-- **BFS/Dijkstra on graphs**: unit-weight edges make this a multi-source BFS; the same skeleton generalises to weighted Dijkstra.
-- **JSON parsing**: reading a structured graph (`n`, `edges`, nullable `loads`) into typed input rather than splitting lines.
+- **Multi-source propagation**: each fixed node spreads a lower bound `L − dist`; the answer is the pointwise maximum over all sources, floored at 0.
+- **BFS as Dijkstra**: unit edges make this a multi-source BFS — the same skeleton that scales to weighted graphs.
 
 ## Run
 

@@ -1,28 +1,44 @@
 # 09 — Edit Distance
 
-Compute the Levenshtein distance between strings `s` and `t`: the minimum number of single-character insertions, deletions, or substitutions to turn one into the other. The interesting part is recognising the optimal substructure on prefixes and collapsing the DP table to two rows.
+**Task**: Implement the core of a spell-checker: the fewest single-character edits to turn a misspelled word into the intended one.
 
-**Difficulty: medium** — one classic 2-D DP with a space optimisation, solvable in ~30 min.
+**Difficulty**: medium
+**Time estimate**: ~30 min
 
-## Input / Output
+## Problem
 
+A user typed `s`; you think they meant `t`. Compute the minimum number of single-character edits — insert, delete, or replace — that transforms `s` into `t`. This is the Levenshtein distance, the number a spell-checker uses to rank suggestions.
+
+The greedy "fix the first mismatch" instinct fails: sometimes deleting is cheaper than replacing, and you can't know which without looking ahead. The fix is a DP over prefixes — and once it works, you'll notice you only ever read the previous row.
+
+Constraints: |s|, |t| up to a few thousand.
+
+## Input
+
+```json
+{"s": "kitten", "t": "sitting"}
 ```
-{"s":<string>,"t":<string>}
----
-<distance>      minimum number of edits
+
+## Output
+
+A single integer: the minimum number of edits.
+
+## Examples
+
+**Example 1** — kitten → sitten (replace) → sittin (replace) → sitting (insert)
+```
+{"s":"kitten","t":"sitting"} → 3
 ```
 
-## Example
-
+**Example 2** — when one string is empty, every char of the other is an insert
 ```
-{"s":"kitten","t":"sitting"}
-→ 3      sitten, sittin, sitting
+{"s":"","t":"abc"} → 3
 ```
 
 ## Teaches
 
-- **2-D dynamic programming**: `dp[i][j]` = distance between prefixes `s[:i]` and `t[:j]`; each cell is the cheapest of insert (`+1`), delete (`+1`), substitute (`+0/1`).
-- **Rolling-array space reduction**: only the previous row is needed, cutting space from O(|s|·|t|) to O(min(|s|,|t|)).
+- **2-D dynamic programming**: `dp[i][j]` = distance between prefixes `s[:i]` and `t[:j]`; each cell is the cheapest of insert (+1), delete (+1), or substitute (+0/1).
+- **Rolling-array space**: only the previous row is needed, so space drops from O(|s|·|t|) to O(min(|s|,|t|)).
 
 ## Run
 

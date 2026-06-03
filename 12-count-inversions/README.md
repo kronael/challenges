@@ -1,28 +1,44 @@
 # 12 — Count Inversions
 
-Count the inversions in an array: index pairs `i < j` with `arr[i] > arr[j]`. The interesting part is counting them as a side effect of merge sort, dropping the naive O(n²) to O(n log n).
+**Task**: Count exactly how many out-of-order pairs an array has — a measure of how far it is from sorted.
 
-**Difficulty: medium** — one divide-and-conquer with a counting twist, solvable in ~30 min.
+**Difficulty**: medium
+**Time estimate**: ~30 min
 
-## Input / Output
+## Problem
 
+An array is "almost sorted" if it has few *inversions*: index pairs `i < j` where `arr[i] > arr[j]`. A sorted array has 0; a fully reversed array of `n` elements has the maximum, n(n−1)/2. Count the exact number for a given array.
+
+Checking every pair is O(n²) — fine for n=1000, hopeless at n=10⁵ (that's 5 billion comparisons). The elegant fix: run a merge sort, and every time you pull an element from the right half ahead of `k` elements still waiting in the left half, those `k` pairs are inversions. Counting rides along for free.
+
+Constraints: n up to 10⁵, values fit in i32; the count can exceed i32 — use i64.
+
+## Input
+
+```json
+{"n": 5, "arr": [2, 4, 1, 3, 5]}
 ```
-{"n":<int>,"arr":[<int>,…]}
----
-<count>      number of inversions
+
+## Output
+
+A single integer: the number of inversions.
+
+## Examples
+
+**Example 1** — the inversions are (2,1), (4,1), (4,3)
+```
+{"n":5,"arr":[2,4,1,3,5]} → 3
 ```
 
-## Example
-
+**Example 2** — fully reversed: every pair is an inversion, 5·4/2 = 10
 ```
-{"n":5,"arr":[2,4,1,3,5]}
-→ 3      (2,1),(4,1),(4,3)
+{"n":5,"arr":[5,4,3,2,1]} → 10
 ```
 
 ## Teaches
 
-- **Counting during the merge**: when a right-half element is emitted ahead of `k` remaining left-half elements, those `k` form inversions; summing them counts all cross-half pairs.
-- **Divide and conquer**: total = left inversions + right inversions + cross inversions, each computed within the same merge-sort recursion.
+- **Count during the merge**: when a right-half element is emitted ahead of `k` remaining left-half elements, add `k` to the total — that's every cross-half inversion.
+- **Divide and conquer**: total = left + right + cross inversions, all computed inside one merge-sort recursion in O(n log n).
 
 ## Run
 
