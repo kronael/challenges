@@ -1,20 +1,17 @@
-# 05 — SPSC Ring Buffer, False-Sharing Free
+# 05 — SPSC Ring Buffer
 
-Single producer, single consumer, capacity N (power of two). Each side owns one
-index. `push` returns false when full; `pop` returns None when empty. No locks.
+Single producer, single consumer, lock-free ring of capacity N (power of two); each side owns one index.
+Hard not because of correctness but because the obvious layout puts `head` and `tail` on one cache line, so the two cores fight over it and the queue runs an order of magnitude slow.
 
-The trap is full-vs-empty ambiguity. With a plain `head == tail` test you cannot
-tell "empty" from "completely full" — both make the indices equal. The standard
-fix is to let the indices run as free monotonic counters and mask only on slot
-access: empty is `head == tail`, full is `head - tail == N`. (Do not reset them
-to 0 each wrap — that reintroduces the ambiguity and a shadow-counter race.)
+## Teaches
 
-The performance trap is false sharing. `head` and `tail` are touched by
-different cores every operation; if they share a cache line, each push
-invalidates the consumer's line and vice versa, serialising the two threads.
-Put them on separate 64-byte cache lines (`#[repr(align(64))]` + padding).
+- **False sharing**: `head` and `tail` are written by different cores every op; sharing a cache line means each write triggers a MESI invalidation on the other core, serialising the threads.
+- **Padding to separate lines**: `#[repr(align(64))]` + padding puts each index on its own cache line, killing the invalidation traffic.
+- **Full-vs-empty**: free-running monotonic counters masked only on slot access — empty is `head == tail`, full is `head - tail == N` — avoid the wrap ambiguity.
 
-The test: producer sends 0..10M, consumer asserts each `pop` returns the next
-expected value **in order** — catching any skip, duplicate, reorder, or torn
-index; backpressure forces the buffer to fill, exercising the full/empty
-boundary. `make test` · `make bench` (push+pop throughput)
+## Run
+```
+cd rust && make
+cd go   && make
+```
+Source: [Drepper, *What Every Programmer Should Know About Memory* §6.4 (false sharing)](https://people.freebsd.org/~lstewart/articles/cpumemory.pdf)

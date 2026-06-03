@@ -1,6 +1,8 @@
 # 10 — Coin Change
 
-Given coin denominations (unlimited supply of each) and a target `amount`, find the minimum number of coins that sum exactly to `amount`, or `-1` if it cannot be made.
+Given coin denominations (unlimited supply of each) and a target `amount`, find the minimum number of coins summing exactly to `amount`, or `-1` if impossible. The interesting part is seeing that greedy "take the biggest coin" fails and a bottom-up DP is required.
+
+**Difficulty: medium** — one DP formulation plus an impossibility case, solvable in ~30 min.
 
 ## Input / Output
 
@@ -10,24 +12,24 @@ Given coin denominations (unlimited supply of each) and a target `amount`, find 
 <count>      min coins, or -1 if impossible
 ```
 
-## Examples
+## Example
 
 ```
 {"amount":11,"coins":[1,2,5]}
-→ 3
-
-{"amount":3,"coins":[2]}
-→ -1
+→ 3      5+5+1
 ```
 
-## Key insight
+## Teaches
 
-Unbounded-knapsack DP: `dp[a] = 1 + min over coins c of dp[a-c]`. Iterating amounts 0..amount over all coins gives O(amount · #coins).
+- **Unbounded-knapsack DP**: `dp[a] = 1 + min over coins c≤a of dp[a-c]`; reusing each coin freely distinguishes this from 0/1 knapsack.
+- **Reachability via a sentinel**: seed unreachable amounts with an infinite cost so an untouched `dp[amount]` cleanly maps to `-1`.
 
 ## Run
 
 ```
-cd python && make test
-cd go     && make test
-cd rust   && make test
+cd rust   && make
+cd go     && make
+cd python && make
 ```
+
+Source: CLRS

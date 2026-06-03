@@ -1,6 +1,6 @@
 # 25 — Minimum Spanning Tree (Kruskal)
 
-Given a connected undirected weighted graph on `n` nodes (`0…n-1`), output the total weight of a minimum spanning tree.
+Compute the total weight of a minimum spanning tree of a connected weighted graph. The challenge is proving the greedy choice is safe and detecting cycles cheaply.
 
 ## Input / Output
 
@@ -10,24 +10,22 @@ Given a connected undirected weighted graph on `n` nodes (`0…n-1`), output the
 <int>      total weight of the MST
 ```
 
-## Examples
+## Example
 
 ```
 {"n":4,"edges":[[0,1,10],[0,2,6],[0,3,5],[1,3,15],[2,3,4]]}
-→ 19
-
-{"n":2,"edges":[[0,1,7]]}
-→ 7
+→ 19      (edges 5 + 6 + 4 + ... minus the cycle-forming ones)
 ```
 
-## Key insight
+## Teaches
 
-Kruskal: sort edges by weight and add each edge whose endpoints lie in different components, merging them with union-find. The greedy choice is safe by the cut property. O(E log E).
+- **Greedy by the cut property**: sort edges ascending and add the cheapest edge that joins two different components; it is always safe to take.
+- **DSU for cycle tests**: union-find answers "would this edge create a cycle?" in O(α), making the whole algorithm O(E log E) dominated by the sort.
 
 ## Run
-
 ```
-cd python && make test
-cd go     && make test
-cd rust   && make test
+cd rust && make
+cd go   && make
+cd python && make
 ```
+Source: CLRS §23

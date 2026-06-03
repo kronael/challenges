@@ -1,6 +1,6 @@
 # 23 — 0/1 Knapsack
 
-Given a knapsack of integer `capacity` and a list of items each with a `weight` and `value`, choose a subset whose total weight is at most the capacity and whose total value is maximal. Each item is taken whole or not at all.
+Pick a subset of items fitting an integer `capacity` that maximizes total value, each item taken whole or not at all. The challenge is the "0/1" constraint: an item must not be reused.
 
 ## Input / Output
 
@@ -10,24 +10,22 @@ Given a knapsack of integer `capacity` and a list of items each with a `weight` 
 <int>      maximum achievable total value
 ```
 
-## Examples
+## Example
 
 ```
 {"capacity":10,"items":[{"weight":5,"value":10},{"weight":4,"value":40},{"weight":6,"value":30},{"weight":3,"value":50}]}
-→ 90
-
-{"capacity":1,"items":[{"weight":2,"value":100}]}
-→ 0
+→ 90      (items of weight 4 + 3 + ... = value 40+50)
 ```
 
-## Key insight
+## Teaches
 
-Dynamic programming over capacity: `dp[w]` = best value using a fixed-weight budget `w`. Process items one at a time, iterating `w` downward so each item is used at most once. O(n·W).
+- **1-D DP, right-to-left scan**: `dp[w]` is the best value for budget `w`; iterating capacity downward when adding an item guarantees each item contributes at most once.
+- **Pseudo-polynomial cost**: O(n·W) depends on the numeric capacity, not just the item count — the classic distinction from truly polynomial DP.
 
 ## Run
-
 ```
-cd python && make test
-cd go     && make test
-cd rust   && make test
+cd rust && make
+cd go   && make
+cd python && make
 ```
+Source: CLRS §15

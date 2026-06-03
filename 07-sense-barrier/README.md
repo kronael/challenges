@@ -1,20 +1,17 @@
 # 07 — Sense-Reversing Barrier
 
-Reusable N-thread barrier from atomics only — no Mutex, Condvar, or OS sleep;
-`wait()` returns only once all N threads have called it this round.
+Reusable N-thread barrier from atomics only — no Mutex, Condvar, or OS sleep.
+Hard because a naive "spin until count == N, then reset" barrier cannot be reused: a fast thread loops into round K+1 and sees the not-yet-reset count still at N, sailing through before its peers arrive.
 
-The reuse trap: a naive "spin until count == N, then reset to 0" barrier breaks
-on the next round — a fast thread finishes round K, loops back, and sees the
-not-yet-reset count still at N for K+1, passing before its peers arrive. Sense
-reversal fixes it: each thread holds a local sense bit; the last arriver resets
-the count and flips a shared sense; others spin until the shared sense flips,
-then flip their local copy. The flipped bit, not the count, is the release
-signal, so a stale count can never leak across rounds.
+## Teaches
 
-The ordering trap: `count.store(N, Relaxed); sense.store(new, Release)` does NOT
-guarantee peers see the count reset before the sense flip — use a `fence(Release)`
-over both stores (and `Acquire` on the waiters' load), or `SeqCst` on the sense.
+- **Barrier reuse**: a shared count alone can't distinguish phase K from K+1, so a stale count leaks across rounds and releases threads early.
+- **Sense reversal**: each thread holds a local sense bit; the last arriver resets the count and flips a shared sense; others spin on the *flipped bit*, not the count, so a stale count can never release them.
+- **Fence ordering**: a `fence(Release)` over the count-reset and sense-flip (Acquire on waiters) guarantees peers see the reset before the flip — plain `Relaxed` stores do not.
 
-The test: 16 threads, 100k rounds; two barriers bracket each round where every
-thread stamps the round into its slot, then verifies **all 16** slots hold it —
-early release sees a stale slot, a stuck thread hangs. `make test` · `make bench`
+## Run
+```
+cd rust && make
+cd go   && make
+```
+Source: [Mellor-Crummey & Scott, *Algorithms for Scalable Synchronization* (ACM TOCS 1991)](https://www.cs.rochester.edu/u/scott/papers/1991_TOCS_synch.pdf)

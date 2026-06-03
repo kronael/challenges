@@ -1,6 +1,6 @@
 # 15 — Binary Search on Answer (Book Allocation)
 
-Split the array `pages` into `k` contiguous, non-empty groups assigned to `k` students (order preserved). Minimize the maximum total pages any single student reads. Assumes `1 ≤ k ≤ len(pages)`.
+Split `pages` into `k` contiguous groups, minimizing the largest group sum. The trick is that you don't search the array — you search the *answer*.
 
 ## Input / Output
 
@@ -10,24 +10,22 @@ Split the array `pages` into `k` contiguous, non-empty groups assigned to `k` st
 <value>      minimum possible maximum pages
 ```
 
-## Examples
+## Example
 
 ```
-{"k":3,"pages":[12,34,67,90]}
-→ 90
-
 {"k":2,"pages":[10,20,30,40]}
-→ 60
+→ 60      ([10,20,30] | [40] gives max 60)
 ```
 
-## Key insight
+## Teaches
 
-The answer is monotone: if a page cap is feasible, any larger cap is too. Binary search the cap in `[max(pages), sum(pages)]`, checking feasibility with a greedy left-to-right partition. O(n log(sum)).
+- **Optimization → decision**: rewrite "find the minimum feasible X" as "is X feasible?", a monotone predicate you can binary-search over the value range `[max, sum]`.
+- **Greedy feasibility check**: a single left-to-right pass counts the groups a given cap needs — O(n) per probe, O(n log sum) overall.
 
 ## Run
-
 ```
-cd python && make test
-cd go     && make test
-cd rust   && make test
+cd rust && make
+cd go   && make
+cd python && make
 ```
+Source: https://codeforces.com/edu/courses

@@ -1,6 +1,6 @@
 # 14 — Union-Find (DSU)
 
-Start with `n` singleton nodes `0..n-1`. Apply the given `unions` (merge two components), then answer each query `[u,v]`: are `u` and `v` in the same component?
+Maintain disjoint components over `n` nodes under a stream of merges, then answer connectivity queries. The hard part is making each operation near-constant despite arbitrary merge orders.
 
 ## Input / Output
 
@@ -10,24 +10,22 @@ Start with `n` singleton nodes `0..n-1`. Apply the given `unions` (merge two com
 q0 q1 …      one value per query: 1 if same component, else 0
 ```
 
-## Examples
+## Example
 
 ```
 {"n":5,"unions":[[0,1],[1,2],[3,4]],"queries":[[0,2],[0,3],[3,4]]}
 → 1 0 1
-
-{"n":3,"unions":[],"queries":[[0,1],[2,2]]}
-→ 0 1
 ```
 
-## Key insight
+## Teaches
 
-Disjoint-set union with path compression and union by rank gives near-constant amortized (inverse-Ackermann) time per operation.
+- **Amortized O(α(n)) via two tricks together**: path compression flattens trees on `find`, union by rank keeps them shallow; neither alone is enough, but combined they give inverse-Ackermann (effectively constant) per op.
+- **Representative-based equivalence**: connectivity reduces to "same root", turning a relation into pointer chasing.
 
 ## Run
-
 ```
-cd python && make test
-cd go     && make test
-cd rust   && make test
+cd rust && make
+cd go   && make
+cd python && make
 ```
+Source: CLRS §21

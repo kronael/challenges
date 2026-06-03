@@ -1,6 +1,6 @@
 # 20 — Matrix Exponentiation (Fibonacci)
 
-Compute the `n`-th Fibonacci number modulo `1_000_000_007`, with `F(0) = 0`, `F(1) = 1`.
+Compute `F(n) mod 1e9+7` for `n` up to a billion. The challenge is collapsing a linear recurrence into a logarithmic number of steps.
 
 ## Input / Output
 
@@ -10,24 +10,22 @@ Compute the `n`-th Fibonacci number modulo `1_000_000_007`, with `F(0) = 0`, `F(
 <value>      F(n) mod 1_000_000_007
 ```
 
-## Examples
+## Example
 
 ```
 {"n":10}
 → 55
-
-{"n":1000000000}
-→ 21
 ```
 
-## Key insight
+## Teaches
 
-`[[1,1],[1,0]]^n` has `F(n)` in its corner, so raising it by exponentiation-by-squaring (equivalently, fast doubling) gives `F(n)` in O(log n) modular multiplications.
+- **Recurrence as matrix power**: `[[1,1],[1,0]]^n` holds `F(n)` in a corner; any linear recurrence becomes a matrix raised to a power.
+- **O(log n) via squaring**: exponentiation-by-squaring on the transition matrix (equivalently fast doubling) turns an O(n) scan into O(log n) multiplies.
 
 ## Run
-
 ```
-cd python && make test
-cd go     && make test
-cd rust   && make test
+cd rust && make
+cd go   && make
+cd python && make
 ```
+Source: competitive classic

@@ -1,33 +1,15 @@
-# 32 — Relational Programming in Python
+# 32 — Relational Programming
 
-A Prolog program defines **relations**, not functions. `append(X, Y, [1,2,3])`
-runs *backward*: it enumerates every way to split `[1,2,3]` into a prefix `X` and
-suffix `Y`. The same clause that *checks* a split also *generates* all of them.
-That is the shift: you describe **what a solution looks like** — its constraints —
-and let the engine find every assignment that satisfies them. You never write the
-search.
+Solve N-Queens, graph coloring, SEND+MORE=MONEY, and list splits by *declaring constraints and enumerating models* — never by writing a backtracking loop.
+Hard because the mental shift is real: you must describe *what a solution looks like* and let the engine search, the way `append(X, Y, [1,2,3])` in Prolog runs backward to generate every prefix/suffix split.
 
-## The tools
+## Teaches
 
-- [`python-constraint`](https://pypi.org/project/python-constraint/) — declare
-  variables, domains, and constraints; ask for `getSolutions()`.
-- `itertools` / `functools` — relational enumeration when a CSP is overkill.
-
-## The prompt
-
-For each `solve_*`, **state the constraints, then enumerate solutions** — do not
-hand-code a backtracking search. The test of relational thinking: your N-Queens
-must say "no two queens share a column, row, or diagonal" and ask for all models,
-not loop-and-prune. Your splits must read like `append(X, Y, lst)` — every
-`(prefix, suffix)` pair — not an index walk you reasoned about.
-
-If you find yourself writing nested `for` loops with `if`-guards and an
-accumulator, you are thinking imperatively. Declare the relation instead.
+- **Relational, not functional**: the same predicate that *checks* a split also *generates* all of them; one definition runs forward and backward.
+- **CSP for constraint satisfaction**: declare variables, domains, and constraints with `python-constraint`, then ask for `getSolutions()` instead of looping and pruning by hand.
 
 ## Run
-
 ```
-cd python && make test
+cd python && make
 ```
-
-Source: relational/logic programming (Prolog); `python-constraint`, SEND+MORE=MONEY.
+Source: relational/logic programming (Prolog); [`python-constraint`](https://pypi.org/project/python-constraint/)

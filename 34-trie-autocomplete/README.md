@@ -1,57 +1,24 @@
 # 34 — Trie Autocomplete
 
-Build a trie (prefix tree) over a dictionary of `words`. For each `query`,
-return the up-to-3 lexicographically smallest words in the dictionary that
-have the query as a prefix.
+Build a trie over a pre-sorted dictionary; for each query return the 3 lexicographically smallest words having the query as a prefix.
+Medium because the insight is that an alphabetical DFS of the prefix subtree yields words already sorted, so the first three leaves are the answer — no separate sort, no scanning all words per query.
 
-The dictionary is given pre-sorted, so when you walk the subtree under a
-prefix node in alphabetical order, the first three leaves you reach are the
-answer. A sorted-list scan would be `O(words × queries)`; the trie makes each
-query cost only the prefix length plus a bounded subtree walk.
-
-## Input
-
-```json
-{"words": ["mobile", "mouse", "moneypot", "monitor", "mousepad"],
- "queries": ["m", "mo", "mou", "mous", "mouse"]}
+## Input / Output
+```
+{"words":[…sorted, lowercase…], "queries":[…]}
+---
+one line; query results joined by ';', up to 3 words per result joined by ' ', empty segment on no match
 ```
 
-`1 ≤ words.length ≤ 1000`, word length `≤ 20`, `queries.length ≤ 100`.
-Words are distinct, lowercase `a–z`, and given in ascending order.
+## Teaches
 
-## Output
-
-One line. Query results are joined by `;`; within a result the matching words
-(up to 3) are joined by a single space. A query with no match contributes an
-empty segment.
-
-```
-mobile moneypot monitor;mobile moneypot monitor;mouse mousepad;mouse mousepad;mouse mousepad
-```
-
-## Example
-
-```
-{"words":["a","ab","abc"],"queries":["a","ab","abc","abcd","x"]}
-→ a ab abc;ab abc;abc;;
-```
-
-## Key insight
-
-Insert every word into the trie. To answer a query, walk down to the prefix
-node (`O(len)`); if it exists, DFS its subtree visiting children in `a–z`
-order and stop after collecting 3 words. Because the alphabetical DFS yields
-words in sorted order, the first three are the lexicographically smallest.
-
-Source: [LeetCode 1268 — Search Suggestions System](https://leetcode.com/problems/search-suggestions-system/)
+- **Trie (prefix tree)**: 26-ary nodes; walking to the prefix node costs O(len), independent of dictionary size.
+- **DFS for lexicographic order**: visiting children a–z and stopping after 3 words gives the smallest matches without re-sorting.
 
 ## Run
-
 ```
-cd rust   && make test && make bench
-cd go     && make test && make bench
-cd python && make test && make bench
+cd rust   && make
+cd go     && make
+cd python && make
 ```
-
-> No debug prints. Extra stdout breaks the test harness and signals you don't
-> have a mental model yet. Build the model, then write the code.
+Source: [LeetCode 1268 — Search Suggestions System](https://leetcode.com/problems/search-suggestions-system/)

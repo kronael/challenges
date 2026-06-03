@@ -1,6 +1,6 @@
 # 24 — Topological Sort
 
-Given a directed graph on `n` nodes (`0…n-1`), output a topological ordering: every edge `u→v` has `u` before `v`. If the graph has a cycle, output `CYCLE`. Ties are broken by smallest node first, so the answer is unique.
+Order the nodes of a directed graph so every edge points forward, breaking ties by smallest node; output `CYCLE` if no ordering exists. The challenge is detecting a cycle as a side effect of the ordering.
 
 ## Input / Output
 
@@ -10,24 +10,22 @@ Given a directed graph on `n` nodes (`0…n-1`), output a topological ordering: 
 o1 o2 … on      a valid ordering, or `CYCLE`
 ```
 
-## Examples
+## Example
 
 ```
 {"n":6,"edges":[[5,2],[5,0],[4,0],[4,1],[2,3],[3,1]]}
 → 4 5 2 0 3 1
-
-{"n":2,"edges":[[0,1],[1,0]]}
-→ CYCLE
 ```
 
-## Key insight
+## Teaches
 
-Kahn's algorithm: repeatedly remove a node with in-degree 0 (a min-heap gives the lexicographically smallest order) and decrement its neighbors. If fewer than `n` nodes come out, a cycle remains.
+- **Kahn's BFS by in-degree**: repeatedly emit a node with in-degree 0 and decrement its successors; a min-heap of ready nodes yields the lexicographically smallest order.
+- **Cycle = leftover nodes**: if fewer than `n` nodes are emitted, the rest form a cycle — cycle detection falls out for free.
 
 ## Run
-
 ```
-cd python && make test
-cd go     && make test
-cd rust   && make test
+cd rust && make
+cd go   && make
+cd python && make
 ```
+Source: CLRS §22.4

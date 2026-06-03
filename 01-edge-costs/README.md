@@ -1,6 +1,6 @@
 # 01 — Vertex Load Assignment
 
-A graph (usually a tree) has integer vertex loads, some missing; adjacent loads may differ by at most 1. Assign non-negative loads to the missing vertices so the total is minimised. The trick: each missing vertex's minimum is the largest lower bound forced on it by any known vertex, which is a shortest-distance question in disguise.
+A graph (usually a tree) has integer vertex loads, some missing; adjacent loads may differ by at most 1. Assign non-negative loads to the missing vertices so the total is minimised. The trick: a missing vertex's minimum is the largest lower bound any known vertex forces on it — a shortest-distance question in disguise.
 
 **Difficulty: medium** — one non-trivial idea (reframing the constraint as multi-source propagation), solvable in ~30 min.
 
@@ -16,10 +16,8 @@ l0 l1 … ln-1      assigned loads, space-separated
 
 ```
 {"n":4,"edges":[[0,1],[1,2],[2,3]],"loads":[10,null,null,null]}
-→ 10 9 8 7
+→ 10 9 8 7      a node d hops from load L must be ≥ L-d; max over sources, floored at 0
 ```
-
-A node `d` hops from a fixed load `L` must be at least `L - d`; take the max over all sources, floored at 0.
 
 ## Teaches
 

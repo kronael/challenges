@@ -1,20 +1,16 @@
 # 06 — Hazard-Pointer Treiber Stack
 
-Lock-free Treiber stack with hazard-pointer reclamation. No GC, no leaks, no UAF.
+Lock-free Treiber stack with hazard-pointer memory reclamation — no GC, no leaks, no use-after-free.
+Hard because a CAS on `head` checks the pointer, not its generation, so an ABA cycle (pop A, pop B, push A) silently corrupts the stack, and reclaiming nodes safely under concurrent readers is a TOCTOU minefield.
 
-The ABA trap: `pop` reads `head -> A`, is preempted; another thread pops A, pops
-B, pushes A back. Now `pop` CASes `head` from A to A's stale `next` (pointing at
-freed B). The CAS succeeds — it checks the pointer, not the generation — and the
-stack is corrupt. Per-load refcounting is too slow; hazard pointers fix it with
-no per-node atomics on the read path.
+## Teaches
 
-Correct approach (guess–publish–verify): load `head` (guess), write it into your
-thread's hazard slot (publish), re-load `head` and confirm unchanged (verify)
-before dereferencing. A retired node is freed only once no hazard slot points at
-it. The fence between publish and verify, and the reclaimer's slot scan, must
-both be `SeqCst` — `Release`/`Acquire` opens a TOCTOU window where a node is
-freed after a reader published but before it re-checked.
+- **ABA**: `head` CAS from A to A's stale `next` succeeds even though `next` now points at freed memory; hazard pointers fix it with no per-node atomics on the read path.
+- **Guess–publish–verify**: load `head` (guess), write it to your hazard slot (publish), re-load `head` and confirm unchanged (verify) before dereferencing.
+- **SeqCst between publish and verify**: `Release`/`Acquire` leaves a window where a node is freed after a reader published but before it re-checked; the reclaimer's slot scan must be SeqCst too.
 
-The test: 16 threads each push+pop 10k times on a payload whose `Drop` bumps an
-atomic counter; at the end **constructs == drops, live == 0** — leaks (>0),
-double-frees (<0), UAF trips the counter or segfaults. `make test` · `make bench`
+## Run
+```
+cd rust && make
+```
+Source: [Michael, *Hazard Pointers* (IEEE TPDS 2004)](https://www.cs.otago.ac.nz/cosc440/readings/hazard-pointers.pdf)

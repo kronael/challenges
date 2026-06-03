@@ -1,6 +1,8 @@
 # 12 — Count Inversions
 
-Count the inversions in an array: the number of index pairs `i < j` with `arr[i] > arr[j]`.
+Count the inversions in an array: index pairs `i < j` with `arr[i] > arr[j]`. The interesting part is counting them as a side effect of merge sort, dropping the naive O(n²) to O(n log n).
+
+**Difficulty: medium** — one divide-and-conquer with a counting twist, solvable in ~30 min.
 
 ## Input / Output
 
@@ -10,24 +12,24 @@ Count the inversions in an array: the number of index pairs `i < j` with `arr[i]
 <count>      number of inversions
 ```
 
-## Examples
+## Example
 
 ```
 {"n":5,"arr":[2,4,1,3,5]}
-→ 3
-
-{"n":4,"arr":[4,3,2,1]}
-→ 6
+→ 3      (2,1),(4,1),(4,3)
 ```
 
-## Key insight
+## Teaches
 
-Merge sort: while merging two sorted halves, each time a right-half element is taken before remaining left-half elements, those are all inversions. Counting during the merge gives O(n log n) versus the naive O(n²).
+- **Counting during the merge**: when a right-half element is emitted ahead of `k` remaining left-half elements, those `k` form inversions; summing them counts all cross-half pairs.
+- **Divide and conquer**: total = left inversions + right inversions + cross inversions, each computed within the same merge-sort recursion.
 
 ## Run
 
 ```
-cd python && make test
-cd go     && make test
-cd rust   && make test
+cd rust   && make
+cd go     && make
+cd python && make
 ```
+
+Source: CLRS

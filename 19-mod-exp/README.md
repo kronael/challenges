@@ -1,6 +1,6 @@
 # 19 — Fast Modular Exponentiation
 
-Compute `(base ^ exp) mod m` for non-negative `base`, `exp` and `m ≥ 1`.
+Compute `(base ^ exp) mod m` where `exp` can be a billion. The trick is reaching the answer in O(log exp) multiplications while never overflowing.
 
 ## Input / Output
 
@@ -10,24 +10,22 @@ Compute `(base ^ exp) mod m` for non-negative `base`, `exp` and `m ≥ 1`.
 <value>      (base ^ exp) mod m
 ```
 
-## Examples
+## Example
 
 ```
-{"base":2,"exp":1000000000,"mod":1000000007}
-→ 140625001
-
 {"base":3,"exp":5,"mod":7}
-→ 5
+→ 5      (243 mod 7)
 ```
 
-## Key insight
+## Teaches
 
-Exponentiation by squaring: square the base and consume one bit of the exponent per step, multiplying into the result on set bits. O(log exp) multiplications, all reduced mod m.
+- **Repeated squaring**: square the base and consume one bit of the exponent per step, halving the problem each time — O(log exp) instead of O(exp).
+- **Modular arithmetic discipline**: reduce mod `m` after every multiply so intermediate values stay bounded and never overflow the word size.
 
 ## Run
-
 ```
-cd python && make test
-cd go     && make test
-cd rust   && make test
+cd rust && make
+cd go   && make
+cd python && make
 ```
+Source: CLRS §31.6

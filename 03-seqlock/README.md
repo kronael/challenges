@@ -1,20 +1,17 @@
-# 03 — Seqlock for a 64-byte Payload
+# 03 — Seqlock
 
-One writer, many readers, guarding a 64-byte payload with a sequence counter.
-Atomics only — readers never block the writer.
+One writer, many wait-free readers, guarding a 64-byte payload with a sequence counter.
+Hard because the payload is wider than any atomic, so a reader can stitch together bytes from two different epochs — a value that never existed — and reading mid-write is a genuine data race that is UB in C++.
 
-The trap is the torn read: the payload is wider than any atomic, so the writer
-copies it byte by byte; a concurrent reader can see some bytes from epoch K and
-some from K+1 — a value that never existed. The protocol: writer does `seq++`
-(now odd) → copy → `seq++` (now even); reader loads `seq` (must be even), copies,
-loads `seq` again, and retries if either load was odd or the two differ.
+## Teaches
 
-The ordering trap: the second reader load must `Acquire` and the writer's
-trailing `seq++` must `Release`, with a `fence(Acquire)` after the copy, so the
-payload reads cannot be reordered past the sequence check. `Relaxed` on the
-checks lets the CPU hoist the load outside the guarded window and tear silently.
+- **Torn reads / speculative-read UB**: reading the payload while the writer copies it is a data race; the seq protocol turns it into a *retry*, but the read must still be ordered.
+- **Odd/even seq protocol**: writer does `seq++` (odd) → copy → `seq++` (even); reader checks even-before, copies, re-reads seq, retries on odd-or-changed.
+- **Fence placement**: `fence(Acquire)` after the copy + `Release` on the trailing `seq++` stops the CPU hoisting the load outside the guarded window. TSO hides the bug on x86; ARM exposes it.
 
-The test: 1 writer stamps an incrementing counter into all eight u64 slots while
-15 readers loop millions of times. Every accepted read must have all eight slots
-**equal** — any mismatch is a torn read; the torn-read count must be ZERO.
-`make test` · `make bench` (reads/sec under write contention)
+## Run
+```
+cd rust && make
+cd go   && make
+```
+Source: [Wikipedia — Seqlock](https://en.wikipedia.org/wiki/Seqlock)

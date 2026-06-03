@@ -1,6 +1,6 @@
 # 17 — Maximum Subarray (Kadane)
 
-Find the largest sum of any contiguous, non-empty subarray.
+Find the largest sum over any contiguous, non-empty subarray. The insight is that the answer needs only one pass and O(1) memory.
 
 ## Input / Output
 
@@ -10,24 +10,22 @@ Find the largest sum of any contiguous, non-empty subarray.
 <sum>      maximum contiguous subarray sum
 ```
 
-## Examples
+## Example
 
 ```
 {"arr":[-2,1,-3,4,-1,2,1,-5,4]}
-→ 6
-
-{"arr":[-5,-2,-8]}
-→ -2
+→ 6      (subarray [4,-1,2,1])
 ```
 
-## Key insight
+## Teaches
 
-Kadane: scan once tracking the best subarray ending at the current index (`cur = max(x, cur + x)`) and the global best. O(n) online DP.
+- **DP with a "best ending here" state**: `cur = max(x, cur + x)` decides whether to extend the previous subarray or restart; the global best tracks the max over all endings.
+- **Online, single-pass**: the recurrence depends only on the prior step, so it streams in O(n) time and O(1) space.
 
 ## Run
-
 ```
-cd python && make test
-cd go     && make test
-cd rust   && make test
+cd rust && make
+cd go   && make
+cd python && make
 ```
+Source: CLRS §4.1
