@@ -31,29 +31,46 @@ sys challenges have no `python/`; rust-only sys challenges (04, 06) have no `go/
   parsing into an `Input` struct, not `line.split()`.
 - **Output is space-separated values on one line** (ints or floats).
 
-## Make targets (same in every language dir)
+## Make targets (identical in every language dir)
 
-| target | does |
-|--------|------|
-| `fmt`   | format (ruff format / gofmt / cargo fmt) |
-| `lint`  | ruff check / go vet / cargo clippy |
-| `check` | `fmt` then `lint` |
-| `test`  | runs `check` first, then the test suite |
-| `bench` | builds the release binary, times it on large cases |
+| target  | does |
+|---------|------|
+| `all`   | **default** — runs fmt → build → lint → test in sequence |
+| `build` | compile / syntax-check (`cargo build` / `go build .` / `python -c "import main"`) |
+| `fmt`   | format in place (ruff / gofmt / cargo fmt) |
+| `lint`  | static analysis (ruff check / go vet / cargo clippy) |
+| `check` | fmt then lint |
+| `test`  | build + check + test suite — **small cases only** (no `_large_`) |
+| `bench` | build, then time binary on every `??_large_*.in` |
+| `help`  | print all targets |
 
-- `make test` → `check` (fmt+lint) runs first, then the suite
-  (`pytest -v` / `go test -v ./...` / `cargo test`).
-- `make bench` → builds the **release** binary once, runs it on every
-  `cases/??_large_*.in`, prints `<ms>` per case or `TIMEOUT`.
+Running `make` (no target) = fmt + build + lint + test.
 
-## TIMEOUT
+`make bench` uses `timeout -k 2 $(TIMEOUT)` — SIGTERM then SIGKILL 2s later,
+so the loop can **never hang** regardless of what the binary does.
+Defaults: **5s** Rust/Go, **10s** Python. Override: `make bench TIMEOUT=30`.
 
-`make bench` enforces a per-case wall-clock limit. Defaults: **5s** (Rust/Go),
-**10s** (Python). Override per run:
+`golden/` has `all: test` and adds a `regen` target to regenerate `.out` files.
 
-```bash
-make bench TIMEOUT=30
-```
+## Test case coverage
+
+**Every challenge must cover these categories in its 8 small cases:**
+- Minimal / degenerate input (n=0 or n=1 where valid)
+- All-null / all-set inputs
+- Single fixed value, all others propagate from it
+- Two fixed values that meet in the middle
+- Cycle / star / path — at least two graph shapes
+- Values that propagate to the zero floor
+- An already-correct input (no changes needed)
+- Maximum constraint stress at small scale (n=8, densest graph)
+
+**Large cases (`09_large_*`, `10_large_*`):**
+- One that punishes O(n²): e.g. long path, 200k nodes
+- One with different structure: star, caterpillar, or dense graph
+
+When writing cases: if you can construct a valid input the naive algorithm
+gets wrong or slow, include it. Edge cases are the point — don't just use
+the README examples.
 
 ## Large cases
 
