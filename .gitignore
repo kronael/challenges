@@ -53,7 +53,3 @@ Cargo.lock
 *.prof
 *.trace
 perf.data
-
-# Large generated inputs (regenerate with the reference impl)
-cases/??_large_*.in
-cases/??_large_*.out
