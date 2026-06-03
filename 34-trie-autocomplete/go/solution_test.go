@@ -14,7 +14,7 @@ func TestCases(t *testing.T) {
 	sort.Strings(all)
 	var ins []string
 	for _, f := range all {
-		if \!strings.Contains(filepath.Base(f), "_large_") {
+		if !strings.Contains(filepath.Base(f), "_large_") {
 			ins = append(ins, f)
 		}
 	}

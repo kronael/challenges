@@ -23,18 +23,10 @@ func solve(n int, edges [][2]int, loads []*int) []int {
 		}
 	}
 
-	adj := [][]int{}
-	for i := range n {
-		entry := []int{}
-		for _, edge := range edges {
-			if i == edge[0] {
-				entry = append(entry, edge[1])
-			}
-			if i == edge[1] {
-				entry = append(entry, edge[0])
-			}
-		}
-		adj = append(adj, entry)
+	adj := make([][]int, n)
+	for _, edge := range edges {
+		adj[edge[0]] = append(adj[edge[0]], edge[1])
+		adj[edge[1]] = append(adj[edge[1]], edge[0])
 	}
 
 	for {
