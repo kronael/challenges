@@ -1,5 +1,4 @@
 use serde::Deserialize;
-use std::collections::BinaryHeap;
 use std::io::{self, Read};
 
 #[derive(Deserialize)]
@@ -10,54 +9,9 @@ struct Input {
 }
 
 fn solve(n: usize, edges: &[[usize; 2]], loads: &[Option<i64>]) -> Vec<i64> {
-    let _ = n;
-    let mut loads = loads.to_vec();
-
-    let mut adj: Vec<Vec<usize>> = (0..n).map(|_| vec![]).collect();
-    for &[a, b] in edges.iter() {
-        adj[a].push(b);
-        adj[b].push(a);
-    }
-
-    #[derive(Eq, PartialOrd, Ord, PartialEq, Clone)]
-    struct Vertex {
-        v: i64,
-        i: usize,
-    }
-
-    let mut vis: BinaryHeap<Vertex> = loads
-        .iter()
-        .enumerate()
-        .filter_map(|(i, v)| v.map(|v| Vertex { i, v }))
-        .collect();
-
-    while let Some(vertex) = vis.pop() {
-        for &x in &adj[vertex.i] {
-            if loads[x].is_none() {
-                let mut max_load = 1;
-                for &y in &adj[x] {
-                    if let Some(c) = loads[y] {
-                        if c > max_load {
-                            max_load = c;
-                        }
-                    }
-                }
-                loads[x] = Some(max_load - 1);
-                vis.push(Vertex {
-                    i: x,
-                    v: max_load - 1,
-                });
-            }
-        }
-    }
-
-    for l in &mut loads {
-        if l.is_none() {
-            *l = Some(0);
-        }
-    }
-
-    loads.into_iter().map(|x| x.unwrap()).collect()
+    // TODO: return loads with None values filled in to minimise total
+    let _ = (n, edges, loads);
+    vec\![]
 }
 
 fn main() {
@@ -65,14 +19,7 @@ fn main() {
     io::stdin().read_to_string(&mut buf).unwrap();
     let inp: Input = serde_json::from_str(&buf).unwrap();
     let result = solve(inp.n, &inp.edges, &inp.loads);
-    println!(
-        "{}",
-        result
-            .iter()
-            .map(|v| v.to_string())
-            .collect::<Vec<_>>()
-            .join(" ")
-    );
+    println\!("{}", result.iter().map(|v| v.to_string()).collect::<Vec<_>>().join(" "));
 }
 
 #[cfg(test)]
@@ -88,7 +35,7 @@ mod tests {
             .map(|e| e.path())
             .filter(|p| {
                 p.extension().map_or(false, |x| x == "in")
-                    && !p.file_name().unwrap().to_str().unwrap().contains("_large_")
+                    && \!p.file_name().unwrap().to_str().unwrap().contains("_large_")
             })
             .collect();
         ins.sort();
@@ -100,7 +47,7 @@ mod tests {
                 .map(|s| s.parse().unwrap())
                 .collect();
             let p: Input = serde_json::from_str(&src).unwrap();
-            assert_eq!(
+            assert_eq\!(
                 solve(p.n, &p.edges, &p.loads),
                 want,
                 "{:?}",
