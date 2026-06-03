@@ -13,11 +13,10 @@ fn solve(n: usize, edges: &[[usize; 2]], loads: &[Option<i64>]) -> Vec<i64> {
     let _ = n;
     let mut loads = loads.to_vec();
 
-    // make edges bidirectional
-    let mut edges = edges.to_vec();
-    let orig: Vec<_> = edges.clone();
-    for x in &orig {
-        edges.push([x[1], x[0]]);
+    let mut adj = vec![vec![]; n];
+    for &[a, b] in edges {
+        adj[a].push(b);
+        adj[b].push(a);
     }
 
     #[derive(Eq, PartialOrd, Ord, PartialEq, Clone)]
@@ -33,21 +32,19 @@ fn solve(n: usize, edges: &[[usize; 2]], loads: &[Option<i64>]) -> Vec<i64> {
         .collect();
 
     while let Some(vertex) = vis.pop() {
-        for x in &edges {
-            if x[0] == vertex.i && loads[x[1]].is_none() {
+        for &x in &adj[vertex.i] {
+            if loads[x].is_none() {
                 let mut max_load = 1;
-                for y in &edges {
-                    if y[0] == x[1] {
-                        if let Some(c) = loads[y[1]] {
-                            if c > max_load {
-                                max_load = c;
-                            }
+                for &y in &adj[x] {
+                    if let Some(c) = loads[y] {
+                        if c > max_load {
+                            max_load = c;
                         }
                     }
                 }
-                loads[x[1]] = Some(max_load - 1);
+                loads[x] = Some(max_load - 1);
                 vis.push(Vertex {
-                    i: x[1],
+                    i: x,
                     v: max_load - 1,
                 });
             }
