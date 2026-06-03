@@ -1,4 +1,4 @@
-.PHONY: build fmt lint check test bench
+.PHONY: build fmt lint check test bench help
 
 build:
 	uv run python -c "import main"
@@ -17,7 +17,7 @@ test: build check
 
 bench:
 	@for f in ../cases/??_large_*.in; do \
-	  printf "%%-36s" "$$(basename $$f .in): "; \
+	  printf "%-36s" "$$(basename $$f .in): "; \
 	  t0=$$(date +%s%3N); \
 	  timeout $${TIMEOUT:-10} uv run python main.py < "$$f" > /dev/null 2>&1; \
 	  code=$$?; elapsed=$$(( $$(date +%s%3N) - t0 )); \

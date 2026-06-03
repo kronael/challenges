@@ -1,4 +1,4 @@
-.PHONY: build fmt lint check test bench
+.PHONY: build fmt lint check test bench help
 
 build:
 	cargo build
@@ -18,8 +18,8 @@ bench:
 	cargo bench
 
 help:
-	@echo "build  — cargo build"
+	@echo "build  — cargo build (debug)"
 	@echo "fmt    — cargo fmt"
 	@echo "lint   — cargo clippy"
-	@echo "test   — build + check + cargo test (stress test)"
+	@echo "test   — build + check + cargo test (stress)"
 	@echo "bench  — cargo bench"
