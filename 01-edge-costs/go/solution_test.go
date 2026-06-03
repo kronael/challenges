@@ -11,28 +11,48 @@ import (
 )
 
 func TestCases(t *testing.T) {
-	all, _ := filepath.Glob("../cases/*.in")
+	all, err := filepath.Glob("../cases/*.in")
+	if err != nil {
+		t.Fatalf("glob: %v", err)
+	}
 	sort.Strings(all)
+
 	var ins []string
 	for _, f := range all {
 		if !strings.Contains(filepath.Base(f), "_large_") {
 			ins = append(ins, f)
 		}
 	}
+	if len(ins) == 0 {
+		t.Fatal("no small cases found in ../cases")
+	}
+
 	for _, inp := range ins {
 		inp := inp
 		t.Run(filepath.Base(inp), func(t *testing.T) {
-			f, _ := os.Open(inp)
+			f, err := os.Open(inp)
+			if err != nil {
+				t.Fatalf("open %s: %v", inp, err)
+			}
 			var in input
-			json.NewDecoder(f).Decode(&in)
+			if err := json.NewDecoder(f).Decode(&in); err != nil {
+				f.Close()
+				t.Fatalf("decode %s: %v", inp, err)
+			}
 			f.Close()
 
 			got := solve(in.N, in.Edges, in.Loads)
 
-			expRaw, _ := os.ReadFile(strings.TrimSuffix(inp, ".in") + ".out")
+			expRaw, err := os.ReadFile(strings.TrimSuffix(inp, ".in") + ".out")
+			if err != nil {
+				t.Fatalf("read .out for %s: %v", inp, err)
+			}
 			var want []int
 			for _, s := range strings.Fields(string(expRaw)) {
-				v, _ := strconv.Atoi(s)
+				v, err := strconv.Atoi(s)
+				if err != nil {
+					t.Fatalf("parse .out for %s: %v", inp, err)
+				}
 				want = append(want, v)
 			}
 
