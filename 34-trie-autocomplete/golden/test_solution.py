@@ -18,4 +18,4 @@ def test_case(inp):
     )
     got = result.stdout.strip()
     want = inp.with_suffix(".out").read_text().strip()
-    assert got == want, f"got {got\!r}, want {want\!r}"
+    assert got == want, f"got {got!r}, want {want!r}"
