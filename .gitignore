@@ -42,7 +42,6 @@ uv.lock
 # Go
 *.exe
 *.test
-*.out
 /tmp/
 
 # Rust
