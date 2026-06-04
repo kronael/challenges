@@ -1,6 +1,6 @@
 # Coding Challenges
 
-40 self-contained algorithm and systems challenges. Each has a problem statement,
+48 self-contained algorithm and systems challenges. Each has a problem statement,
 test cases, a golden reference solution, and stubs to implement in Python, Go,
 and Rust. Run `make` in any language directory to format, build, lint, and test.
 
@@ -10,8 +10,17 @@ and Rust. Run `make` in any language directory to format, build, lint, and test.
 
 ```bash
 # pick a challenge, pick a language
-cd 08-lis/rust && make       # fmt → build → lint → test
-cd 08-lis/go   && make bench # time your solution on large inputs
+cd 08-price-streak/rust && make       # fmt → build → lint → test
+cd 08-price-streak/go   && make bench # time your solution on large inputs
+```
+
+From the repo root, verify the whole bench at once:
+
+```bash
+make test    # every golden + rotten passes its case suite
+make golden  # every golden passes test AND bench (stays fast)
+make rotten  # every naive rotten passes test BUT times out on bench
+make sys     # the sys (02-07) C stress tests pass
 ```
 
 Every language directory has the same five targets:
@@ -30,13 +39,18 @@ Every language directory has the same five targets:
 
 ```
 NN-slug/
-  README.md      ← problem, difficulty, what it teaches, source
+  README.md      ← the problem only: task, constraints, I/O, examples, source
+  HINTS.md       ← the approach/technique — spoilers, open only when stuck
   cases/         ← NN.in / NN.out  (small correctness + large bench)
-  golden/        ← optimised Python reference; always passes make test
+  golden/        ← optimised reference; always passes make test
+  rotten/        ← naive trap: passes make test, times out on make bench
   python/        ← stub: implement solve() in main.py
   go/            ← stub: implement solve() in main.go
   rust/          ← stub: implement solve() in src/main.rs
 ```
+
+The `README.md` never names the technique — that lives in `HINTS.md`. `rotten/`
+is the obvious slow approach the problem punishes; beating it is the point.
 
 **Two challenge types:**
 - **io** — reads JSON from stdin, writes space-separated values to stdout
@@ -58,7 +72,7 @@ parsing is real work rather than splitting whitespace.
 | [05](05-spsc-ring-buffer/) | SPSC Ring Buffer | false sharing, shadow counter | hard | [LMAX Disruptor](https://lmax-exchange.github.io/disruptor/disruptor.html) | go rs |
 | [06](06-hazard-pointer-stack/) | Hazard-Pointer Stack | ABA, guess-publish-verify | expert | [Maged Michael 2004](https://www.cs.otago.ac.nz/cosc440/readings/hazard-pointers.pdf) | rs |
 | [07](07-sense-barrier/) | Sense-Reversing Barrier | barrier reuse, fence ordering | hard | [Herlihy & Shavit](https://dl.acm.org/doi/10.1145/62527.62529) | go rs |
-| [08](08-lis/) | Longest Increasing Subsequence | patience sort, binary search | med | CLRS §15.4 | py go rs |
+| [08](08-price-streak/) | Price Streak | longest strictly rising run | med | CLRS §15.4 | py go rs |
 | [09](09-edit-distance/) | Edit Distance | 2-D DP, Levenshtein | med | CLRS §15.5 | py go rs |
 | [10](10-coin-change/) | Coin Change | unbounded knapsack DP | med | CLRS | py go rs |
 | [11](11-interval-scheduling/) | Interval Scheduling | greedy + exchange argument | med | CLRS §16.1 | py go rs |
@@ -91,6 +105,14 @@ parsing is real work rather than splitting whitespace.
 | [38](38-skip-list/) | Skip List | probabilistic linked list | hard | [Pugh CACM 1990](https://dl.acm.org/doi/10.1145/78973.78977) | py rs |
 | [39](39-rope/) | Rope | binary tree of string fragments | hard | [Boehm et al. 1995](https://dl.acm.org/doi/10.1145/214438.214444) | py rs |
 | [40](40-weighted-job-scheduling/) | Weighted Job Scheduling | DP + binary search, O(n log n) | med | [CLRS §16.3](https://en.wikipedia.org/wiki/Introduction_to_Algorithms) · [LC 1235](https://leetcode.com/problems/maximum-profit-in-job-scheduling/) | py go rs |
+| [41](41-order-book/) | Order Book | limit-order matching engine | hard | original | py go rs |
+| [42](42-news-feed-merge/) | News Feed Merge | merge k sorted event streams | med | original | py go rs |
+| [43](43-max-drawdown/) | Max Drawdown | largest peak-to-trough drop | easy | original | py go rs |
+| [44](44-affine-align/) | Affine Alignment Score | protein sequence alignment | hard | [Rosalind GAFF](https://rosalind.info/problems/gaff/) | py go rs |
+| [45](45-kmer-assembly/) | K-mer Assembly | reconstruct a genome from k-mers | hard | [Rosalind PCOV](https://rosalind.info/problems/pcov/) | py go rs |
+| [46](46-crispr-offtarget/) | CRISPR Off-Targets | approximate genome matching | hard | [Cas-OFFinder](https://academic.oup.com/bioinformatics/article/30/10/1473/267560) | py go rs |
+| [47](47-rna-max-pairs/) | RNA Max Pairs | maximum valid base-pairing | hard | [Nussinov 1980](https://pubmed.ncbi.nlm.nih.gov/6161375/) | py go rs |
+| [48](48-shortest-superstring/) | Shortest Superstring | DNA fragment assembly | hard | [Rosalind LONG](https://rosalind.info/problems/long/) | py go rs |
 
 ---
 
