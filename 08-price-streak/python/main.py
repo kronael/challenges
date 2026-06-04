@@ -3,13 +3,13 @@ import sys
 
 
 def solve(seq):
-    # TODO: implement
+    # TODO: return the length of the longest strictly increasing subsequence
     pass
 
 
 def main():
     obj = json.load(sys.stdin)
-    # TODO: parse obj, call solve, print result
+    print(solve(obj["seq"]))
 
 
 if __name__ == "__main__":

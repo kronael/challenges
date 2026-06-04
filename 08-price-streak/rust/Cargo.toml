@@ -1,5 +1,5 @@
 [package]
-name = "lis"
+name = "price-streak"
 version = "0.1.0"
 edition = "2021"
 
