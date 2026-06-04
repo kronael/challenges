@@ -18,6 +18,8 @@ Harness is **editor + `make test`**. Each challenge has its own dir `NN-slug/`.
 
 **sys challenges** (02–07): Python is inappropriate (GIL prevents real concurrency).
 Use **`golden/main.c`** as the reference implementation instead of `main.py`.
+`golden/main.c` contains the complete algorithm + a pthreads stress test in one file.
+`golden/Makefile` builds with `gcc -std=c11 -O2 -pthread` and `make test` runs `./main`.
 
 **Never put a working solution in `python/`, `go/`, or `rust/`.** If you find one,
 move it to `golden/` and replace the original with a stub.
