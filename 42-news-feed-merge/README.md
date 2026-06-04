@@ -60,4 +60,4 @@ cd python && make
 
 Stuck? See `HINTS.md`.
 
-Source: classic k-way merge of sorted streams (CLRS §6.5 — merge of sorted lists)
+Source: CLRS §6.5 (merging sorted sequences)
