@@ -56,12 +56,28 @@ impl<T: Send> Default for VyukovQueue<T> {
 }
 
 impl<T: Send> MpscQueue<T> for VyukovQueue<T> {
-    fn push(&self, _value: T) {
-        todo!("implement Vyukov MPSC push")
+    fn push(&self, value: T) {
+        self.tail.store(
+            Box::into_raw(Box::new(Node::<T> {
+                next: AtomicPtr::new(ptr::null_mut()),
+                val: Some(value),
+            })),
+            Ordering::Relaxed,
+        )
     }
 
     fn try_pop(&self) -> PopResult<T> {
-        todo!("implement Vyukov MPSC try_pop")
+        let node = self.head.load(Ordering::Relaxed);
+        if unsafe { (*node).val.as_ref().is_none() } {
+            return PopResult::Empty;
+        }
+        let next = unsafe { (*node).next.load(Ordering::Relaxed) };
+        if next.is_null() {
+            PopResult::Retry
+        } else {
+            self.head.store(next, Ordering::Relaxed);
+            PopResult::Item(unsafe { Box::from_raw(node) }.val.unwrap())
+        }
     }
 }
 
