@@ -1,3 +1,3 @@
-module 11-interval-scheduling
+module interval-scheduling
 
 go 1.22

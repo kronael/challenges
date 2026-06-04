@@ -1,3 +1,3 @@
-module 18-prime-sieve
+module prime-sieve
 
 go 1.22

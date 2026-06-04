@@ -1,3 +1,3 @@
-module 13-dijkstra
+module dijkstra
 
 go 1.22

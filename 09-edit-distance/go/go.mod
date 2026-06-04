@@ -1,3 +1,3 @@
-module 09-edit-distance
+module edit-distance
 
 go 1.22

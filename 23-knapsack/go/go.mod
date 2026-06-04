@@ -1,3 +1,3 @@
-module 23-knapsack
+module knapsack
 
 go 1.22

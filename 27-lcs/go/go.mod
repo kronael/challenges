@@ -1,3 +1,3 @@
-module 27-lcs
+module lcs
 
 go 1.22

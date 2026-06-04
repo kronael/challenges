@@ -1,3 +1,3 @@
-module 24-toposort
+module toposort
 
 go 1.22

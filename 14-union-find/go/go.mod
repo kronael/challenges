@@ -1,3 +1,3 @@
-module 14-union-find
+module union-find
 
 go 1.22

@@ -1,3 +1,3 @@
-module 17-max-subarray
+module max-subarray
 
 go 1.22

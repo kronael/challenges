@@ -1,3 +1,3 @@
-module 10-coin-change
+module coin-change
 
 go 1.22

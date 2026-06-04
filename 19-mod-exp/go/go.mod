@@ -1,3 +1,3 @@
-module 19-mod-exp
+module mod-exp
 
 go 1.22

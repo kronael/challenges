@@ -1,3 +1,3 @@
-module 16-sliding-window-max
+module sliding-window-max
 
 go 1.22

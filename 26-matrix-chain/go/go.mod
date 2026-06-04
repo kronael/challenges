@@ -1,3 +1,3 @@
-module 26-matrix-chain
+module matrix-chain
 
 go 1.22

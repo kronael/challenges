@@ -1,3 +1,3 @@
-module 20-matrix-exp
+module matrix-exp
 
 go 1.22

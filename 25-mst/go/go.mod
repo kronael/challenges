@@ -1,3 +1,3 @@
-module 25-mst
+module mst
 
 go 1.22
