@@ -10,13 +10,17 @@
 # contract holds across the whole repo.
 SHELL := /bin/bash
 
-GOLDEN := $(sort $(dir $(wildcard [0-9][0-9]-*/golden/Makefile)))
-ROTTEN := $(sort $(dir $(wildcard [0-9][0-9]-*/rotten/Makefile)))
+# io challenges only: golden/rotten that ship a python case-suite. sys challenges
+# (02-07) have C golden/rotten with no cases — their rotten is *meant* to fail its
+# stress test, so they are verified separately via `make sys`, never in `test`.
+GOLDEN := $(sort $(dir $(wildcard [0-9][0-9]-*/golden/test_solution.py)))
+ROTTEN := $(sort $(dir $(wildcard [0-9][0-9]-*/rotten/test_solution.py)))
+SYS    := $(sort $(dir $(wildcard [0-9][0-9]-*/golden/main.c)))
 
 GOLDEN_TIMEOUT ?= 15   # generous: golden must finish well within this
 ROTTEN_TIMEOUT ?= 5    # short: the naive trap must blow past this
 
-.PHONY: all test golden rotten help
+.PHONY: all test golden rotten sys help
 
 all: test
 
@@ -53,8 +57,18 @@ rotten:
 	done; \
 	[ $$fail -eq 0 ] && echo "all rotten pass test and time out on bench" || { echo "FAILURES above"; exit 1; }
 
+sys:
+	@fail=0; \
+	for d in $(SYS); do \
+	  printf "sys    %-33s " "$$d"; \
+	  if (cd $$d && make test) >/tmp/psys.log 2>&1; then echo "ok (stress passes)"; \
+	  else echo "FAIL"; sed 's/^/    /' /tmp/psys.log | tail -3; fail=1; fi; \
+	done; \
+	[ $$fail -eq 0 ] && echo "all sys golden stress tests pass" || { echo "FAILURES above"; exit 1; }
+
 help:
-	@echo "test    — every golden + rotten passes its case suite"
-	@echo "golden  — every golden passes test AND bench (must not time out)"
-	@echo "rotten  — every rotten passes test BUT times out on bench (the trap)"
+	@echo "test    — every io golden + rotten passes its case suite"
+	@echo "golden  — every io golden passes test AND bench (must not time out)"
+	@echo "rotten  — every io rotten passes test BUT times out on bench (the trap)"
+	@echo "sys     — every sys (02-07) golden C stress test passes"
 	@echo "Override GOLDEN_TIMEOUT (def 15s) / ROTTEN_TIMEOUT (def 5s)."
