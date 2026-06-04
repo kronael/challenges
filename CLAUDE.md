@@ -13,8 +13,19 @@ Harness is **editor + `make test`**. Each challenge has its own dir `NN-slug/`.
 
 - **`golden/main.py`** — the optimised reference. Always passes `make test`.
   Never shown to the solver. Used to generate `.out` files and as the bench target.
+- **`golden/rotten.py`** — the *naive* reference: correct (passes `make test` on
+  small cases) but too slow — it TIMEOUTs on `make bench`. It is the trap the
+  solver must beat: the obvious O(n²)/exponential approach the problem punishes.
+  `golden/Makefile` benches both, so `bench` shows `main.py` fast and `rotten.py`
+  TIMEOUT side by side. (sys challenges: `rotten.c` is the obvious-but-wrong
+  version — torn reads, false sharing, ABA — that passes a weak check but fails
+  the stress test / race detector.)
 - **`python/main.py`, `go/main.go`, `rust/src/main.rs`** — stubs ONLY.
-  `solve()` must contain only `pass` / `return nil` / `todo!()`.
+  Only the algorithm body is a stub (`pass` / `return nil` / `todo!()`); the
+  scaffold around it must be COMPLETE — `solve(...)` signature matches the Input,
+  `main` parses JSON → calls `solve` → prints, and the test harness actually runs
+  the cases through `solve`. A finished stub builds and its tests run (and fail
+  only on the unimplemented body), never on harness/parse errors.
 
 **sys challenges** (02–07): Python is inappropriate (GIL prevents real concurrency).
 Use **`golden/main.c`** as the reference implementation instead of `main.py`.
@@ -26,6 +37,17 @@ move it to `golden/` and replace the original with a stub.
 
 When scaffolding a new challenge: write the reference first in `golden/main.py`,
 verify it passes, then write stubs in the three solver dirs.
+
+## README vs HINTS — never spoil the problem
+
+- **`README.md`** states the *problem* only: task, constraints, I/O format, worked
+  examples, source. It must NOT name the technique, data structure, or memory
+  ordering that solves it. Describe *what* to compute and *why it's hard* (scale,
+  the trap), corroborated against the canonical online problem statement — never
+  *how*. No "the trick is…", no "use a min-heap", no "## Teaches" section.
+- **`HINTS.md`** holds everything that would spoil it: the approach, the named
+  algorithm, the ordering, the old "Teaches" bullets. Checked in next to README;
+  the solver opens it only when stuck.
 
 ## Two challenge types
 
