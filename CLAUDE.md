@@ -13,13 +13,15 @@ Harness is **editor + `make test`**. Each challenge has its own dir `NN-slug/`.
 
 - **`golden/main.py`** — the optimised reference. Always passes `make test`.
   Never shown to the solver. Used to generate `.out` files and as the bench target.
-- **`golden/rotten.py`** — the *naive* reference: correct (passes `make test` on
-  small cases) but too slow — it TIMEOUTs on `make bench`. It is the trap the
-  solver must beat: the obvious O(n²)/exponential approach the problem punishes.
-  `golden/Makefile` benches both, so `bench` shows `main.py` fast and `rotten.py`
-  TIMEOUT side by side. (sys challenges: `rotten.c` is the obvious-but-wrong
-  version — torn reads, false sharing, ABA — that passes a weak check but fails
-  the stress test / race detector.)
+- **`rotten/`** — its OWN dir, a sibling of `golden/` (same shape: `main.py` +
+  `Makefile` + `pyproject.toml`, never a file nested inside `golden/`). It holds
+  the *naive* reference: correct, so `make test` PASSES the small cases, but too
+  slow, so `make bench` TIMEOUTs. It is the trap the solver must beat — the
+  obvious O(n²)/exponential approach the problem punishes. `rotten/`'s test
+  excludes the `_large_` cases (those are exactly where it would hang). (sys
+  challenges: `rotten/main.c` is the obvious-but-wrong version — torn reads, false
+  sharing, ABA — that passes a weak check but fails the stress test / race
+  detector.)
 - **`python/main.py`, `go/main.go`, `rust/src/main.rs`** — stubs ONLY.
   Only the algorithm body is a stub (`pass` / `return nil` / `todo!()`); the
   scaffold around it must be COMPLETE — `solve(...)` signature matches the Input,
@@ -62,8 +64,11 @@ verify it passes, then write stubs in the three solver dirs.
 ```
 NN-slug/
   README.md              problem statement, constraints, examples, source link
+  HINTS.md               the approach/technique — spoilers, kept out of README
   cases/                 NN.in / NN.out          (io only)
-  python/  solution.py · test_solution.py · Makefile
+  golden/  main.py · test_solution.py · Makefile · pyproject.toml   (fast reference)
+  rotten/  main.py · test_solution.py · Makefile · pyproject.toml   (naive trap: passes test, fails bench)
+  python/  main.py · test_solution.py · Makefile
   go/      main.go · solution_test.go · go.mod · Makefile
   rust/    src/lib.rs · src/main.rs · tests/ · Cargo.toml · Makefile
 ```
