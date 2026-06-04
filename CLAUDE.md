@@ -1,19 +1,26 @@
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
 # challenges/
 
-Personal coding-practice bench. 30 self-contained challenges, one per sitting.
+Personal coding-practice bench. 40 self-contained challenges, one per sitting.
 Harness is **editor + `make test`**. Each challenge has its own dir `NN-slug/`.
 
 ## Golden rule — solutions ONLY in golden/
 
-Every challenge has **four** language dirs: `golden/`, `python/`, `go/`, `rust/`.
+**io challenges** have four language dirs: `golden/`, `python/`, `go/`, `rust/`.
 
 - **`golden/main.py`** — the optimised reference. Always passes `make test`.
   Never shown to the solver. Used to generate `.out` files and as the bench target.
 - **`python/main.py`, `go/main.go`, `rust/src/main.rs`** — stubs ONLY.
   `solve()` must contain only `pass` / `return nil` / `todo!()`.
 
+**sys challenges** (02–07): Python is inappropriate (GIL prevents real concurrency).
+Use **`golden/main.c`** as the reference implementation instead of `main.py`.
+
 **Never put a working solution in `python/`, `go/`, or `rust/`.** If you find one,
-move it to `golden/main.py` and replace the original with a stub.
+move it to `golden/` and replace the original with a stub.
 
 When scaffolding a new challenge: write the reference first in `golden/main.py`,
 verify it passes, then write stubs in the three solver dirs.
@@ -120,8 +127,8 @@ The race detector and the stress test are your debugger for sys challenges.
 
 ## State of the repo
 
-- 01, 08–20: full cases + tests (ready to solve).
-- 21–30: README + harness scaffolded, `cases/` still empty (need generating).
+- 01, 08–20, 34–40: full cases + tests (ready to solve).
+- 21–33: README + harness scaffolded, `cases/` still empty (need generating).
 - 02–07: sys challenges, stress tests in place.
 
 ## Sources
