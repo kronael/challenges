@@ -1,4 +1,5 @@
-import json, sys
+import json
+import sys
 
 
 def solve(jobs):

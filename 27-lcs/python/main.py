@@ -3,13 +3,13 @@ import sys
 
 
 def solve(s, t):
-    # TODO: implement
+    # TODO: return the length of the longest common subsequence of s and t
     pass
 
 
 def main():
     obj = json.load(sys.stdin)
-    # TODO: parse obj, call solve, print result
+    print(solve(obj["s"], obj["t"]))
 
 
 if __name__ == "__main__":

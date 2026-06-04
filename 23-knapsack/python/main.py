@@ -3,13 +3,13 @@ import sys
 
 
 def solve(capacity, items):
-    # TODO: implement
+    # TODO
     pass
 
 
 def main():
     obj = json.load(sys.stdin)
-    # TODO: parse obj, call solve, print result
+    print(solve(obj["capacity"], obj["items"]))
 
 
 if __name__ == "__main__":

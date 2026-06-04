@@ -7,14 +7,23 @@
 
 ## Problem
 
-Process a mix of point updates and prefix-sum queries over a large array (2·10⁵
-operations). A plain array makes updates O(1) but sums O(n); a prefix-sum array
-flips it. You need both logarithmic.
+You maintain an array `a` of `n` numbers and process a stream of two kinds of
+operations, in order:
 
-The Fenwick tree is startlingly terse — one flat array, two bit-twiddling loops.
-The non-obvious part is *why* `i & (-i)` (the lowest set bit) walks exactly the
-right indices: each slot stores the sum of a power-of-two block, and the binary
-form of i partitions `[1, i]` into O(log n) such blocks.
+- `update i d` — add `d` to element `i`.
+- `sum i` — report the prefix sum `a[1] + a[2] + … + a[i]`.
+
+Process a mix of point updates and prefix-sum queries over a large array (2·10⁵
+operations). The naive approaches each lose on one side: a plain array makes
+updates O(1) but every `sum` is O(n); precomputing a prefix-sum array flips it,
+making `sum` O(1) but every `update` O(n). Either way a query-heavy or
+update-heavy stream is quadratic and will not finish in time. You need *both*
+operations to run in O(log n).
+
+Sums can be large: with `n = 2·10⁵` elements and values up to ~`10¹⁸`, a prefix
+sum overflows 32 bits, so accumulate in 64-bit integers.
+
+Constraints: `n` up to 2·10⁵, up to 2·10⁵ queries, indices are 1-based.
 
 ## Input / Output
 
@@ -38,11 +47,6 @@ init [5,5,5]: sum3→15, update(1,-5), sum1→0, sum3→10
   → 15 0 10
 ```
 
-## Teaches
-
-- **Lowest-set-bit traversal**: `update` walks up with `i += i & (-i)`, `sum` walks down with `i -= i & (-i)`; each index stores the sum of a block whose length is its lowest set bit.
-- **Why it works**: the binary form of i partitions `[1, i]` into O(log n) power-of-two blocks. Prefix-only and invertible — simpler than a segment tree (challenge 22).
-
 ## Run
 
 ```
@@ -50,5 +54,7 @@ cd rust   && make
 cd go     && make
 cd python && make
 ```
+
+Stuck? See `HINTS.md`.
 
 Source: [CP-Algorithms — Fenwick Tree](https://cp-algorithms.com/data_structures/fenwick.html)

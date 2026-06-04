@@ -7,7 +7,23 @@
 
 ## Problem
 
-You need to multiply a chain of K matrices. The order doesn't change the result, but it dramatically changes how many scalar multiplications it costs — a good split and a bad split can differ by orders of magnitude. Given the dimensions, find the cheapest order. The challenge: the best split of a range depends on the best splits of its subranges.
+You need to multiply a chain of `k` matrices, `A₁ · A₂ · … · A_k`, where matrix
+`i` has dimensions `dims[i-1] × dims[i]`. Matrix multiplication is associative —
+the final product is the same no matter how you parenthesize it — but the *cost*
+is not. Multiplying a `p×q` matrix by a `q×r` matrix takes `p·q·r` scalar
+multiplications, so the order in which you pair up the matrices decides the total
+work, and a good order versus a bad one can differ by orders of magnitude.
+
+Given the dimension list, output the minimum number of scalar multiplications
+needed to compute the whole product.
+
+The catch is the number of orderings. The count of distinct parenthesizations of
+`k` matrices grows like the Catalan numbers — exponential in `k` — so trying them
+all is hopeless once the chain is long. With up to `k = 500` matrices you need a
+formulation that does not enumerate orderings.
+
+Constraints: `k` up to 500 matrices (so up to 501 dimensions), each dimension up
+to 100.
 
 ## Input
 
@@ -33,11 +49,6 @@ dims [10,30,5,60] → 4500   (A·B)·C costs 4500 vs A·(B·C) at 27000
 dims [5,10,20] → 1000
 ```
 
-## Teaches
-
-- **Interval DP**: `dp[i][j]` is the best cost for matrices `i…j`; solve length-2 intervals first, then length 3, ... so every split reuses solved subproblems.
-- **Choosing a split point**: try each `k` in `[i,j)` and combine `dp[i][k] + dp[k+1][j] + dims[i]·dims[k+1]·dims[j+1]` — O(n³) over n²/2 intervals.
-
 ## Run
 
 ```
@@ -46,4 +57,6 @@ cd go   && make
 cd python && make
 ```
 
-Source: CLRS §15.2
+Stuck? See `HINTS.md`.
+
+Source: CLRS §15.2 (matrix-chain multiplication)

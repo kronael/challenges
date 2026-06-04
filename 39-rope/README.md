@@ -1,21 +1,24 @@
 # 39 — Rope
 
-**Task**: Implement a rope — a binary tree of string fragments — and answer substring queries without materialising the whole string.
+**Task**: Concatenate many string fragments and answer many overlapping substring queries fast — without materialising the whole joined string for every query.
 
 **Difficulty**: hard
 **Time estimate**: ~70 min
 
 ## Problem
 
-A rope stores text as the leaves of a binary tree; concatenation is O(1) (hang two
-ropes off a new root) and indexing is O(log n). The naive `s += part` loop is
-O(total²) — each `+` recopies the entire prefix — so building a megabyte from
-thousands of fragments melts.
+You are given an ordered list of string fragments `parts` and a list of
+half-open queries `[lo, hi)`. Conceptually the fragments are concatenated, in
+order, into one logical string; each query asks for the substring covering
+positions `lo` up to (but not including) `hi` of that logical string. Each `lo`
+and `hi` is clamped to `[0, total)`, where `total` is the combined length.
 
-The key insight: each internal node stores its left subtree's length (its
-*weight*). To index character i, descend left when i < weight, else go right with
-i − weight. That weight is what turns linear concatenation into logarithmic
-addressing.
+The catch is scale: there can be thousands of fragments and tens of thousands of
+queries, and the combined string can run into the megabytes. Naively flattening
+the fragments and re-slicing for every query — or rebuilding the joined string
+per query — does far too much copying and will not finish in time. The queries
+overlap and span fragment boundaries arbitrarily, so you cannot answer them by
+touching one fragment at a time either.
 
 ## Input / Output
 
@@ -39,16 +42,13 @@ parts ["hello","world","foo"], queries [[0,8],[5,5],[2,6]]
   → hellowor||llow
 ```
 
-## Teaches
-
-- **Binary tree of fragments**: each internal node stores its left subtree's length (weight); concatenation is O(1).
-- **Weight-based traversal**: `extract` descends left when `lo < weight`, right when `hi > weight` (subtracting weight). Build by balanced pairwise merge — a left fold degrades to an O(n) chain.
-
 ## Run
 
 ```
 cd rust   && make
 cd python && make
 ```
+
+Stuck? See `HINTS.md`.
 
 Source: [Boehm, Atkinson & Plass, *Ropes: an Alternative to Strings* (1995)](https://www.cs.rit.edu/usr/local/pub/jeh/courses/QUARTERS/FP/Labs/CedarRope/rope-paper.pdf)

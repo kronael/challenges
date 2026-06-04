@@ -3,13 +3,13 @@ import sys
 
 
 def solve(dims):
-    # TODO: implement
+    # TODO: return the minimum number of scalar multiplications
     pass
 
 
 def main():
     obj = json.load(sys.stdin)
-    # TODO: parse obj, call solve, print result
+    print(solve(obj["dims"]))
 
 
 if __name__ == "__main__":

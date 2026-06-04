@@ -3,13 +3,13 @@ import sys
 
 
 def solve(n, values, ops):
-    # TODO: implement
+    # TODO: return the list of sum-query answers, in order
     pass
 
 
 def main():
     obj = json.load(sys.stdin)
-    # TODO: parse obj, call solve, print result
+    print(*solve(obj["n"], obj["values"], obj["ops"]))
 
 
 if __name__ == "__main__":

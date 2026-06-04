@@ -7,7 +7,23 @@
 
 ## Problem
 
-Find the longest common subsequence of two strings — the longest run of characters that appears in both, in order but not necessarily contiguous. This is *not* the longest common substring: a subsequence may skip characters in either string. The trick is filling a 2-D grid indexed by prefixes of both strings, where each cell builds on the cells above, left, and diagonal.
+Given two strings `s` and `t`, find the length of their longest *common
+subsequence*: the longest string of characters that appears in both, in the
+same order but not necessarily contiguous. You may delete any characters from
+either string, but you may not reorder them.
+
+This is *not* the longest common *substring*: a subsequence may skip over
+characters in either string, so `"ABC"` is a subsequence of `"AXBXC"` even
+though it never appears as a contiguous block.
+
+The strings are long — up to a few thousand characters each — and the answer
+must come back fast. The obvious recursive formulation (at each mismatch, try
+dropping a character from one side or the other and take the better result)
+re-explores the same pairs of prefixes over and over; its running time blows up
+exponentially and it will not finish at this scale. Part of the challenge is
+finding a formulation that does.
+
+Constraints: `|s|`, `|t|` up to a few thousand; characters are printable ASCII.
 
 ## Input
 
@@ -31,11 +47,6 @@ s "ABCBDAB", t "BDCAB" → 4   (e.g. "BDAB" or "BCAB")
 s "ABC", t "AXBXC" → 3   ("ABC")
 ```
 
-## Teaches
-
-- **2-D prefix DP**: `dp[i][j]` is the LCS of the first `i` chars of `s` and first `j` of `t`; a match extends the diagonal, otherwise take the better of dropping one character.
-- **Rolling rows**: each row depends only on the previous one, so two rows give O(|s|·|t|) time in O(min(|s|,|t|)) space.
-
 ## Run
 
 ```
@@ -44,4 +55,6 @@ cd go   && make
 cd python && make
 ```
 
-Source: CLRS §15.4
+Stuck? See `HINTS.md`.
+
+Source: CLRS §15.4 (longest common subsequence)

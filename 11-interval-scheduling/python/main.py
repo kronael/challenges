@@ -3,13 +3,13 @@ import sys
 
 
 def solve(intervals):
-    # TODO: implement
+    # TODO: return the maximum number of non-overlapping intervals
     pass
 
 
 def main():
     obj = json.load(sys.stdin)
-    # TODO: parse obj, call solve, print result
+    print(solve(obj["intervals"]))
 
 
 if __name__ == "__main__":

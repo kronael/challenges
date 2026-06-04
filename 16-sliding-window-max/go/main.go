@@ -1,16 +1,35 @@
 package main
 
 import (
-	"bufio"
+	"encoding/json"
 	"fmt"
 	"os"
+	"strconv"
+	"strings"
 )
 
-func solve() any {
-	return nil // TODO
+type input struct {
+	K   int   `json:"k"`
+	Arr []int `json:"arr"`
+}
+
+func solve(k int, arr []int) []int {
+	// TODO: return the maximum of each window of k readings, left to right
+	_ = k
+	_ = arr
+	return nil
 }
 
 func main() {
-	_ = bufio.NewReader(os.Stdin)
-	fmt.Println(solve())
+	var in input
+	if err := json.NewDecoder(os.Stdin).Decode(&in); err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
+	out := solve(in.K, in.Arr)
+	parts := make([]string, len(out))
+	for i, v := range out {
+		parts[i] = strconv.Itoa(v)
+	}
+	fmt.Println(strings.Join(parts, " "))
 }

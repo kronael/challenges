@@ -21,7 +21,7 @@ func solve(n int, edges [][2]int, loads []*int) []int {
 
 func main() {
 	var in input
-	if err := json.NewDecoder(os.Stdin).Decode(&in); err \!= nil {
+	if err := json.NewDecoder(os.Stdin).Decode(&in); err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}

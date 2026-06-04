@@ -1,7 +1,9 @@
+use prime_pair_sets::{solve, Input};
 use std::io::{self, Read};
 
 fn main() {
-    let mut input = String::new();
-    io::stdin().read_to_string(&mut input).unwrap();
-    // TODO parse + call solve
+    let mut buf = String::new();
+    io::stdin().read_to_string(&mut buf).unwrap();
+    let _inp: Input = serde_json::from_str(&buf).unwrap();
+    println!("{}", solve());
 }

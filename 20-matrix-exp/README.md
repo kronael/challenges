@@ -1,13 +1,22 @@
 # 20 — Matrix Exponentiation
 
-**Task**: Compute the Nth Fibonacci number mod 10^9+7, where N can be 10^9.
+**Task**: Compute the Nth Fibonacci number mod 10^9+7, where N can be as large as 10^18.
 
 **Difficulty**: medium
 **Time estimate**: ~30 min
 
 ## Problem
 
-Compute `F(n) mod 1e9+7` for `n` up to 10^9. Iterating the recurrence is O(n) — far too slow at this scale. The insight: a linear recurrence is a matrix multiplication, and `[[1,1],[1,0]]^n` carries `F(n)` in a corner. Raising that matrix to a power can be done by squaring in O(log n) steps.
+The Fibonacci numbers are defined by `F(0) = 0`, `F(1) = 1`, and
+`F(n) = F(n-1) + F(n-2)` for `n ≥ 2`. Given `n`, output `F(n) mod 1_000_000_007`.
+
+The catch is the scale: `n` can be as large as 10^18. Walking the recurrence one
+term at a time is O(n) — at 10^18 steps it would never finish, no matter how
+tight the inner loop. The values also grow astronomically, so every arithmetic
+step must stay reduced modulo 10^9+7. The challenge is producing `F(n)` without
+visiting all `n` of the intermediate terms.
+
+Constraints: `0 ≤ n ≤ 10^18`.
 
 ## Input
 
@@ -31,11 +40,6 @@ n=10 → 55
 n=1000000000 → 21
 ```
 
-## Teaches
-
-- **Recurrence as matrix power**: `[[1,1],[1,0]]^n` holds `F(n)` in a corner; any linear recurrence becomes a matrix raised to a power.
-- **O(log n) via squaring**: exponentiation-by-squaring on the transition matrix (equivalently fast doubling) turns an O(n) scan into O(log n) multiplies.
-
 ## Run
 
 ```
@@ -43,5 +47,7 @@ cd rust && make
 cd go   && make
 cd python && make
 ```
+
+Stuck? See `HINTS.md`.
 
 Source: competitive classic

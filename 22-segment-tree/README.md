@@ -7,7 +7,24 @@
 
 ## Problem
 
-Given an array, handle a mix of two operations in any order: update the element at index `i`, and query the sum over a range `[l, r]`. A plain array gives O(1) update but O(n) query; a prefix-sum array gives O(1) query but O(n) update — neither survives when both kinds of op are interleaved heavily. You need *both* in O(log n).
+Given an array of `n` values, process a sequence of operations of two kinds,
+interleaved in any order:
+
+- `update i v` — set the element at index `i` to `v`.
+- `sum l r` — report the sum of the elements in the inclusive range `[l, r]`.
+
+Indices are 1-based and ranges are inclusive. Emit one answer per `sum`, in the
+order the `sum` operations appear.
+
+The catch is the mix. A plain array answers `update` in O(1) but `sum` in O(n);
+a prefix-sum array flips that — O(1) `sum` but O(n) to rebuild after an
+`update`. With both kinds of operation interleaved heavily (`n` and the number
+of operations both up to 2·10⁵), either one-sided choice degrades to O(n) per
+operation and will not finish in time. You need a structure that keeps *both*
+operations at O(log n).
+
+Constraints: `n` and the number of operations each up to 2·10⁵; values and the
+running sums fit in a 64-bit signed integer.
 
 ## Input
 
@@ -31,11 +48,6 @@ values [1,3,2,5,4], [sum 1-3][update 2→10][sum 1-5] → 6 22
 values [7,8,9], [sum 2-2] → 8
 ```
 
-## Teaches
-
-- **Halving the range per level**: each node owns a contiguous span; a query or update splits into O(log n) canonical nodes, so neither costs O(n).
-- **Lazy propagation**: the same tree supports *range* updates by deferring a pending delta at a node and pushing it down only when a child is visited.
-
 ## Run
 
 ```
@@ -44,4 +56,6 @@ cd go   && make
 cd python && make
 ```
 
-Source: https://cses.fi/problemset/
+Stuck? See `HINTS.md`.
+
+Source: CSES Problem Set — Dynamic Range Sum Queries (https://cses.fi/problemset/task/1648)

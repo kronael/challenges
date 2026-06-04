@@ -3,13 +3,13 @@ import sys
 
 
 def solve(n, edges):
-    # TODO: implement
+    # TODO: return the shortest distance from node 0 to each node, -1 if unreachable
     pass
 
 
 def main():
     obj = json.load(sys.stdin)
-    # TODO: parse obj, call solve, print result
+    print(*solve(obj["n"], obj["edges"]))
 
 
 if __name__ == "__main__":

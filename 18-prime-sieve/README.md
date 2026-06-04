@@ -7,7 +7,15 @@
 
 ## Problem
 
-Count the primes strictly below N. For N around 10^8, testing each number for primality — O(N√N) — is far too slow. The insight: instead of asking "is this number prime?", strike out the multiples of every prime you find, so each composite is marked rather than tested.
+Count the primes strictly below `n`. A prime equal to `n` is not counted.
+
+`n` reaches 10^8, so the answer must come back fast. Testing each candidate for
+primality one at a time — checking divisors up to its square root — is O(n√n)
+and will not finish in time at that scale; part of the challenge is finding a
+formulation that does, while keeping the working set small enough to stay in
+memory.
+
+Constraints: `n` up to 10^8.
 
 ## Input
 
@@ -31,11 +39,6 @@ n=10 → 4   (2, 3, 5, 7)
 n=2 → 0
 ```
 
-## Teaches
-
-- **Sieve of Eratosthenes**: mark composites by striking multiples of each prime starting at `p²`; total work is O(n log log n), far below per-number testing.
-- **Cache- and memory-aware sieving**: an odd-only bytearray halves space, and for very large `n` a segmented sieve keeps the working set in cache.
-
 ## Run
 
 ```
@@ -43,5 +46,7 @@ cd rust && make
 cd go   && make
 cd python && make
 ```
+
+Stuck? See `HINTS.md`.
 
 Source: https://projecteuler.net/problem=10

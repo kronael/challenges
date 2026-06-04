@@ -7,9 +7,14 @@
 
 ## Problem
 
-A user typed `s`; you think they meant `t`. Compute the minimum number of single-character edits — insert, delete, or replace — that transforms `s` into `t`. This is the Levenshtein distance, the number a spell-checker uses to rank suggestions.
+A user typed `s`; you think they meant `t`. Compute the minimum number of
+single-character edits — insert, delete, or replace — that transforms `s` into
+`t`. This is the number a spell-checker uses to rank suggestions.
 
-The greedy "fix the first mismatch" instinct fails: sometimes deleting is cheaper than replacing, and you can't know which without looking ahead. The fix is a DP over prefixes — and once it works, you'll notice you only ever read the previous row.
+The greedy "fix the first mismatch" instinct fails: sometimes deleting is
+cheaper than replacing, and you can't know which without looking ahead. Trying
+every sequence of edits explodes exponentially, so the obvious recursion won't
+finish at scale — the strings run up to a few thousand characters each.
 
 Constraints: |s|, |t| up to a few thousand.
 
@@ -35,11 +40,6 @@ A single integer: the minimum number of edits.
 {"s":"","t":"abc"} → 3
 ```
 
-## Teaches
-
-- **2-D dynamic programming**: `dp[i][j]` = distance between prefixes `s[:i]` and `t[:j]`; each cell is the cheapest of insert (+1), delete (+1), or substitute (+0/1).
-- **Rolling-array space**: only the previous row is needed, so space drops from O(|s|·|t|) to O(min(|s|,|t|)).
-
 ## Run
 
 ```
@@ -47,5 +47,7 @@ cd rust   && make
 cd go     && make
 cd python && make
 ```
+
+Stuck? See `HINTS.md`.
 
 Source: CLRS §15.5

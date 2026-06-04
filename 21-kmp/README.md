@@ -7,7 +7,18 @@
 
 ## Problem
 
-Report every 1-indexed start position where `pattern` occurs in `text`, including overlapping matches. The naive approach re-checks the pattern from scratch on every mismatch — O(|T|·|P|), which blows up on long repetitive text. You need O(|T|+|P|): precompute a failure function so the text pointer never moves backward.
+Report every 1-indexed start position where `pattern` occurs in `text`,
+including overlapping matches.
+
+The text is long and highly repetitive — up to `|T| = 3·10⁵` characters with a
+`|P|` up to `10³`. The obvious scan that re-checks the pattern from scratch
+after every mismatch is O(|T|·|P|); on text full of near-matches that almost
+complete before failing, it does close to the full product of work and will not
+finish in time. Part of the challenge is matching in time linear in the input
+size.
+
+Constraints: `|T|` up to 3·10⁵, `|P|` up to 10³, both lowercase a–z (the small
+cases also use spaces). `pattern` may be empty — report no positions.
 
 ## Input
 
@@ -31,11 +42,6 @@ text "aababab", pattern "abab" → 2 4
 text "aaaaa", pattern "aa" → 1 2 3 4
 ```
 
-## Teaches
-
-- **Failure function**: for each prefix, the longest proper prefix that is also a suffix; on a mismatch this tells you how far to fall back instead of restarting.
-- **Linear matching**: the text pointer never moves backward, giving O(n+m); the related Z-function answers "how far does the match extend from here".
-
 ## Run
 
 ```
@@ -43,5 +49,7 @@ cd rust && make
 cd go   && make
 cd python && make
 ```
+
+Stuck? See `HINTS.md`.
 
 Source: https://cses.fi/problemset/task/2107

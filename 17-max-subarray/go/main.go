@@ -1,16 +1,26 @@
 package main
 
 import (
-	"bufio"
+	"encoding/json"
 	"fmt"
 	"os"
 )
 
-func solve() any {
-	return nil // TODO
+type input struct {
+	Arr []int `json:"arr"`
+}
+
+func solve(arr []int) int {
+	// TODO: return the maximum contiguous subarray sum
+	_ = arr
+	return 0
 }
 
 func main() {
-	_ = bufio.NewReader(os.Stdin)
-	fmt.Println(solve())
+	var in input
+	if err := json.NewDecoder(os.Stdin).Decode(&in); err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
+	fmt.Println(solve(in.Arr))
 }

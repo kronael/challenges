@@ -7,9 +7,17 @@
 
 ## Problem
 
-Given a directed graph with non-negative edge weights, output the shortest-path distance from node `0` to each node, or `-1` for any node you can't reach.
+Given a directed graph with non-negative edge weights, output the shortest-path
+distance from node `0` to each node, or `-1` for any node you can't reach. The
+distance to a node is the minimum total weight over every directed path from
+node `0` to it.
 
-The engine is a greedy min-heap: repeatedly settle the closest unfinished node and relax its out-edges. The correctness rests entirely on weights being non-negative — once a node is popped, its distance is final, because no later (longer) path can ever improve it. Hand this algorithm a negative edge and that guarantee collapses: a node can be "settled" too early and the answer goes wrong. (Detecting negatives is Bellman-Ford's job, not this one.)
+The graph is large — up to ~10⁵ nodes and ~5·10⁵ edges — so the distances must
+come back fast. A direct edge to a node is not necessarily the cheapest way to
+reach it: a longer detour through other nodes can undercut it, so you cannot
+trust the first edge you see into a node. The cost of getting the formulation
+wrong is either a quadratic blow-up that will not finish at this scale, or a
+wrong answer when a cheaper detour is overlooked.
 
 Constraints: n up to ~10⁵, edges up to ~5·10⁵, weights non-negative, distances fit in i64.
 
@@ -36,11 +44,6 @@ Each edge is `[u, v, w]`: a directed edge u → v with weight w.
 {"n":3,"edges":[[0,1,5]]} → 0 5 -1
 ```
 
-## Teaches
-
-- **Greedy shortest paths with a min-heap**: pop the nearest unsettled node, relax its edges; popped = final, which is exactly why negative weights break it.
-- **Lazy heap deletion**: push improved distances as fresh entries and skip any pop where `d > dist[u]` — no decrease-key needed.
-
 ## Run
 
 ```
@@ -48,5 +51,7 @@ cd rust   && make
 cd go     && make
 cd python && make
 ```
+
+Stuck? See `HINTS.md`.
 
 Source: CLRS §24.3

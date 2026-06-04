@@ -1,16 +1,28 @@
 package main
 
 import (
-	"bufio"
+	"encoding/json"
 	"fmt"
 	"os"
 )
 
-func solve() any {
-	return nil // TODO
+type input struct {
+	S string `json:"s"`
+	T string `json:"t"`
+}
+
+func solve(s, t string) int {
+	// TODO: return the minimum number of single-character edits from s to t
+	_ = s
+	_ = t
+	return 0
 }
 
 func main() {
-	_ = bufio.NewReader(os.Stdin)
-	fmt.Println(solve())
+	var in input
+	if err := json.NewDecoder(os.Stdin).Decode(&in); err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
+	fmt.Println(solve(in.S, in.T))
 }

@@ -3,13 +3,13 @@ import sys
 
 
 def solve():
-    # TODO: implement
+    # TODO: return the smallest sum of a pairwise-compatible set of five primes
     pass
 
 
 def main():
-    obj = json.load(sys.stdin)
-    # TODO: parse obj, call solve, print result
+    json.load(sys.stdin)
+    print(solve())
 
 
 if __name__ == "__main__":

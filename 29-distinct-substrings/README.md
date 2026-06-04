@@ -7,21 +7,23 @@
 
 ## Problem
 
-A string of length n has n(n+1)/2 substrings if you count positions; many repeat,
-and you want the count of *distinct* ones. Generating them all into a set is
-O(n²) substrings of O(n) characters each — quadratic memory, cubic time, dead on
-arrival at n = 10⁵.
+A string of length `n` has `n(n+1)/2` substrings counted by position, but many of
+them coincide. Count how many *distinct* non-empty substrings the string has.
 
-The trick: build a suffix array, then an LCP array. Every substring is a prefix
-of exactly one suffix, and adjacent sorted suffixes share an LCP that counts the
-duplicates. The answer falls out of one subtraction.
+The naive route — generate every substring and drop it into a set — is `O(n²)`
+substrings of up to `O(n)` characters each, so it is quadratic in memory and
+cubic in time. At `n = 10⁵` it never finishes and never fits; clearing that wall
+is the point of the challenge.
+
+Constraints: `1 ≤ n ≤ 10⁵`, characters are lowercase `a`–`z`. The answer can
+exceed a 32-bit integer.
 
 ## Input / Output
 
 ```json
 {"s": "abab"}
 ```
-Single integer: the number of distinct non-empty substrings (lowercase, n ≤ 10⁵).
+Single integer: the number of distinct non-empty substrings.
 
 ## Examples
 
@@ -30,16 +32,10 @@ Single integer: the number of distinct non-empty substrings (lowercase, n ≤ 10
 "abab" → 7      (a, b, ab, ba, aba, bab, abab)
 ```
 
-**Example 2** — catches a set-based approach that forgets dedup.
+**Example 2** — duplicates must not be counted twice.
 ```
 "aaa" → 3       (a, aa, aaa) — not 6
 ```
-
-## Teaches
-
-- **Suffix array (O(n log n))**: sort all suffixes by prefix doubling; every substring is a prefix of one suffix.
-- **Kasai's LCP**: longest common prefix of adjacent sorted suffixes in O(n), reusing the previous value.
-- **The formula**: total prefixes `n(n+1)/2` minus `Σ LCP` removes exactly the double-counted shared prefixes.
 
 ## Run
 
@@ -48,5 +44,7 @@ cd rust   && make
 cd go     && make
 cd python && make
 ```
+
+Stuck? See `HINTS.md`.
 
 Source: [CSES #2105 — Distinct Substrings](https://cses.fi/problemset/task/2105)

@@ -9,7 +9,7 @@
 
 An array is "almost sorted" if it has few *inversions*: index pairs `i < j` where `arr[i] > arr[j]`. A sorted array has 0; a fully reversed array of `n` elements has the maximum, n(n−1)/2. Count the exact number for a given array.
 
-Checking every pair is O(n²) — fine for n=1000, hopeless at n=10⁵ (that's 5 billion comparisons). The elegant fix: run a merge sort, and every time you pull an element from the right half ahead of `k` elements still waiting in the left half, those `k` pairs are inversions. Counting rides along for free.
+Checking every pair is O(n²) — fine for n=1000, hopeless at n=10⁵ (that's 5 billion comparisons). The count alone must come back fast, so the all-pairs scan is the trap to avoid.
 
 Constraints: n up to 10⁵, values fit in i32; the count can exceed i32 — use i64.
 
@@ -35,11 +35,6 @@ A single integer: the number of inversions.
 {"n":5,"arr":[5,4,3,2,1]} → 10
 ```
 
-## Teaches
-
-- **Count during the merge**: when a right-half element is emitted ahead of `k` remaining left-half elements, add `k` to the total — that's every cross-half inversion.
-- **Divide and conquer**: total = left + right + cross inversions, all computed inside one merge-sort recursion in O(n log n).
-
 ## Run
 
 ```
@@ -47,5 +42,7 @@ cd rust   && make
 cd go     && make
 cd python && make
 ```
+
+Stuck? See `HINTS.md`.
 
 Source: CLRS

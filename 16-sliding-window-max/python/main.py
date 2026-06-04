@@ -3,13 +3,13 @@ import sys
 
 
 def solve(k, arr):
-    # TODO: implement
+    # TODO: return the maximum of each window of k readings, left to right
     pass
 
 
 def main():
     obj = json.load(sys.stdin)
-    # TODO: parse obj, call solve, print result
+    print(*solve(obj["k"], obj["arr"]))
 
 
 if __name__ == "__main__":

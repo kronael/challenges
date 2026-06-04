@@ -2,15 +2,37 @@ package main
 
 import (
 	"bufio"
+	"encoding/json"
 	"fmt"
 	"os"
+	"strconv"
+	"strings"
 )
 
-func solve() any {
-	return nil // TODO
+type input struct {
+	N       int     `json:"n"`
+	Unions  [][]int `json:"unions"`
+	Queries [][]int `json:"queries"`
+}
+
+func solve(n int, unions, queries [][]int) []int {
+	// TODO: apply unions, then return 1/0 per query for same-component
+	_, _, _ = n, unions, queries
+	return nil
 }
 
 func main() {
-	_ = bufio.NewReader(os.Stdin)
-	fmt.Println(solve())
+	var in input
+	if err := json.NewDecoder(os.Stdin).Decode(&in); err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
+	out := solve(in.N, in.Unions, in.Queries)
+	parts := make([]string, len(out))
+	for i, v := range out {
+		parts[i] = strconv.Itoa(v)
+	}
+	w := bufio.NewWriter(os.Stdout)
+	defer w.Flush()
+	fmt.Fprintln(w, strings.Join(parts, " "))
 }

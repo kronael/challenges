@@ -1,9 +1,12 @@
 package main
 
 import (
+	"encoding/json"
+	"os"
 	"path/filepath"
-	"strings"
 	"sort"
+	"strconv"
+	"strings"
 	"testing"
 )
 
@@ -16,10 +19,46 @@ func TestCases(t *testing.T) {
 			ins = append(ins, f)
 		}
 	}
+	if len(ins) == 0 {
+		t.Fatal("no small cases found in ../cases")
+	}
 	for _, inp := range ins {
 		inp := inp
 		t.Run(filepath.Base(inp), func(t *testing.T) {
-			_ = inp // TODO
+			f, err := os.Open(inp)
+			if err != nil {
+				t.Fatalf("open %s: %v", inp, err)
+			}
+			var in input
+			err = json.NewDecoder(f).Decode(&in)
+			f.Close()
+			if err != nil {
+				t.Fatalf("decode %s: %v", inp, err)
+			}
+
+			raw, err := os.ReadFile(strings.TrimSuffix(inp, ".in") + ".out")
+			if err != nil {
+				t.Fatalf("read .out for %s: %v", inp, err)
+			}
+			var want []int
+			for _, tok := range strings.Fields(string(raw)) {
+				v, err := strconv.Atoi(tok)
+				if err != nil {
+					t.Fatalf("parse .out for %s: %v", inp, err)
+				}
+				want = append(want, v)
+			}
+
+			got := solve(in.N, in.Unions, in.Queries)
+			if len(got) != len(want) {
+				t.Fatalf("got %v want %v", got, want)
+			}
+			for i := range want {
+				if got[i] != want[i] {
+					t.Errorf("got %v want %v", got, want)
+					break
+				}
+			}
 		})
 	}
 }

@@ -7,7 +7,20 @@
 
 ## Problem
 
-You're packing a bag with capacity W. Each item has a weight and a value, and you can take each item at most once. Maximise total value without exceeding capacity. The trap: greedy by value/weight ratio fails — a high-ratio item can crowd out a pair that together fills the bag better. You must consider take-or-leave for every item.
+You're packing a bag with capacity `W`. Each item has a weight and a value, and
+you may take each item at most once (no splitting an item, no taking it twice).
+Maximise the total value of the packed items without letting their combined
+weight exceed `W`.
+
+The trap: picking greedily by value-to-weight ratio can lose. A single dense
+item can crowd out a pair that together fills the bag for more total value, so
+the obvious ratio sort gives a wrong answer.
+
+The series is large — up to 1000 items and capacity up to 10⁴ — and the answer
+must come back fast. Enumerating every subset is exponential and will not finish
+at that scale.
+
+Constraints: items up to 1000, capacity up to 10⁴, weights and values fit in i32.
 
 ## Input
 
@@ -31,11 +44,6 @@ capacity 10, items above → 90   (weight 4+3, value 40+50)
 capacity 10, items [{w:6,v:10},{w:5,v:6},{w:5,v:6}] → 12   (greedy ratio gets only 10)
 ```
 
-## Teaches
-
-- **1-D DP, right-to-left scan**: `dp[w]` is the best value for budget `w`; iterating capacity downward when adding an item guarantees each item contributes at most once.
-- **Pseudo-polynomial cost**: O(n·W) depends on the numeric capacity, not just the item count — the classic distinction from truly polynomial DP.
-
 ## Run
 
 ```
@@ -43,5 +51,7 @@ cd rust && make
 cd go   && make
 cd python && make
 ```
+
+Stuck? See `HINTS.md`.
 
 Source: CLRS §15

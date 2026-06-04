@@ -3,13 +3,13 @@ import sys
 
 
 def solve(s):
-    # TODO: implement
+    # TODO: count the number of distinct non-empty substrings of s
     pass
 
 
 def main():
     obj = json.load(sys.stdin)
-    # TODO: parse obj, call solve, print result
+    print(solve(obj["s"]))
 
 
 if __name__ == "__main__":

@@ -1,16 +1,33 @@
 package main
 
 import (
-	"bufio"
+	"encoding/json"
 	"fmt"
 	"os"
 )
 
-func solve() any {
-	return nil // TODO
+type item struct {
+	Weight int `json:"weight"`
+	Value  int `json:"value"`
+}
+
+type input struct {
+	Capacity int    `json:"capacity"`
+	Items    []item `json:"items"`
+}
+
+func solve(capacity int, items []item) int {
+	// TODO: return the maximum achievable total value
+	_ = capacity
+	_ = items
+	return 0
 }
 
 func main() {
-	_ = bufio.NewReader(os.Stdin)
-	fmt.Println(solve())
+	var in input
+	if err := json.NewDecoder(os.Stdin).Decode(&in); err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
+	fmt.Println(solve(in.Capacity, in.Items))
 }

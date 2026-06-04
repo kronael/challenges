@@ -18,11 +18,15 @@ type input struct {
 
 func solve(jobs []Job) int {
 	// TODO: return maximum total weight of non-overlapping jobs
+	_ = jobs
 	return 0
 }
 
 func main() {
 	var in input
-	json.NewDecoder(os.Stdin).Decode(&in)
+	if err := json.NewDecoder(os.Stdin).Decode(&in); err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
 	fmt.Println(solve(in.Jobs))
 }

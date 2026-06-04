@@ -3,13 +3,13 @@ import sys
 
 
 def solve(amount, coins):
-    # TODO: implement
+    # TODO: return the minimum number of coins summing to amount, or -1 if impossible
     pass
 
 
 def main():
     obj = json.load(sys.stdin)
-    # TODO: parse obj, call solve, print result
+    print(solve(obj["amount"], obj["coins"]))
 
 
 if __name__ == "__main__":

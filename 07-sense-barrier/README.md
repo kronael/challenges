@@ -8,22 +8,20 @@
 ## Problem
 
 A barrier blocks each thread until all N have arrived, then releases them
-together. The naive version — "increment a count, spin until count == N, then
-reset" — cannot be reused: a fast thread that loops into phase K+1 sees the
-not-yet-reset count still at N and sails straight through before its peers from
-phase K have even left.
+together, and must work for many successive phases — the same barrier object is
+reused round after round.
 
-Sense reversal fixes this with a local sense bit per thread plus a shared sense
-bit. The last arriver resets the count and *flips* the shared sense; everyone
-else spins on the flipped bit, not the count — so a stale count can never release
-them. The stress test runs N threads through many phases and asserts no thread
-ever runs ahead.
+Reuse is the hard part. The naive version — "increment a count, spin until
+count == N, then reset" — cannot be reused safely: a fast thread that finishes
+a phase and loops straight into the next one can observe the not-yet-reset count
+still sitting at N and sail through before its peers from the previous phase
+have even left. The barrier must distinguish "everyone arrived this round" from
+"the counter happens to read N because last round's value is still there", and
+it must do so using atomics only — no Mutex, no Condvar, no OS sleep, no channel.
 
-## Teaches
-
-- **Barrier reuse**: a shared count alone can't distinguish phase K from K+1, so a stale count leaks across rounds and releases threads early.
-- **Sense reversal**: each thread holds a local sense bit; the last arriver resets the count and flips a shared sense; others spin on the *flipped bit*, so a stale count can never release them.
-- **Fence ordering**: a `fence(Release)` over the count-reset and sense-flip (Acquire on waiters) guarantees peers see the reset before the flip — plain `Relaxed` stores do not.
+The stress test runs N threads through many phases and asserts that no thread is
+ever released before all N have arrived for the current phase (a thread released
+early reads a stale per-phase slot), and that no thread stalls forever.
 
 ## Run
 
@@ -31,5 +29,7 @@ ever runs ahead.
 cd rust && make test
 cd go   && make test
 ```
+
+Stuck? See `HINTS.md`.
 
 Source: [Mellor-Crummey & Scott, *Algorithms for Scalable Synchronization* (ACM TOCS 1991)](https://www.cs.rochester.edu/u/scott/papers/1991_TOCS_synch.pdf)

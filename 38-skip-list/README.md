@@ -7,15 +7,24 @@
 
 ## Problem
 
-A skip list is a sorted linked list with "express lanes": each node randomly gets
-a tower of forward pointers, so a search drops down levels like a binary search
-over a linked list. It is the balanced-BST result with no rotations.
+Maintain a sorted multiset of integers under a stream of operations, answering
+each query in expected O(log n):
 
-The difficulty is that the balance is *probabilistic*, not structural. Correctness
-must hold for any random tower assignment, and the search descends levels by a
-rule you have to reason about — overshoot the target at level k, drop to level
-k−1, repeat. Get the descent or the level-pointer splicing wrong and it silently
-loses elements.
+- `insert v` — add `v` if not already present (duplicates are no-ops).
+- `delete v` — remove `v` if present.
+- `search v` — is `v` in the set? (emit `1` or `0`).
+- `range_count lo hi` — how many stored values lie in the closed interval
+  `[lo, hi]`?
+
+A skip list is the structure named by this challenge: a sorted linked list
+augmented so that lookups need not walk every node. The catch is that its balance
+is *probabilistic*, not structural — there are no rotations to fall back on, and
+correctness must hold for any random choices the structure makes internally. A
+query that descends or splices a pointer one step wrong does not crash; it
+silently loses elements and returns a subtly wrong count. With up to `10^5`
+operations, the naive "rescan the whole list every time" approach is too slow.
+
+Constraints: up to `10^5` operations; values fit in i32.
 
 ## Input / Output
 
@@ -39,16 +48,13 @@ search0→0; range_count(-10,10)→0; insert0; search0→1; range_count(-10,10)�
   → 0 0 1 1
 ```
 
-## Teaches
-
-- **Probabilistic balancing**: each node's height comes from a geometric distribution (flip until tails, P=0.5), giving expected O(log n) with no rebalancing.
-- **Level-descending search**: walk from the top level down, dropping a level whenever the next node would overshoot the target.
-
 ## Run
 
 ```
 cd rust   && make
 cd python && make
 ```
+
+Stuck? See `HINTS.md`.
 
 Source: [Pugh, *Skip Lists: A Probabilistic Alternative to Balanced Trees* (CACM 1990)](https://15721.courses.cs.cmu.edu/spring2018/papers/08-oltpindexes1/pugh-skiplists-cacm1990.pdf)

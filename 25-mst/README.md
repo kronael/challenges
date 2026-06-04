@@ -1,13 +1,25 @@
 # 25 — Minimum Spanning Tree
 
-**Task**: Find the cheapest set of roads that connects all N cities.
+**Task**: Find the cheapest set of roads that connects all `n` cities.
 
 **Difficulty**: medium
 **Time estimate**: ~40 min
 
 ## Problem
 
-Connect N cities with M candidate roads, each with a construction cost. Find the minimum total cost to connect every city (build a spanning tree). Unlike coin change, greedy works here — sort edges cheapest-first and take each one that joins two not-yet-connected components. An exchange argument proves it's always safe; the only catch is detecting cycles cheaply.
+You are given `n` cities and `m` candidate roads. Each road joins two cities and
+has a construction cost. Choose a subset of the roads so that every city is
+reachable from every other city, and the total construction cost is as small as
+possible. Output that minimum total cost.
+
+The graph is connected, so a connecting subset always exists; the minimal one is
+a spanning tree (`n − 1` roads). The trap is scale and cycles: with up to
+`m = 2·10⁵` candidate roads you cannot afford to recheck the whole partial
+network every time you consider adding a road, and any road that closes a loop
+must be rejected — detecting that cheaply is the hard part.
+
+Constraints: `n` up to 10⁴, `m` up to 2·10⁵, costs fit in i32, the graph is
+connected (a spanning tree exists).
 
 ## Input
 
@@ -15,26 +27,23 @@ Connect N cities with M candidate roads, each with a construction cost. Find the
 {"n": 4, "edges": [[0,1,10],[0,2,6],[0,3,5],[1,3,15],[2,3,4]]}
 ```
 
+`edges[i] = [u, v, w]`: a road between cities `u` and `v` (0-indexed) costing `w`.
+
 ## Output
 
 A single integer: the total weight of the minimum spanning tree.
 
 ## Examples
 
-**Example 1** — greedy skips the two costliest edges that would form cycles
+**Example 1** — two of the five roads are left out
 ```
-n=4, edges above → 19   (take 4 + 5 + ... not 10, 15)
-```
-
-**Example 2** — already a tree, so every edge is forced
-```
-n=3, edges [[0,1,2],[1,2,3]] → 5
+{"n":4,"edges":[[0,1,10],[0,2,6],[0,3,5],[1,3,15],[2,3,4]]} → 19
 ```
 
-## Teaches
-
-- **Greedy by the cut property**: add the cheapest edge that joins two different components; it is always safe to take.
-- **DSU for cycle tests**: union-find answers "would this edge create a cycle?" in O(α), making the algorithm O(E log E), dominated by the sort.
+**Example 2** — already a tree, so every road is forced
+```
+{"n":3,"edges":[[0,1,2],[1,2,3]]} → 5
+```
 
 ## Run
 
@@ -44,4 +53,6 @@ cd go   && make
 cd python && make
 ```
 
-Source: CLRS §23
+Stuck? See `HINTS.md`.
+
+Source: CLRS §23 (minimum spanning trees)

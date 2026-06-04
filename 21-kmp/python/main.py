@@ -3,13 +3,13 @@ import sys
 
 
 def solve(text, pattern):
-    # TODO: implement
+    # TODO: return the 1-indexed start positions where pattern occurs in text
     pass
 
 
 def main():
     obj = json.load(sys.stdin)
-    # TODO: parse obj, call solve, print result
+    print(*solve(obj["text"], obj["pattern"]))
 
 
 if __name__ == "__main__":

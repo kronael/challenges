@@ -7,7 +7,18 @@
 
 ## Problem
 
-Given a stream of sensor readings and a window size k, find the maximum reading in each consecutive window, left to right. A naive approach rescans k values per window — O(nk) total, which dies on long streams. You need O(n), touching each reading a constant number of times.
+Given a stream of sensor readings and a window size `k`, a window of `k`
+consecutive readings slides from the far left of the stream to the far right,
+moving one position at a time. For each position, report the maximum reading
+visible in the window. The first window covers readings `0..k-1`; the last
+covers the final `k` readings. There are `n - k + 1` windows in all.
+
+The stream is long — the naive approach that rescans all `k` values for every
+window does O(nk) work and dies on long streams with a large window. The
+challenge is to answer every window without re-examining values you have
+already seen.
+
+Constraints: `n` up to 2·10⁵, `1 ≤ k ≤ n`, readings fit in i32.
 
 ## Input
 
@@ -31,11 +42,6 @@ k=3, arr [1,3,-1,-3,5,3,6,7] → 3 3 5 5 6 7
 k=2, arr [9,1,1,1] → 9 1 1
 ```
 
-## Teaches
-
-- **Monotone deque**: keep window indices in decreasing value order so the front is always the current max; smaller-and-older elements can never win, so drop them.
-- **Amortized O(n)**: each index is pushed and popped at most once — no window is ever re-scanned.
-
 ## Run
 
 ```
@@ -43,5 +49,7 @@ cd rust && make
 cd go   && make
 cd python && make
 ```
+
+Stuck? See `HINTS.md`.
 
 Source: https://leetcode.com/problems/sliding-window-maximum/

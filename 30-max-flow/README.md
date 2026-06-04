@@ -11,10 +11,14 @@ Think of the edges as water pipes, each with a capacity; you want to push as muc
 as possible from the source (node 1) to the sink (node n). Equivalently, you are
 finding the minimum edge-cut that separates them.
 
-Plain Ford–Fulkerson augments one path at a time and degrades to O(V·E²),
-crawling on adversarial graphs (long thin augmenting paths). Dinic's algorithm
-layers the residual graph by BFS distance and pushes a *blocking flow* per phase,
-reaching O(V²·E).
+The naive approach — find any one path with spare capacity, push flow along it,
+repeat — is correct but degrades badly on adversarial graphs: long thin
+augmenting paths make it crawl, and on the large cases it will not finish in
+time. Part of the challenge is pushing flow in a way that the number of rounds
+stays bounded regardless of how the capacities are chosen.
+
+Constraints: up to `n = 500` nodes; capacities fit in a 64-bit integer and the
+total flow can too.
 
 ## Input / Output
 
@@ -37,12 +41,6 @@ Path 1→2→4 carries 2, path 1→3→4 carries 4.
 {"n":2,"edges":[[1,2,5],[1,2,7]]} → 12
 ```
 
-## Teaches
-
-- **Dinic's algorithm**: BFS builds a level graph, DFS pushes a blocking flow along level-respecting edges; repeat until the sink is unreachable.
-- **Residual graph**: every edge gets a back-edge so flow can be cancelled and re-routed.
-- **Why O(V²·E) beats O(V·E²)**: each phase strictly increases the shortest augmenting-path length, capping phases at V.
-
 ## Run
 
 ```
@@ -50,5 +48,7 @@ cd rust   && make
 cd go     && make
 cd python && make
 ```
+
+Stuck? See `HINTS.md`.
 
 Source: [CSES #1694 — Download Speed](https://cses.fi/problemset/task/1694)

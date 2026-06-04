@@ -7,7 +7,19 @@
 
 ## Problem
 
-Allocate N textbooks (each with a page count) across K students so the maximum pages any single student reads is minimised. Each student gets a contiguous block. You can't search the array directly — there are exponentially many splits. The insight: binary-search on the *answer* (the maximum), and for each candidate cap check feasibility in O(n).
+You have `N` textbooks laid out in a row, the `i`-th holding `pages[i]` pages, and
+`K` students. Hand the books out so that each student gets a *contiguous* block of
+the row, every book is assigned, and the row's order is preserved. Among all such
+splits, minimise the largest total any single student ends up reading. Output that
+minimum-possible maximum.
+
+The catch is scale. The number of ways to cut a row of `N` books into blocks grows
+exponentially, so you cannot enumerate the splits and pick the best — at `N = 2·10⁵`
+that search never finishes. You need a way to home in on the answer without ever
+materialising a split.
+
+Constraints: `N` up to 2·10⁵, `K` up to `N`, page counts fit in i32, the total fits
+in i64.
 
 ## Input
 
@@ -31,11 +43,6 @@ k=2, pages [10,20,30,40] → 60   ([10,20,30] | [40])
 k=2, pages [5,5,100] → 100   ([5,5] | [100])
 ```
 
-## Teaches
-
-- **Optimization → decision**: rewrite "find the minimum feasible X" as "is X feasible?", a monotone predicate you can binary-search over `[max, sum]`.
-- **Greedy feasibility check**: one left-to-right pass counts the groups a cap needs — O(n) per probe, O(n log sum) overall.
-
 ## Run
 
 ```
@@ -43,5 +50,7 @@ cd rust && make
 cd go   && make
 cd python && make
 ```
+
+Stuck? See `HINTS.md`.
 
 Source: https://codeforces.com/edu/courses

@@ -10,7 +10,7 @@ def solve(words, queries):
 
 def main():
     obj = json.load(sys.stdin)
-    print(solve(obj["words"], [q for q in obj["queries"]]))
+    print(solve(obj["words"], obj["queries"]))
 
 
 if __name__ == "__main__":

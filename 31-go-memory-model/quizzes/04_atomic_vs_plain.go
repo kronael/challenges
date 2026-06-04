@@ -12,13 +12,13 @@ func main() {
 	// Version A: plain variable
 	stopA := false
 	go func() { stopA = true }()
-	for \!stopA { // may loop forever — compiler can hoist the load
+	for !stopA { // may loop forever — compiler can hoist the load
 	}
 
 	// Version B: atomic
 	var stopB atomic.Bool
 	go func() { stopB.Store(true) }()
-	for \!stopB.Load() { // guaranteed to eventually terminate
+	for !stopB.Load() { // guaranteed to eventually terminate
 	}
 }
 

@@ -3,13 +3,13 @@ import sys
 
 
 def solve(n, edges):
-    # TODO: implement
+    # TODO: return the total weight of the minimum spanning tree
     pass
 
 
 def main():
     obj = json.load(sys.stdin)
-    # TODO: parse obj, call solve, print result
+    print(solve(obj["n"], obj["edges"]))
 
 
 if __name__ == "__main__":

@@ -21,7 +21,7 @@ func TestNoDoublePass(t *testing.T) {
 		}()
 	}
 	for range n { <-done }
-	if got := total.Load(); got \!= n*rounds {
+	if got := total.Load(); got != n*rounds {
 		t.Fatalf("got %d want %d", got, n*rounds)
 	}
 }

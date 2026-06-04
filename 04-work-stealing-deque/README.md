@@ -9,26 +9,36 @@
 
 This is the data structure behind every work-stealing scheduler: a worker runs
 its own queue as a stack (bottom), and idle workers steal the oldest tasks (top).
-Both ends operate concurrently and lock-free.
+Both ends operate concurrently and lock-free — no mutex on the hot path.
+
+The interface is three operations:
+
+- `push(task)` — owner only, adds at the bottom.
+- `pop() -> Option<task>` — owner only, removes from the bottom (LIFO for the owner).
+- `steal() -> Empty | Success(task) | Retry` — any thief, removes from the top
+  (FIFO for thieves). `Retry` signals a transient race the caller should retry;
+  `Empty` means there was nothing to take.
 
 The hard part is the last element. When `bottom - top == 1`, exactly one slot
-remains, and the owner's `pop` races a thief's `steal` for it — exactly one may
-win, and neither may return it twice. The owner speculatively decrements
-`bottom`, reads the slot, then CASes `top`; the owner's `bottom` store and the
-thief's `top` load form a Dekker pattern that only `SeqCst` on the decisive CAS
-resolves correctly. The stress test runs one owner against many thieves and
-asserts every task is taken exactly once.
+remains, and the owner's `pop` races a thief's `steal` for it. Two consumers may
+both look at that slot and each conclude it is theirs — and then the same task is
+returned twice, or, if both back off, lost. The invariant you must hold under
+arbitrary interleaving and on a weak memory model: every task that goes in comes
+out exactly once, across the owner and all thieves combined, with no torn or
+duplicated value.
 
-## Teaches
-
-- **Last-element race**: owner decrements `bottom`, reads the slot, then CASes `top`; on CAS failure a thief took it, so it returns Empty and restores `bottom`.
-- **The Dekker moment**: the `bottom` store and the `top` load form a Dekker pattern — only `SeqCst` on the decisive `top` CAS stops both sides claiming the same element.
-- **ABA**: `top` must carry a tag so a stale read isn't mistaken for fresh.
+The backing buffer is fixed power-of-two sized; you do not need to resize it.
+The stress test runs one owner against many thieves, interleaving pushes with
+the owner's own pops so the deque hovers at one element, then asserts that the
+multiset of everything consumed equals the multiset pushed — a repeat means two
+threads claimed the same element, a gap means one was dropped.
 
 ## Run
 
 ```
 cd rust && make test
 ```
+
+Stuck? See `HINTS.md`.
 
 Source: [Chase & Lev, *Dynamic Circular Work-Stealing Deque* (SPAA 2005)](https://www.di.ens.fr/~zappa/readings/ppopp13.pdf)

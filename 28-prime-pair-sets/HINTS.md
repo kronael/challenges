@@ -1,0 +1,20 @@
+# Hints — 28 Prime Pair Sets
+
+> Spoilers. Open only when stuck.
+
+- **Model it as a graph**: compatibility (both concatenations prime) is a
+  symmetric relation, so it's an undirected edge between two primes. A
+  pairwise-compatible 5-set is exactly a 5-clique in that graph. The answer is
+  the cheapest 5-clique.
+- **Miller–Rabin primality**: deterministic over the 64-bit range, fast enough
+  to test millions of concatenations. Trial division dies once the
+  concatenations reach eight digits.
+- **Clique search by extension**: backtrack, adding only primes compatible with
+  *every* current member; this pruning is what makes 5-cliques tractable. Cache
+  pair compatibility so each concatenation is tested once.
+- **Prune by sum**: keep the best sum found so far and stop extending a partial
+  clique once `current_sum + smallest_possible_remaining` already meets it.
+
+The naive method — enumerate primes, test every C(n,5) subset with trial-division
+primality on each concatenation — is correct but hopelessly slow; that is what
+`rotten/main.py` does, and it TIMEOUTs.

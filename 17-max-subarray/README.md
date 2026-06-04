@@ -7,7 +7,16 @@
 
 ## Problem
 
-Find the contiguous, non-empty subarray with the largest sum. The array can hold negative numbers, so taking everything isn't always best — sometimes the best run sits in the middle, flanked by losses you must skip. Do it in one pass and O(1) memory.
+Find the contiguous, non-empty subarray with the largest sum. The array can hold
+negative numbers, so taking everything isn't always best — sometimes the best run
+sits in the middle, flanked by losses you must skip, and sometimes every element is
+negative so the answer is a single least-bad value.
+
+The array is long — up to `n = 10⁶` elements — and the answer must come back fast.
+Checking every (start, end) pair is quadratic and will not finish in time at that
+scale; part of the challenge is finding a formulation that does.
+
+Constraints: `n` up to 10⁶, values fit in i64 sums.
 
 ## Input
 
@@ -31,11 +40,6 @@ arr [-2,1,-3,4,-1,2,1,-5,4] → 6   (subarray [4,-1,2,1])
 arr [-5,-2,-8] → -2
 ```
 
-## Teaches
-
-- **DP with a "best ending here" state**: `cur = max(x, cur + x)` decides whether to extend the previous run or restart; the global best tracks the max over all endings.
-- **Online, single-pass**: the recurrence depends only on the prior step, so it streams in O(n) time and O(1) space.
-
 ## Run
 
 ```
@@ -44,4 +48,6 @@ cd go   && make
 cd python && make
 ```
 
-Source: CLRS §4.1
+Stuck? See `HINTS.md`.
+
+Source: CLRS §4.1 (maximum-subarray problem)

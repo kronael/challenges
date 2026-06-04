@@ -7,14 +7,24 @@
 
 ## Problem
 
-On overflow the cache drops the key untouched for the longest time. The catch is
-the dual O(1) requirement. A plain hash map gives O(1) lookup but O(n) to find the
-LRU victim. An ordered list gives O(1) eviction but O(n) lookup. Neither alone
-works.
+Maintain a cache holding at most `capacity` key→value entries. Process a stream
+of operations:
 
-The answer is a hash map *plus* a doubly-linked list: the map maps key → node for
-O(1) lookup, and the list orders nodes by recency so move-to-front and tail
-eviction are both O(1). Every access touches both structures.
+- `get k` — return the stored value for key `k`, or `-1` if `k` is not present.
+- `put k v` — set key `k` to value `v`, inserting it if new or overwriting if it
+  already exists.
+
+Both `get` and a `put` on an existing key count as *using* that key. When a `put`
+inserts a new key and the cache is already at `capacity`, the entry that has gone
+untouched the longest (the least recently used) is evicted to make room.
+
+The catch is the dual O(1) requirement: every `get` and every `put` must run in
+constant time *on average*, including finding and evicting the least-recently-used
+entry. The operation stream is long — up to 2·10⁵ ops — so any approach that scans
+the cache to locate the eviction victim is too slow and will not finish in time.
+
+Constraints: `capacity` up to 3000, up to 2·10⁵ operations, keys and values fit in
+i32.
 
 ## Input / Output
 
@@ -38,11 +48,6 @@ cap 2: put(1,1) put(1,2) get1→2 put2 put(1,3) get1→3 get2→2
   → 2 3 2
 ```
 
-## Teaches
-
-- **Hash map + doubly-linked list**: map for O(1) lookup, list for O(1) move-to-front and tail eviction; recency *is* the list order, MRU at head.
-- **Sentinel nodes**: head/tail sentinels erase the insert/remove end-case branching.
-
 ## Run
 
 ```
@@ -50,5 +55,7 @@ cd rust   && make
 cd go     && make
 cd python && make
 ```
+
+Stuck? See `HINTS.md`.
 
 Source: [LeetCode 146 — LRU Cache](https://leetcode.com/problems/lru-cache/)

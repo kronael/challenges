@@ -18,16 +18,30 @@ func TestCases(t *testing.T) {
 			ins = append(ins, f)
 		}
 	}
+	if len(ins) == 0 {
+		t.Fatal("no small cases found in ../cases")
+	}
 	for _, inp := range ins {
+		inp := inp
 		t.Run(filepath.Base(inp), func(t *testing.T) {
-			f, _ := os.Open(inp)
+			f, err := os.Open(inp)
+			if err != nil {
+				t.Fatalf("open %s: %v", inp, err)
+			}
 			var in input
-			json.NewDecoder(f).Decode(&in)
+			err = json.NewDecoder(f).Decode(&in)
 			f.Close()
-			got := solve(in.Words, in.Queries)
-			raw, _ := os.ReadFile(strings.TrimSuffix(inp, ".in") + ".out")
+			if err != nil {
+				t.Fatalf("decode %s: %v", inp, err)
+			}
+
+			raw, err := os.ReadFile(strings.TrimSuffix(inp, ".in") + ".out")
+			if err != nil {
+				t.Fatalf("read .out for %s: %v", inp, err)
+			}
 			want := strings.TrimRight(string(raw), "\n")
-			if got != want {
+
+			if got := solve(in.Words, in.Queries); got != want {
 				t.Errorf("got %q want %q", got, want)
 			}
 		})

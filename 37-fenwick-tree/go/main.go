@@ -49,31 +49,12 @@ func (in *input) UnmarshalJSON(b []byte) error {
 }
 
 func solve(n int, initial []int64, queries []query) []int64 {
-	tree := make([]int64, n+1)
-	update := func(i int, delta int64) {
-		for ; i <= n; i += i & (-i) {
-			tree[i] += delta
-		}
-	}
-	prefixSum := func(i int) int64 {
-		var s int64
-		for ; i > 0; i -= i & (-i) {
-			s += tree[i]
-		}
-		return s
-	}
-	for idx, v := range initial {
-		update(idx+1, v)
-	}
-	out := []int64{}
-	for _, q := range queries {
-		if q.op == "sum" {
-			out = append(out, prefixSum(q.i))
-		} else {
-			update(q.i, q.delta)
-		}
-	}
-	return out
+	// TODO: Fenwick tree — handle "sum" i and "update" i delta queries
+	// Return results of "sum" queries (1-indexed) in order
+	_ = n
+	_ = initial
+	_ = queries
+	return nil
 }
 
 func main() {

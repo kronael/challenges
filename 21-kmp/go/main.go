@@ -1,16 +1,35 @@
 package main
 
 import (
-	"bufio"
+	"encoding/json"
 	"fmt"
 	"os"
+	"strconv"
+	"strings"
 )
 
-func solve() any {
-	return nil // TODO
+type input struct {
+	Text    string `json:"text"`
+	Pattern string `json:"pattern"`
+}
+
+func solve(text, pattern string) []int {
+	// TODO: return the 1-indexed start positions where pattern occurs in text
+	_ = text
+	_ = pattern
+	return nil
 }
 
 func main() {
-	_ = bufio.NewReader(os.Stdin)
-	fmt.Println(solve())
+	var in input
+	if err := json.NewDecoder(os.Stdin).Decode(&in); err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
+	pos := solve(in.Text, in.Pattern)
+	parts := make([]string, len(pos))
+	for i, p := range pos {
+		parts[i] = strconv.Itoa(p)
+	}
+	fmt.Println(strings.Join(parts, " "))
 }

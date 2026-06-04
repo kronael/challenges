@@ -3,13 +3,13 @@ import sys
 
 
 def solve(k, pages):
-    # TODO: implement
+    # TODO: return the minimum possible value of the largest contiguous block sum
     pass
 
 
 def main():
     obj = json.load(sys.stdin)
-    # TODO: parse obj, call solve, print result
+    print(solve(obj["k"], obj["pages"]))
 
 
 if __name__ == "__main__":

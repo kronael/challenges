@@ -1,26 +1,33 @@
 # 28 — Prime Pair Sets
 
-**Task**: Find five primes where every pair — concatenated in either order — is also prime, with the smallest possible sum.
+**Task**: Find a set of five primes such that any two of them, concatenated in either order, also form a prime — and whose sum is the smallest possible.
 
 **Difficulty**: expert
 **Time estimate**: ~90 min
 
 ## Problem
 
-Two primes are "compatible" if both concatenations are prime: 3 and 7 give 37 and
-73, both prime. You must find a set of *five* primes, pairwise compatible, whose
-sum is minimal. The answer is **26033** (the set {13, 5197, 5701, 6733, 8389}).
+Call two primes *compatible* if concatenating them — in both orders — yields a
+prime each time. For example 7 and 109 are compatible because both 7109 and
+1097 are prime. The primes 3, 7, 109, and 673 are pairwise compatible, and their
+sum, 792, is the lowest sum for any such set of *four* primes.
 
-The naive search is hopeless: candidates run into the thousands, concatenations
-exceed 32 bits, and checking every 5-subset is C(n,5). You need fast primality on
-large numbers plus a real clique search with pruning.
+Find the lowest sum for a set of *five* primes that are pairwise compatible: for
+every pair you pick, both concatenations must be prime.
+
+The search space is brutal. The five primes are not small, so the candidate pool
+runs into the thousands and the number of 5-subsets is astronomical. The
+concatenations grow past eight digits, so any primality test that trial-divides
+will fall over. Both the candidate explosion and the size of the numbers being
+tested have to be tamed for the search to finish.
 
 ## Input / Output
 
 ```json
 {}
 ```
-Single integer: the smallest sum of a compatible 5-set.
+The input is the empty object. Output a single integer: the smallest sum of a
+pairwise-compatible set of five primes.
 
 ## Examples
 
@@ -29,14 +36,8 @@ Single integer: the smallest sum of a compatible 5-set.
 {} → 26033
 ```
 
-**Why it's hard**: 3‖7 and 7‖3 must *both* be prime, so compatibility is a
-symmetric edge in a graph over primes. The answer is the cheapest 5-clique — and
-the concatenations grow to 8 digits, killing trial division.
-
-## Teaches
-
-- **Miller–Rabin primality**: deterministic over the 64-bit range, fast enough to test millions of concatenations.
-- **Clique search by extension**: backtrack, adding only primes compatible with *every* current member; this pruning is what makes 5-cliques tractable.
+The worked four-prime set above (sum 792) is given only to illustrate the
+compatibility rule — your job is the five-prime minimum.
 
 ## Run
 
@@ -45,5 +46,7 @@ cd rust   && make
 cd go     && make
 cd python && make
 ```
+
+Stuck? See `HINTS.md`.
 
 Source: [Project Euler #60](https://projecteuler.net/problem=60)

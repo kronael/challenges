@@ -3,13 +3,13 @@ import sys
 
 
 def solve(arr):
-    # TODO: implement
+    # TODO: return the maximum contiguous subarray sum
     pass
 
 
 def main():
     obj = json.load(sys.stdin)
-    # TODO: parse obj, call solve, print result
+    print(solve(obj["arr"]))
 
 
 if __name__ == "__main__":

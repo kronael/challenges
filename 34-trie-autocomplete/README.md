@@ -7,13 +7,18 @@
 
 ## Problem
 
-Given a pre-sorted word list and a stream of queries, emit the three smallest
-matches for each prefix — exactly what a search box shows as you type. The
-brute-force scan is O(k · |words|): for every query you re-scan the whole list.
+Given a pre-sorted word list and a stream of queries, emit the up to three
+lexicographically smallest words that have the query as a prefix — exactly what a
+search box shows as you type. An empty query matches every word, so it returns the
+three smallest words overall; a query with no matching word returns nothing.
 
-Build the trie once in O(|words|). A query then walks to the prefix node in
-O(|query|), and an alphabetical DFS of that subtree yields words already sorted —
-take the first three and stop. No per-query scan, no per-query sort.
+The dictionary and the query stream are both large, and the obvious brute force —
+for every query, re-scan the whole word list, collect the matches, sort them and
+keep three — costs O(queries · |words|) and will not finish in time at that scale.
+The challenge is answering each query without re-touching the whole dictionary.
+
+Constraints: up to 5·10⁴ words and 5·10³ queries; words are lowercase `a`–`z`,
+each up to 20 characters; the word list arrives already sorted.
 
 ## Input / Output
 
@@ -37,11 +42,6 @@ words ["a","ab","abc"], queries ["a","ab","abc","abcd","x"]
   → a ab abc;ab abc;abc;;
 ```
 
-## Teaches
-
-- **Trie (prefix tree)**: 26-ary nodes; reaching the prefix costs O(len), independent of dictionary size.
-- **DFS for lexicographic order**: visiting children a–z and stopping after 3 leaves gives the smallest matches with no re-sorting.
-
 ## Run
 
 ```
@@ -49,5 +49,7 @@ cd rust   && make
 cd go     && make
 cd python && make
 ```
+
+Stuck? See `HINTS.md`.
 
 Source: [LeetCode 1268 — Search Suggestions System](https://leetcode.com/problems/search-suggestions-system/)
