@@ -1,4 +1,4 @@
-use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering::*};
+use std::sync::atomic::{AtomicBool, AtomicUsize};
 
 pub struct Barrier {
     n: usize,
@@ -6,8 +6,14 @@ pub struct Barrier {
     sense: AtomicBool,
 }
 
+pub struct Waiter<'a> {
+    barrier: &'a Barrier,
+    local_sense: bool,
+}
+
 impl Barrier {
     pub fn new(n: usize) -> Self {
+        assert!(n > 0, "barrier size must be positive");
         Barrier {
             n,
             count: AtomicUsize::new(n),
@@ -15,12 +21,22 @@ impl Barrier {
         }
     }
 
-    pub fn wait(&self) {
-        // TODO: sense-reversing barrier — no Mutex, no Condvar, no OS sleep
-        // Each caller has its own local sense (pass it in or use thread_local!).
-        // Last thread to arrive: reset count to n, flip shared sense.
-        // Others: spin on shared sense != local sense.
-        // Ordering: the count reset must be visible before the sense flip.
+    pub fn waiter(&self) -> Waiter<'_> {
+        Waiter {
+            barrier: self,
+            local_sense: false,
+        }
+    }
+}
+
+impl Waiter<'_> {
+    pub fn wait(&mut self) {
+        let _ = (
+            self.barrier.n,
+            &self.barrier.count,
+            &self.barrier.sense,
+            self.local_sense,
+        );
         todo!()
     }
 }

@@ -27,12 +27,13 @@ fn no_early_pass_no_stall() {
             let slots = Arc::clone(&slots);
             let early = Arc::clone(&early);
             thread::spawn(move || {
+                let mut waiter = barrier.waiter();
                 for round in 0..ROUNDS {
                     // Opening barrier: all threads aligned on this round before any write.
-                    barrier.wait();
+                    waiter.wait();
                     slots[id].store(round, Ordering::Relaxed);
                     // Closing barrier: every slot for this round is written before any read.
-                    barrier.wait();
+                    waiter.wait();
                     for slot in slots.iter() {
                         if slot.load(Ordering::Relaxed) != round {
                             // A peer had not stamped this round yet -> we were released early.
@@ -66,10 +67,11 @@ fn reusable_two_threads() {
             let barrier = Arc::clone(&barrier);
             let total = Arc::clone(&total);
             thread::spawn(move || {
+                let mut waiter = barrier.waiter();
                 for _ in 0..10_000 {
-                    barrier.wait();
+                    waiter.wait();
                     total.fetch_add(1, Ordering::Relaxed);
-                    barrier.wait();
+                    waiter.wait();
                 }
             })
         })

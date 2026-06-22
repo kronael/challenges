@@ -1,26 +1,16 @@
 use std::cell::UnsafeCell;
-use std::sync::atomic::{AtomicUsize, Ordering};
+use std::sync::atomic::AtomicUsize;
 
-// TODO: implement push() and pop() using the SPSC ring-buffer protocol.
-// The stub compiles but panics at runtime — replace the bodies.
-//
-// Layout requirements:
-//   - head (producer index) and tail (consumer index) must be on separate
-//     cache lines to avoid false sharing. Use #[repr(C, align(64))].
-//   - N must be a power of two; use (index & (N-1)) for cheap modulo.
-//
-// Rules:
-//   - push() is called only from the producer thread.
-//   - pop() is called only from the consumer thread.
-//   - No Mutex or OS primitive.
-//   - push() returns false when the buffer is full; pop() returns None when empty.
+// stub compiles but panics at runtime; replace the bodies. Rules: push() is
+// called only from the producer thread, pop() only from the consumer thread, no
+// Mutex or OS primitive is allowed, and N must be a power of two.
 
-#[repr(C, align(64))]
 pub struct SpscQueue<T, const N: usize> {
+    #[allow(dead_code)]
     head: AtomicUsize,
-    _pad_head: [u8; 64 - std::mem::size_of::<AtomicUsize>()],
+    #[allow(dead_code)]
     tail: AtomicUsize,
-    _pad_tail: [u8; 64 - std::mem::size_of::<AtomicUsize>()],
+    #[allow(dead_code)]
     buf: [UnsafeCell<std::mem::MaybeUninit<T>>; N],
 }
 
@@ -36,9 +26,7 @@ impl<T: Copy, const N: usize> SpscQueue<T, N> {
         unsafe {
             SpscQueue {
                 head: AtomicUsize::new(0),
-                _pad_head: [0; 64 - std::mem::size_of::<AtomicUsize>()],
                 tail: AtomicUsize::new(0),
-                _pad_tail: [0; 64 - std::mem::size_of::<AtomicUsize>()],
                 buf: std::mem::zeroed(),
             }
         }

@@ -1,7 +1,6 @@
 use std::cell::UnsafeCell;
 use std::sync::atomic::{AtomicU64, Ordering};
 
-// TODO: implement write() and read() using the seqlock protocol.
 // The stub compiles but panics at runtime — replace the bodies.
 //
 // Protocol:
@@ -34,7 +33,6 @@ impl Seqlock {
 
     /// Write a 64-byte payload. Must be called from exactly one writer thread.
     pub fn write(&self, buf: &[u8; 64]) {
-        // TODO: implement seqlock write
         let _ = buf;
         todo!("implement seqlock write")
     }
@@ -42,7 +40,6 @@ impl Seqlock {
     /// Attempt to read the payload into `out`.
     /// Returns false if a concurrent write was detected — the caller must retry.
     pub fn read(&self, out: &mut [u8; 64]) -> bool {
-        // TODO: implement seqlock read
         let _ = out;
         todo!("implement seqlock read")
     }

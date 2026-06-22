@@ -27,15 +27,17 @@ func TestStressMpsc(t *testing.T) {
 
 	close(barrier)
 
-	expected := uint64(producers) * (msgsPerProducer * (msgsPerProducer + 1) / 2)
-	var sum uint64
+	counts := make([]int, msgsPerProducer+1)
 	remaining := producers * msgsPerProducer
 
 	for remaining > 0 {
 		result := queue.TryPop()
 		switch result.State {
 		case 0: // Item
-			sum += result.Value
+			if result.Value == 0 || result.Value > msgsPerProducer {
+				t.Fatalf("unexpected value popped: %d", result.Value)
+			}
+			counts[result.Value]++
 			remaining--
 		default:
 			// Empty or Retry — spin
@@ -44,8 +46,25 @@ func TestStressMpsc(t *testing.T) {
 
 	wg.Wait()
 
-	if sum != expected {
-		t.Fatalf("sum mismatch: got %d want %d — messages lost or duplicated", sum, expected)
+	switch result := queue.TryPop(); result.State {
+	case 1: // Empty
+	case 0:
+		t.Fatalf("extra item after draining all messages: %d", result.Value)
+	case 2:
+		t.Fatal("Retry after all producers joined")
+	default:
+		t.Fatalf("unknown pop state after drain: %d", result.State)
+	}
+
+	for value := uint64(1); value <= msgsPerProducer; value++ {
+		if counts[value] != producers {
+			t.Fatalf(
+				"value %d popped %d times, expected %d — messages lost or duplicated",
+				value,
+				counts[value],
+				producers,
+			)
+		}
 	}
 }
 

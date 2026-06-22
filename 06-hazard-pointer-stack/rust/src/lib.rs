@@ -1,10 +1,11 @@
-use std::sync::atomic::{AtomicPtr, AtomicUsize, Ordering::*};
+use std::sync::atomic::AtomicPtr;
 
 pub struct Stack<T: Send> {
+    #[allow(dead_code)]
     head: AtomicPtr<Node<T>>,
-    // TODO: hazard pointer slots, retired lists
 }
 
+#[allow(dead_code)]
 struct Node<T> {
     val: T,
     next: *mut Node<T>,
@@ -17,17 +18,11 @@ impl<T: Send> Stack<T> {
         }
     }
 
-    pub fn push(&self, val: T) {
-        // TODO
+    pub fn push(&self, _val: T) {
         todo!()
     }
 
     pub fn pop(&self) -> Option<T> {
-        // TODO: guess-publish-verify loop, then safe reclamation
-        // 1. load head (guess)
-        // 2. publish to hazard slot
-        // 3. fence(SeqCst), re-load head (verify still same)
-        // 4. CAS; on success, retire the old node through hazard reclamation
         todo!()
     }
 }

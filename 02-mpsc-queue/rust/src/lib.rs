@@ -12,7 +12,6 @@ pub trait MpscQueue<T: Send>: Send + Sync {
     fn try_pop(&self) -> PopResult<T>;
 }
 
-// TODO: implement VyukovQueue using an intrusive linked list.
 // The stub compiles but panics at runtime — replace the bodies of push/try_pop.
 //
 // Reference:
@@ -57,14 +56,12 @@ impl<T: Send> Default for VyukovQueue<T> {
 
 impl<T: Send> MpscQueue<T> for VyukovQueue<T> {
     fn push(&self, value: T) {
-        // TODO: implement Vyukov MPSC push (wait-free: one exchange + one store)
         let _ = value;
         let _ = ptr::null_mut::<Node<T>>();
         todo!("implement Vyukov MPSC push")
     }
 
     fn try_pop(&self) -> PopResult<T> {
-        // TODO: implement Vyukov MPSC try_pop; return Retry when mid-enqueue
         todo!("implement Vyukov MPSC try_pop")
     }
 }

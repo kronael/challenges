@@ -42,13 +42,11 @@ func NewVyukovQueue() *VyukovQueue {
 }
 
 func (q *VyukovQueue) Push(value uint64) {
-	// TODO: implement Vyukov MPSC push using atomic.Pointer and unsafe.Pointer
 	_ = value
 	panic("Push: not implemented")
 }
 
 func (q *VyukovQueue) TryPop() PopResult {
-	// TODO: implement Vyukov MPSC try_pop; return Retry when mid-enqueue
 	panic("TryPop: not implemented")
 }
 

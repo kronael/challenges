@@ -15,8 +15,9 @@ fn main() {
         .map(|_| {
             let barrier = Arc::clone(&barrier);
             thread::spawn(move || {
+                let mut waiter = barrier.waiter();
                 for _ in 0..ROUNDS {
-                    barrier.wait();
+                    waiter.wait();
                 }
             })
         })

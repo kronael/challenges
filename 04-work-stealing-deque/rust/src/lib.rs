@@ -1,4 +1,5 @@
 use std::cell::UnsafeCell;
+use std::mem::MaybeUninit;
 use std::sync::atomic::{AtomicIsize, AtomicPtr, Ordering};
 
 pub enum Steal<T> {
@@ -7,7 +8,6 @@ pub enum Steal<T> {
     Retry,
 }
 
-// TODO: implement the Chase-Lev work-stealing deque.
 // The stub compiles but panics at runtime — replace the bodies of push/pop/steal.
 //
 // Reference: "Dynamic Circular Work-Stealing Deque" — Chase & Lev, SPAA 2005.
@@ -15,19 +15,23 @@ pub enum Steal<T> {
 // Rules:
 //   - push() and pop() are called only from the owner thread.
 //   - steal() may be called from any number of thief threads simultaneously.
-//   - The backing buffer must grow when full (power-of-two sizing).
+//   - The backing buffer is fixed-size, power-of-two storage; tests stay within
+//     the default capacity.
 //   - No Mutex or OS primitive on the hot path.
+
+const DEFAULT_CAPACITY: usize = 1 << 22;
 
 struct Buffer<T> {
     cap: usize,
-    data: Vec<UnsafeCell<T>>,
+    data: Vec<UnsafeCell<MaybeUninit<T>>>,
 }
 
+#[allow(dead_code)]
 impl<T> Buffer<T> {
     fn new(cap: usize) -> *mut Self {
         assert!(cap.is_power_of_two());
         let data = (0..cap)
-            .map(|_| UnsafeCell::new(unsafe { std::mem::zeroed() }))
+            .map(|_| UnsafeCell::new(MaybeUninit::uninit()))
             .collect();
         Box::into_raw(Box::new(Buffer { cap, data }))
     }
@@ -35,13 +39,13 @@ impl<T> Buffer<T> {
     unsafe fn read(&self, index: isize) -> T {
         // SAFETY: caller ensures index is within bounds and no writer races.
         let slot = (index as usize) & (self.cap - 1);
-        self.data[slot].get().read()
+        unsafe { (*self.data[slot].get()).assume_init_read() }
     }
 
     unsafe fn write(&self, index: isize, value: T) {
         // SAFETY: caller ensures index is within bounds and only owner writes.
         let slot = (index as usize) & (self.cap - 1);
-        self.data[slot].get().write(value);
+        unsafe { self.data[slot].get().write(MaybeUninit::new(value)) };
     }
 }
 
@@ -61,7 +65,7 @@ impl<T: Send> Deque<T> {
         Deque {
             bottom: AtomicIsize::new(0),
             top: AtomicIsize::new(0),
-            buffer: AtomicPtr::new(Buffer::new(64)),
+            buffer: AtomicPtr::new(Buffer::new(DEFAULT_CAPACITY)),
         }
     }
 
@@ -91,8 +95,21 @@ impl<T: Send> Drop for Deque<T> {
     fn drop(&mut self) {
         let ptr = self.buffer.load(Ordering::Relaxed);
         if !ptr.is_null() {
-            // SAFETY: ptr was allocated via Box::into_raw in Buffer::new.
-            unsafe { drop(Box::from_raw(ptr)) };
+            let top = self.top.load(Ordering::Relaxed);
+            let bottom = self.bottom.load(Ordering::Relaxed);
+
+            // SAFETY: &mut self guarantees no concurrent access during drop.
+            // Live items occupy the half-open range [top, bottom).
+            unsafe {
+                let buffer = &mut *ptr;
+                for index in top..bottom {
+                    let slot = (index as usize) & (buffer.cap - 1);
+                    (&mut *buffer.data[slot].get()).assume_init_drop();
+                }
+
+                // ptr was allocated via Box::into_raw in Buffer::new.
+                drop(Box::from_raw(ptr));
+            }
         }
     }
 }

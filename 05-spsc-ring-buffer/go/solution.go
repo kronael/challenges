@@ -5,12 +5,10 @@ import (
 )
 
 // SpscQueue is a single-producer single-consumer ring buffer of capacity N.
-// N must be a power of two. head and tail are on separate cache lines.
+// N must be a power of two.
 type SpscQueue struct {
 	head atomic.Uint64
-	_    [56]byte // pad to 64-byte cache line
 	tail atomic.Uint64
-	_    [56]byte // pad to 64-byte cache line
 	buf  []uint64
 	mask uint64
 }
@@ -28,14 +26,12 @@ func NewSpscQueue(capacity uint64) *SpscQueue {
 
 // Push writes value into the queue. Returns false if full. Producer only.
 func (queue *SpscQueue) Push(value uint64) bool {
-	// TODO: implement SPSC push
 	_ = value
 	panic("Push: not implemented")
 }
 
 // Pop reads the next value from the queue. Returns (0, false) if empty. Consumer only.
 func (queue *SpscQueue) Pop() (uint64, bool) {
-	// TODO: implement SPSC pop
 	panic("Pop: not implemented")
 }
 

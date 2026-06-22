@@ -23,7 +23,7 @@ func pack(counter uint64) [64]byte {
 	return buf
 }
 
-func checkConsistent(buf *[64]byte) bool {
+func checkConsistent(buf *[64]byte) (uint64, bool) {
 	first := uint64(buf[0]) | uint64(buf[1])<<8 | uint64(buf[2])<<16 | uint64(buf[3])<<24 |
 		uint64(buf[4])<<32 | uint64(buf[5])<<40 | uint64(buf[6])<<48 | uint64(buf[7])<<56
 	for slot := 1; slot < 8; slot++ {
@@ -32,10 +32,19 @@ func checkConsistent(buf *[64]byte) bool {
 			uint64(buf[base+3])<<24 | uint64(buf[base+4])<<32 | uint64(buf[base+5])<<40 |
 			uint64(buf[base+6])<<48 | uint64(buf[base+7])<<56
 		if value != first {
-			return false
+			return 0, false
 		}
 	}
-	return true
+	return first, true
+}
+
+func raiseMax(dst *atomic.Uint64, value uint64) {
+	for {
+		cur := dst.Load()
+		if value <= cur || dst.CompareAndSwap(cur, value) {
+			return
+		}
+	}
 }
 
 func TestNoTornReads(t *testing.T) {
@@ -45,10 +54,13 @@ func TestNoTornReads(t *testing.T) {
 
 	lock := &Seqlock{}
 	var tornCount atomic.Int64
+	var maxSeen atomic.Uint64
 	done := make(chan struct{})
+	writerDone := make(chan struct{})
 
 	// Writer goroutine.
 	go func() {
+		defer close(writerDone)
 		for counter := uint64(0); ; counter++ {
 			payload := pack(counter)
 			lock.Write(&payload)
@@ -65,14 +77,20 @@ func TestNoTornReads(t *testing.T) {
 	for range readerCount {
 		go func() {
 			var buf [64]byte
+			var localMax uint64
 			for range readerIters {
 				for !lock.Read(&buf) {
 					// retry
 				}
-				if !checkConsistent(&buf) {
+				if value, ok := checkConsistent(&buf); ok {
+					if value > localMax {
+						localMax = value
+					}
+				} else {
 					tornCount.Add(1)
 				}
 			}
+			raiseMax(&maxSeen, localMax)
 			readersDone <- struct{}{}
 		}()
 	}
@@ -81,9 +99,13 @@ func TestNoTornReads(t *testing.T) {
 		<-readersDone
 	}
 	close(done)
+	<-writerDone
 
 	if count := tornCount.Load(); count != 0 {
 		t.Fatalf("torn reads detected: %d", count)
+	}
+	if seen := maxSeen.Load(); seen == 0 {
+		t.Fatalf("readers never observed a written value")
 	}
 }
 
@@ -91,7 +113,9 @@ func BenchmarkRead(b *testing.B) {
 	lock := &Seqlock{}
 	counter := uint64(0)
 	done := make(chan struct{})
+	writerDone := make(chan struct{})
 	go func() {
+		defer close(writerDone)
 		for {
 			select {
 			case <-done:
@@ -111,4 +135,5 @@ func BenchmarkRead(b *testing.B) {
 		}
 	}
 	close(done)
+	<-writerDone
 }
