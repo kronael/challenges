@@ -35,7 +35,10 @@ func TestCases(t *testing.T) {
 			if err != nil {
 				t.Fatalf("decode %s: %v", inp, err)
 			}
-			_ = in
+			size := 5
+			if in.Size != nil {
+				size = *in.Size
+			}
 
 			raw, err := os.ReadFile(strings.TrimSuffix(inp, ".in") + ".out")
 			if err != nil {
@@ -46,7 +49,7 @@ func TestCases(t *testing.T) {
 				t.Fatalf("parse .out for %s: %v", inp, err)
 			}
 
-			if got := solve(); got != want {
+			if got := solve(size); got != want {
 				t.Errorf("got %d want %d", got, want)
 			}
 		})

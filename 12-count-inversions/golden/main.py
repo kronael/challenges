@@ -28,7 +28,10 @@ def solve(arr):
 
 def main():
     obj = json.load(sys.stdin)
-    print(solve(obj["arr"]))
+    arr = obj["arr"]
+    if obj["n"] != len(arr):
+        raise ValueError("n must match len(arr)")
+    print(solve(arr))
 
 
 if __name__ == "__main__":

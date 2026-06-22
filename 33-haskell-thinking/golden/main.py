@@ -2,24 +2,17 @@ from typing import Iterator
 
 
 def naturals(start: int = 0) -> Iterator[int]:
-    """Infinite generator of naturals from start.
-
-    Haskell: [start..]. Yield forever; the consumer decides how far.
-    """
+    """Infinite generator of naturals from start: start, start+1, start+2, ..."""
     pass
 
 
 def sieve(nums: Iterator[int]) -> Iterator[int]:
-    """Sieve of Eratosthenes as a lazy generator pipeline.
-
-    Take the first element p (prime), yield it, then sieve the rest with every
-    multiple of p filtered out. Corecursive: define the stream, do not loop to N.
-    """
+    """Given an ascending stream of ints >= 2, yield the primes among them, in order."""
     pass
 
 
 def primes() -> Iterator[int]:
-    """Infinite generator of primes. Uses sieve(naturals(2))."""
+    """Infinite generator of primes: 2, 3, 5, 7, 11, ..."""
     pass
 
 
@@ -29,16 +22,12 @@ def fibonacci() -> Iterator[int]:
 
 
 def running_average(nums: Iterator[float]) -> Iterator[float]:
-    """Infinite generator of running averages. No list accumulation.
-
-    Carry (count, total) as state and yield total/count for each input. A scan,
-    not a slice-and-divide.
-    """
+    """Infinite generator of prefix averages, one output per input. No list accumulation."""
     pass
 
 
 def collatz(n: int) -> Iterator[int]:
-    """Infinite Collatz sequence from n (terminates at 1,4,2,1,4,2,... cycle)."""
+    """Infinite Collatz sequence from n (continues past 1 into the 1, 4, 2, 1, ... cycle)."""
     pass
 
 
@@ -48,8 +37,5 @@ def zipWith(f, xs: Iterator, ys: Iterator) -> Iterator:
 
 
 def unfold(f, seed):
-    """Haskell unfoldr: generate sequence from seed by applying f repeatedly.
-
-    f(state) -> (value, next_state) | None to stop.
-    """
+    """Haskell unfoldr: f(state) -> (value, next_state) to continue, or None to stop."""
     pass

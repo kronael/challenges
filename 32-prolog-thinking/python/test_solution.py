@@ -12,16 +12,23 @@ from main import (
 
 
 def _is_valid_queens(sol, n):
-    if sorted(sol) != list(range(n)) and len(set(sol)) != n:
-        # columns need not be a permutation a priori, but no two may collide
-        pass
+    if not isinstance(sol, tuple):
+        return False
+    if len(sol) != n:
+        return False
+    if any(not isinstance(col, int) or col < 0 or col >= n for col in sol):
+        return False
+    if len(set(sol)) != n:
+        return False
     for r1 in range(n):
         for r2 in range(r1 + 1, n):
-            if sol[r1] == sol[r2]:
-                return False
             if abs(sol[r1] - sol[r2]) == abs(r1 - r2):
                 return False
     return True
+
+
+def test_nqueens_zero_has_empty_board_solution():
+    assert solve_nqueens(0) == [()]
 
 
 def test_nqueens_4_has_two_solutions():
@@ -46,8 +53,16 @@ def test_triangle_three_coloring_has_six():
     sols = solve_graph_coloring(3, edges, 3)
     assert len(sols) == 6
     for c in sols:
+        assert set(c) == {0, 1, 2}
+        assert all(0 <= color <= 2 for color in c.values())
         for u, v in edges:
             assert c[u] != c[v]
+
+
+def test_isolated_nodes_are_still_colored():
+    sols = solve_graph_coloring(3, [], 2)
+    assert len(sols) == 8
+    assert all(set(c) == {0, 1, 2} for c in sols)
 
 
 def test_k4_three_coloring_impossible():
@@ -77,5 +92,9 @@ def test_relational_not_imperative():
     # leans on slicing/itertools. Reject solutions that bury a manual nested
     # backtracking loop (cheap heuristic: source must reference the declared
     # tooling rather than only raw control flow).
-    src = inspect.getsource(solve_nqueens) + inspect.getsource(solve_graph_coloring)
+    src = (
+        inspect.getsource(solve_nqueens)
+        + inspect.getsource(solve_graph_coloring)
+        + inspect.getsource(solve_send_more_money)
+    )
     assert "constraint" in src.lower(), "use python-constraint, not a hand-coded search"

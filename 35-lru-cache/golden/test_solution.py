@@ -16,6 +16,7 @@ def test_case(inp):
         capture_output=True,
         text=True,
     )
+    assert result.returncode == 0, result.stderr
     got = result.stdout.strip()
     want = inp.with_suffix(".out").read_text().strip()
     assert got == want, f"got {got!r}, want {want!r}"

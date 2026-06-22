@@ -30,7 +30,10 @@ def concat_ok(a, b):
     return is_prime(int(f"{a}{b}")) and is_prime(int(f"{b}{a}"))
 
 
-def solve():
+def solve(size=5):
+    if size <= 0:
+        return 0
+
     limit = 10000
     sieve = bytearray([1]) * limit
     sieve[0] = sieve[1] = 0
@@ -52,11 +55,11 @@ def solve():
     best = [float("inf")]
 
     def extend(group, group_sum, start):
-        if len(group) == 5:
+        if len(group) == size:
             if group_sum < best[0]:
                 best[0] = group_sum
             return
-        need = 5 - len(group)
+        need = size - len(group)
         for idx in range(start, len(primes)):
             p = primes[idx]
             if group_sum + p * need >= best[0]:
@@ -69,8 +72,8 @@ def solve():
 
 
 def main():
-    json.load(sys.stdin)
-    print(solve())
+    data = json.load(sys.stdin)
+    print(solve(data.get("size", 5)))
 
 
 if __name__ == "__main__":

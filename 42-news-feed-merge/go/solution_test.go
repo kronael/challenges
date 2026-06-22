@@ -41,9 +41,9 @@ func TestCases(t *testing.T) {
 			if err != nil {
 				t.Fatalf("read .out for %s: %v", inp, err)
 			}
-			want := []int{}
+			want := []int64{}
 			for _, tok := range strings.Fields(string(raw)) {
-				n, err := strconv.Atoi(tok)
+				n, err := strconv.ParseInt(tok, 10, 64)
 				if err != nil {
 					t.Fatalf("parse .out for %s: %v", inp, err)
 				}
@@ -52,7 +52,7 @@ func TestCases(t *testing.T) {
 
 			got := solve(in.Feeds)
 			if got == nil {
-				got = []int{}
+				got = []int64{}
 			}
 			if !reflect.DeepEqual(got, want) {
 				t.Errorf("got %v want %v", got, want)

@@ -35,8 +35,13 @@ def test_running_average():
     assert list(avg) == [1.0, 2.0, 3.0, 4.0]
 
 
+def test_running_average_from_infinite_stream():
+    assert list(islice(running_average(naturals(1)), 4)) == [1.0, 1.5, 2.0, 2.5]
+
+
 def test_collatz():
     assert list(islice(collatz(6), 8)) == [6, 3, 10, 5, 16, 8, 4, 2]
+    assert list(islice(collatz(1), 6)) == [1, 4, 2, 1, 4, 2]
 
 
 def test_zipwith():
@@ -47,6 +52,11 @@ def test_zipwith():
 def test_unfold():
     s = unfold(lambda n: (n, n * 2) if n < 100 else None, 1)
     assert list(s) == [1, 2, 4, 8, 16, 32, 64]
+
+
+def test_unfold_can_be_infinite():
+    s = unfold(lambda n: (n, n + 1), 3)
+    assert list(islice(s, 5)) == [3, 4, 5, 6, 7]
 
 
 def test_primes_is_lazy():

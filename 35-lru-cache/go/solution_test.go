@@ -11,7 +11,10 @@ import (
 )
 
 func TestCases(t *testing.T) {
-	all, _ := filepath.Glob("../cases/*.in")
+	all, err := filepath.Glob("../cases/*.in")
+	if err != nil {
+		t.Fatal(err)
+	}
 	sort.Strings(all)
 	var ins []string
 	for _, f := range all {
@@ -19,17 +22,34 @@ func TestCases(t *testing.T) {
 			ins = append(ins, f)
 		}
 	}
+	if len(ins) == 0 {
+		t.Fatal("no small cases found in ../cases")
+	}
 	for _, inp := range ins {
 		t.Run(filepath.Base(inp), func(t *testing.T) {
-			f, _ := os.Open(inp)
+			f, err := os.Open(inp)
+			if err != nil {
+				t.Fatal(err)
+			}
 			var in input
-			json.NewDecoder(f).Decode(&in)
-			f.Close()
+			if err := json.NewDecoder(f).Decode(&in); err != nil {
+				f.Close()
+				t.Fatal(err)
+			}
+			if err := f.Close(); err != nil {
+				t.Fatal(err)
+			}
 			got := solve(in.Capacity, in.Ops)
-			raw, _ := os.ReadFile(strings.TrimSuffix(inp, ".in") + ".out")
+			raw, err := os.ReadFile(strings.TrimSuffix(inp, ".in") + ".out")
+			if err != nil {
+				t.Fatal(err)
+			}
 			var want []int
 			for _, s := range strings.Fields(string(raw)) {
-				v, _ := strconv.Atoi(s)
+				v, err := strconv.Atoi(s)
+				if err != nil {
+					t.Fatal(err)
+				}
 				want = append(want, v)
 			}
 			if len(got) != len(want) {

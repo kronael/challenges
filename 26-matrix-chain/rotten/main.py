@@ -3,9 +3,6 @@ import sys
 
 
 def solve(dims):
-    # Naive recursion: try every split point with no memoization — correct, but
-    # the work is the Catalan number of parenthesizations, so it TIMEOUTs on the
-    # large cases. That is the trap.
     n = len(dims) - 1
     if n <= 1:
         return 0

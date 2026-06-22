@@ -22,6 +22,6 @@ regen:
 	done
 
 help:
-	@echo "test   — verify golden passes all cases"
+	@echo "test   — verify golden passes the small cases"
 	@echo "bench  — time golden on large cases (the target to beat)"
 	@echo "regen  — regenerate .out files from golden"

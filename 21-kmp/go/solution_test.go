@@ -10,13 +10,14 @@ import (
 	"testing"
 )
 
-func parseInts(s string) []int {
+func parseInts(t *testing.T, s string) []int {
+	t.Helper()
 	fields := strings.Fields(s)
 	out := make([]int, 0, len(fields))
 	for _, f := range fields {
 		n, err := strconv.Atoi(f)
 		if err != nil {
-			continue
+			t.Fatalf("parse expected integer %q: %v", f, err)
 		}
 		out = append(out, n)
 	}
@@ -24,7 +25,10 @@ func parseInts(s string) []int {
 }
 
 func TestCases(t *testing.T) {
-	all, _ := filepath.Glob("../cases/*.in")
+	all, err := filepath.Glob("../cases/*.in")
+	if err != nil {
+		t.Fatalf("glob cases: %v", err)
+	}
 	sort.Strings(all)
 	var ins []string
 	for _, f := range all {
@@ -53,7 +57,7 @@ func TestCases(t *testing.T) {
 			if err != nil {
 				t.Fatalf("read .out for %s: %v", inp, err)
 			}
-			want := parseInts(string(raw))
+			want := parseInts(t, string(raw))
 
 			got := solve(in.Text, in.Pattern)
 			if len(got) != len(want) {

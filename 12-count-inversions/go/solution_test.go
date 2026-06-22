@@ -35,6 +35,9 @@ func TestCases(t *testing.T) {
 			if err != nil {
 				t.Fatalf("decode %s: %v", inp, err)
 			}
+			if in.N != len(in.Arr) {
+				t.Fatalf("%s: n=%d len(arr)=%d", inp, in.N, len(in.Arr))
+			}
 
 			raw, err := os.ReadFile(strings.TrimSuffix(inp, ".in") + ".out")
 			if err != nil {
