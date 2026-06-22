@@ -20,8 +20,4 @@ func main() {
 	}
 }
 
-// WHY: When multiple cases are ready, select chooses one uniformly at random
-// (per the spec). Both c1 and c2 are buffered and immediately ready.
-// Output is either "c1: 1" or "c2: 2" — non-deterministic.
-// Run 20 times to observe both outputs.
-// This trips people up when they assume select is FIFO or ordered by case position.
+// Run with: make race QUIZ=09_select_ordering.go

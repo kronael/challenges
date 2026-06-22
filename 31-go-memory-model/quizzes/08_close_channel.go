@@ -1,4 +1,4 @@
-// QUIZ 08 — Close happens-before receive
+// QUIZ 08 — Close channel receive
 // Predict: can any goroutine print a non-zero value? Can any print zero?
 // Your answer: ________________________________
 
@@ -30,8 +30,4 @@ func main() {
 	wg.Wait()
 }
 
-// WHY: Closing a channel happens-before a receive of the zero value from that
-// channel (go.dev/ref/mem). So x=100 happens-before close(c) happens-before
-// each <-c. All goroutines see x==100. Output: five lines of "100".
-// Contrast: if you used a buffered channel and sent values instead of closing,
-// only the goroutines that received an actual value would have the guarantee.
+// Run with: make race QUIZ=08_close_channel.go

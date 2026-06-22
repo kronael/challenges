@@ -1,4 +1,4 @@
-// QUIZ 02 — Channel as happens-before
+// QUIZ 02 — Channel ordering
 // Predict: is the output always "done: 42"? Can it print "done: 0"?
 // Your answer: ________________________________
 
@@ -17,6 +17,4 @@ func main() {
 	fmt.Println("done:", x)
 }
 
-// WHY: The send on c (in the goroutine) happens-before the receive completes
-// (in main). Therefore x=42 is visible after <-c. Output is always "done: 42".
-// Remove the channel and it becomes quiz 01.
+// Run with: make race QUIZ=02_channel_ordering.go

@@ -24,7 +24,4 @@ func main() {
 	fmt.Println(results)
 }
 
-// WHY: wg.Done() (internally a decrement + release store) happens-before
-// wg.Wait() returns (internally a load that observes count==0).
-// So all writes to results[] happen-before the fmt.Println.
-// Output: [0 1 4 9 16] — always correct, always in order (indices are disjoint).
+// Run with: make race QUIZ=03_waitgroup_fence.go

@@ -26,3 +26,31 @@
   cache-coherence traffic). Padding each counter onto its own 64-byte cache line
   removes the invalidation — same correctness, several times faster under
   contention. `perf c2c` on Linux can show the cache-to-cache transfers directly.
+
+## Answer key
+
+- **01 — Unsynchronised write**: the program often prints `42`, but the output is
+  not guaranteed. `time.Sleep` is not a synchronisation event, so the plain write
+  to `x` races with the read in `main`.
+- **02 — Channel ordering**: always prints `done: 42`. The send on `c`
+  happens-before the receive from `c` completes.
+- **03 — WaitGroup fence**: always prints `[0 1 4 9 16]`. Each goroutine writes a
+  disjoint index before `Done`, and `Wait` returns only after those writes are
+  ordered before the print.
+- **04 — Atomic vs plain read**: the plain-variable loop can run forever or
+  otherwise behave unpredictably because it has a data race. The atomic loop is
+  the one with the memory-ordering guarantee.
+- **05 — Goroutine start ordering**: both `hello` then `world` and `world` then
+  `hello` are possible. Starting goroutines does not order their prints relative
+  to each other.
+- **06 — sync.Once visibility**: every goroutine prints `99`. `sync.Once` orders
+  the completed initializer before every returned `Do` call.
+- **07 — Mutex interleave**: possible outputs are `0 0`, `1 0`, and `1 2`.
+  `0 2` is not possible because the writes inside the writer goroutine are
+  sequenced as `a = 1` before `b = 2`.
+- **08 — Close channel**: every goroutine prints `100`. The write before
+  `close(c)` is visible to receives that observe the closed channel.
+- **09 — Select ordering**: either `c1: 1` or `c2: 2` can print. When multiple
+  cases are ready, `select` does not prefer the first case.
+- **10 — False sharing**: the padded layout should be faster under multi-core
+  contention because the two atomic counters no longer share a cache line.

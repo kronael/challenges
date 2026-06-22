@@ -31,7 +31,4 @@ func main() {
 	wg.Wait()
 }
 
-// WHY: sync.Once guarantees that init_val runs exactly once AND that the
-// return from once.Do in every goroutine happens-after the init_val call
-// completes. So all goroutines see val == 99. This is the canonical
-// safe lazy initialisation pattern.
+// Run with: make race QUIZ=06_once_init.go

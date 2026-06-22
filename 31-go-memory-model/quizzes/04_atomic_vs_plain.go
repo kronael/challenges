@@ -12,18 +12,15 @@ func main() {
 	// Version A: plain variable
 	stopA := false
 	go func() { stopA = true }()
-	for !stopA { // may loop forever — compiler can hoist the load
+	for !stopA {
 	}
 
 	// Version B: atomic
 	var stopB atomic.Bool
 	go func() { stopB.Store(true) }()
-	for !stopB.Load() { // guaranteed to eventually terminate
+	for !stopB.Load() {
 	}
 }
 
-// WHY: The compiler is allowed to cache stopA in a register and never re-read
-// it from memory. The loop becomes infinite. atomic.Bool.Load() has acquire
-// semantics — it always reads from memory and cannot be hoisted.
-// Run with -race: version A is a data race (undefined behaviour).
-// Note: this program likely deadlocks on version A in practice — don't actually run it.
+// Compile with: make compile QUIZ=04_atomic_vs_plain.go
+// Run only with your own timeout.

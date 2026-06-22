@@ -1,6 +1,9 @@
 # 31 — Go Memory Model
 
-**Task**: Ten short Go programs live in `quizzes/`. For each one, predict its output (and whether that output is deterministic) and write a one-line justification in the `Your answer:` comment slot. Then run it — quiz 10 is a benchmark, the rest run under `-race` — and check your prediction against what actually happens.
+**Task**: Ten short Go programs live in `quizzes/`. For each one, predict its
+output (and whether that output is deterministic) and write a one-line
+justification in the `Your answer:` comment slot. Then compile or run it as
+directed below and compare your prediction with the behavior you observe.
 
 **Difficulty**: hard
 **Time estimate**: ~45 min
@@ -18,14 +21,12 @@ answer the questions in its header comment before running it:
 - Why — what in the program (if anything) forces that result?
 
 The hard part is that "it printed the right value on my machine" is not an
-answer. A write performed by one goroutine is **not guaranteed** to be visible to
-another goroutine — not even one started after the write — unless something in
-the program orders them. Some constructs provide that ordering and some that look
-like they should (a `time.Sleep`, the `go` statement itself, a passing `-race`
-run on amd64) do not. Several quizzes are deliberate data races that *usually*
-print the expected value yet are undefined behaviour; the race detector, not the
-output, is the judge. Quiz 10 instead asks you to predict and then measure a
-performance difference between two memory layouts that are both correct.
+answer. A write performed by one goroutine is not guaranteed to be visible to
+another goroutine unless something in the program orders them. Some constructs
+provide that ordering and some that look like they should do not. Several
+quizzes deliberately separate observed behavior from guaranteed behavior; quiz
+10 instead asks you to predict and measure a performance difference between two
+memory layouts that are both correct.
 
 Treat a prediction as wrong if it relies on observed behaviour rather than a rule
 that guarantees it.
@@ -33,9 +34,16 @@ that guarantees it.
 ## Run
 
 ```
-go run -race quizzes/NN_name.go      # predict first, write your answer in the comment
-go test -bench=. -benchmem -cpu=2,4,8 quizzes/10_false_sharing_bench.go  # quiz 10
+make test       # compile every quiz; race-run the quizzes that should terminate
+make run QUIZ=02_channel_ordering.go
+make race QUIZ=01_unsynchronised_write.go
+make bench      # quiz 10
 ```
+
+Quiz 04 is intentionally an analysis quiz; compile it, but do not run it without
+your own timeout. `make race QUIZ=01_unsynchronised_write.go` intentionally
+reports a race and exits nonzero. Quiz 10 is a benchmark and has no `main`
+program output.
 
 Stuck? See `HINTS.md`.
 

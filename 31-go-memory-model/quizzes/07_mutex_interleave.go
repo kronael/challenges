@@ -24,21 +24,15 @@ func main() {
 		mu.Unlock()
 	}()
 
+	done := make(chan struct{})
 	go func() {
+		defer close(done)
 		mu.Lock()
 		fmt.Println(a, b)
 		mu.Unlock()
 	}()
 
-	var wg sync.WaitGroup
-	wg.Add(0) // not actually waiting — intentionally racy for analysis
-	_ = wg
-	select {} // block forever so goroutines run
+	<-done
 }
 
-// WHY: The second goroutine can acquire the mutex at any of 3 points:
-// before a=1, between a=1 and b=2, or after b=2.
-// Possible outputs: "0 0", "1 0", "1 2"
-// "0 2" is NOT possible: b=2 only runs after a=1 (sequenced in the goroutine).
-// This is a classic exam question: the mutex synchronises, but the ORDER
-// of acquisition is non-deterministic.
+// Run with: make race QUIZ=07_mutex_interleave.go
