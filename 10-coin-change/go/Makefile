@@ -7,7 +7,7 @@ BIN      := /tmp/$(MOD_NAME)-bench
 all: fmt build lint test
 
 build:
-	go build .
+	go build -o $(BIN) .
 
 fmt:
 	gofmt -w .
