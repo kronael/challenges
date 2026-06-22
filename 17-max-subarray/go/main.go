@@ -7,11 +7,10 @@ import (
 )
 
 type input struct {
-	Arr []int `json:"arr"`
+	Arr []int64 `json:"arr"`
 }
 
-func solve(arr []int) int {
-	// TODO: return the maximum contiguous subarray sum
+func solve(arr []int64) int64 {
 	_ = arr
 	return 0
 }

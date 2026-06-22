@@ -9,7 +9,6 @@ pub struct Input {
 }
 
 pub fn solve(base: u64, exp: u64, m: u64) -> u64 {
-    // TODO: return (base ** exp) % m, computed in O(log exp)
     let _ = (base, exp, m);
     todo!()
 }

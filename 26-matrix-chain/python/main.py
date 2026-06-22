@@ -3,7 +3,7 @@ import sys
 
 
 def solve(dims):
-    # TODO: return the minimum number of scalar multiplications
+    _ = dims
     pass
 
 

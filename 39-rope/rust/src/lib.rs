@@ -7,8 +7,6 @@ pub struct Input {
 }
 
 pub fn solve(parts: &[String], queries: &[[i64; 2]]) -> String {
-    // TODO: build a rope from parts, answer [lo, hi) substring queries
-    // Return extracted substrings joined by "|"
     let _ = (parts, queries);
     todo!()
 }

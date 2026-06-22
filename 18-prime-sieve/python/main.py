@@ -3,7 +3,6 @@ import sys
 
 
 def solve(n):
-    # TODO: return the number of primes p with p < n
     pass
 
 

@@ -11,7 +11,6 @@ type input struct {
 }
 
 func solve(n int64) int64 {
-	// TODO: return F(n) mod 1_000_000_007
 	_ = n
 	return 0
 }

@@ -37,7 +37,6 @@ type input struct {
 }
 
 func solve(n int, values []int64, ops []op) []int64 {
-	// TODO: return the list of sum-query answers, in order
 	_, _, _ = n, values, ops
 	return nil
 }

@@ -3,8 +3,7 @@ import sys
 
 
 def solve(parts, queries):
-    # TODO: build a rope from parts, answer [lo, hi) substring queries
-    # Return extracted substrings joined by "|"
+    _ = (parts, queries)
     pass
 
 

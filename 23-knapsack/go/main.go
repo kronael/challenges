@@ -17,7 +17,6 @@ type input struct {
 }
 
 func solve(capacity int, items []item) int {
-	// TODO: return the maximum achievable total value
 	_ = capacity
 	_ = items
 	return 0

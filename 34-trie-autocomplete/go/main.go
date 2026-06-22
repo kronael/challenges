@@ -12,8 +12,7 @@ type input struct {
 }
 
 func solve(words, queries []string) string {
-	// TODO: build a trie; for each query return up to 3 lex-smallest completions
-	// join query results with ";", completions within a result with " "
+	// Join query results with ";", and words inside one result with " ".
 	_ = words
 	_ = queries
 	return ""

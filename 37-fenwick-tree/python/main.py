@@ -3,8 +3,7 @@ import sys
 
 
 def solve(n, initial, queries):
-    # TODO: Fenwick tree — handle ["sum", i] and ["update", i, delta]
-    # Return results of "sum" queries (1-indexed) in order
+    _ = (n, initial, queries)
     pass
 
 

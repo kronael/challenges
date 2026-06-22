@@ -11,7 +11,6 @@ type input struct {
 }
 
 func solve(n int) int {
-	// TODO: return the number of primes p with p < n
 	_ = n
 	return 0
 }

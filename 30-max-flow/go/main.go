@@ -7,15 +7,14 @@ import (
 )
 
 type input struct {
-	N     int     `json:"n"`
-	Edges [][]int `json:"edges"`
+	N     int       `json:"n"`
+	Edges [][]int64 `json:"edges"`
 }
 
-func solve(n int, edges [][]int) int {
-	// TODO: return the maximum flow from node 1 to node n
+func solve(n int, edges [][]int64) int64 {
 	_ = n
 	_ = edges
-	return 0
+	panic("TODO")
 }
 
 func main() {

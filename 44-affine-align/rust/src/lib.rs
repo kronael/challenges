@@ -41,7 +41,6 @@ pub fn aa_index(c: u8) -> usize {
 }
 
 pub fn solve(s: &str, t: &str) -> i32 {
-    // TODO: return the maximum global affine-gap alignment score under BLOSUM62
     let _ = (s, t);
     todo!()
 }

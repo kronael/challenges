@@ -3,8 +3,7 @@ import sys
 
 
 def solve(feeds):
-    # TODO: merge the K sorted feeds by ts (tie-break feed index, then id);
-    # return a flat list [ts, id, ts, id, ...] in merged order
+    _ = feeds
     pass
 
 

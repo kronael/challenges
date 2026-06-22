@@ -3,7 +3,6 @@ import sys
 
 
 def solve(n, data):
-    # TODO: implement
     pass
 
 

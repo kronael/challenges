@@ -3,7 +3,6 @@ import sys
 
 
 def solve(k, kmers):
-    # TODO: reconstruct and return the original DNA string from the k-mers
     pass
 
 

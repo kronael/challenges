@@ -12,10 +12,7 @@ type input struct {
 }
 
 func solve(s, t string) int {
-	// TODO: return the length of the longest common subsequence of s and t
-	_ = s
-	_ = t
-	return 0
+	panic("TODO")
 }
 
 func main() {

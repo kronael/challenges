@@ -14,7 +14,6 @@ type input struct {
 }
 
 func solve(k int, arr []int) []int {
-	// TODO: return the maximum of each window of k readings, left to right
 	_ = k
 	_ = arr
 	return nil

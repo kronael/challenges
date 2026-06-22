@@ -8,7 +8,6 @@ pub struct Input {
 }
 
 pub fn solve(n: usize, edges: &[[usize; 2]], loads: &[Option<i64>]) -> Vec<i64> {
-    // TODO: return loads with None values filled in to minimise total
     let _ = (n, edges, loads);
     todo!()
 }

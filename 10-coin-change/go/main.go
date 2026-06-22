@@ -12,10 +12,9 @@ type input struct {
 }
 
 func solve(amount int, coins []int) int {
-	// TODO: return the minimum number of coins summing to amount, or -1 if impossible
 	_ = amount
 	_ = coins
-	return 0
+	panic("TODO")
 }
 
 func main() {

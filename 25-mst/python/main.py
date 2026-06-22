@@ -3,7 +3,7 @@ import sys
 
 
 def solve(n, edges):
-    # TODO: return the total weight of the minimum spanning tree
+    _ = (n, edges)
     pass
 
 

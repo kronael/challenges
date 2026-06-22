@@ -7,17 +7,16 @@ import (
 )
 
 type Job struct {
-	Start  int `json:"start"`
-	End    int `json:"end"`
-	Weight int `json:"weight"`
+	Start  int64 `json:"start"`
+	End    int64 `json:"end"`
+	Weight int64 `json:"weight"`
 }
 
 type input struct {
 	Jobs []Job `json:"jobs"`
 }
 
-func solve(jobs []Job) int {
-	// TODO: return maximum total weight of non-overlapping jobs
+func solve(jobs []Job) int64 {
 	_ = jobs
 	return 0
 }

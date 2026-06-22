@@ -3,7 +3,6 @@ import sys
 
 
 def solve(n, edges, loads):
-    # TODO: return list of loads with None values filled in to minimise total
     pass
 
 

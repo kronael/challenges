@@ -12,7 +12,6 @@ type input struct {
 }
 
 func solve(n int, edges [][]int) []int64 {
-	// TODO: return the shortest distance from node 0 to each node, -1 if unreachable
 	_ = n
 	_ = edges
 	return nil

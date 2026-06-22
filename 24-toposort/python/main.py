@@ -3,8 +3,7 @@ import sys
 
 
 def solve(n, edges):
-    # TODO: return a list giving a valid topological order (smallest ready node
-    # first), or the string "CYCLE" if no ordering exists
+    _ = (n, edges)
     pass
 
 

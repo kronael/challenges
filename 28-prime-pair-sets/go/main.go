@@ -6,10 +6,11 @@ import (
 	"os"
 )
 
-type input struct{}
+type input struct {
+	Size *int `json:"size"`
+}
 
-func solve() int {
-	// TODO: return the smallest sum of a pairwise-compatible set of five primes
+func solve(size int) int {
 	return 0
 }
 
@@ -19,6 +20,9 @@ func main() {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
-	_ = in
-	fmt.Println(solve())
+	size := 5
+	if in.Size != nil {
+		size = *in.Size
+	}
+	fmt.Println(solve(size))
 }

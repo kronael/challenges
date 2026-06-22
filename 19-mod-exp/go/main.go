@@ -13,7 +13,6 @@ type input struct {
 }
 
 func solve(base, exp, mod int64) int64 {
-	// TODO: return (base ** exp) % mod, computed in O(log exp)
 	_, _, _ = base, exp, mod
 	return 0
 }

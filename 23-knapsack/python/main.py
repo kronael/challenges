@@ -3,7 +3,6 @@ import sys
 
 
 def solve(capacity, items):
-    # TODO
     pass
 
 

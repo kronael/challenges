@@ -3,7 +3,6 @@ import sys
 
 
 def solve(n, values, ops):
-    # TODO: return the list of sum-query answers, in order
     pass
 
 

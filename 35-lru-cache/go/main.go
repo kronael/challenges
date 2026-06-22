@@ -39,8 +39,6 @@ func (o *op) UnmarshalJSON(data []byte) error {
 }
 
 func solve(capacity int, ops []op) []int {
-	// TODO: implement LRU cache; return results of "get" ops (-1 if miss)
-	// each op is {kind: "get"|"put", key, val}
 	_ = capacity
 	_ = ops
 	return nil

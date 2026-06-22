@@ -13,7 +13,6 @@ pub struct Input {
 }
 
 pub fn solve(jobs: &[Job]) -> i64 {
-    // TODO: return maximum total weight of non-overlapping jobs
     let _ = jobs;
     todo!()
 }

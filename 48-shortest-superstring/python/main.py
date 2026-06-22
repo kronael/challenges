@@ -3,7 +3,6 @@ import sys
 
 
 def solve(reads):
-    # TODO: return the shortest superstring containing every read (the reassembled chromosome)
     pass
 
 

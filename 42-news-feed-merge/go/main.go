@@ -9,17 +9,16 @@ import (
 )
 
 type event struct {
-	Ts int `json:"ts"`
-	ID int `json:"id"`
+	Ts int64 `json:"ts"`
+	ID int64 `json:"id"`
 }
 
 type input struct {
 	Feeds [][]event `json:"feeds"`
 }
 
-func solve(feeds [][]event) []int {
-	// TODO: merge the K sorted feeds by ts (tie-break feed index, then id);
-	// return a flat slice [ts, id, ts, id, ...] in merged order
+func solve(feeds [][]event) []int64 {
+	_ = feeds
 	return nil
 }
 
@@ -32,7 +31,7 @@ func main() {
 	out := solve(in.Feeds)
 	parts := make([]string, len(out))
 	for i, v := range out {
-		parts[i] = strconv.Itoa(v)
+		parts[i] = strconv.FormatInt(v, 10)
 	}
 	fmt.Println(strings.Join(parts, " "))
 }

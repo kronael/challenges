@@ -14,7 +14,6 @@ type input struct {
 }
 
 func solve(text, pattern string) []int {
-	// TODO: return the 1-indexed start positions where pattern occurs in text
 	_ = text
 	_ = pattern
 	return nil

@@ -10,8 +10,7 @@ type input struct {
 	S string `json:"s"`
 }
 
-func solve(s string) int {
-	// TODO: count the number of distinct non-empty substrings of s
+func solve(s string) int64 {
 	_ = s
 	return 0
 }

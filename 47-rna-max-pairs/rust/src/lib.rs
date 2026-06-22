@@ -8,7 +8,6 @@ pub struct Input {
 }
 
 pub fn solve(rna: &str, min_loop: usize, allow_wobble: bool) -> usize {
-    // TODO: return the maximum number of non-crossing base pairs
     let _ = (rna, min_loop, allow_wobble);
     todo!()
 }

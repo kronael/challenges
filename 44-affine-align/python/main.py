@@ -34,7 +34,7 @@ IDX = {c: i for i, c in enumerate(AA)}
 
 
 def solve(s, t):
-    # TODO: return the maximum global affine-gap alignment score under BLOSUM62
+    _ = (s, t)
     pass
 
 

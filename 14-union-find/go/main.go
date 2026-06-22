@@ -16,7 +16,6 @@ type input struct {
 }
 
 func solve(n int, unions, queries [][]int) []int {
-	// TODO: apply unions, then return 1/0 per query for same-component
 	_, _, _ = n, unions, queries
 	return nil
 }

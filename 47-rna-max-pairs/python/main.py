@@ -3,7 +3,6 @@ import sys
 
 
 def solve(rna, min_loop, allow_wobble):
-    # TODO: return the maximum number of non-crossing base pairs
     pass
 
 

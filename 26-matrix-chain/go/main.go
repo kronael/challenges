@@ -11,7 +11,6 @@ type input struct {
 }
 
 func solve(dims []int) int {
-	// TODO: return the minimum number of scalar multiplications
 	_ = dims
 	return 0
 }

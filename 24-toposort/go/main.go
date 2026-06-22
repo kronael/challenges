@@ -13,10 +13,7 @@ type input struct {
 	Edges [][]int `json:"edges"`
 }
 
-// solve returns a valid topological order (smallest ready node first), or nil
-// if the graph contains a cycle.
 func solve(n int, edges [][]int) []int {
-	// TODO: implement
 	_ = n
 	_ = edges
 	return nil

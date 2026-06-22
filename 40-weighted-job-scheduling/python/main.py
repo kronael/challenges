@@ -4,7 +4,6 @@ import sys
 
 def solve(jobs):
     # jobs: list of (start, end, weight) tuples
-    # TODO: return maximum total weight of non-overlapping jobs
     pass
 
 

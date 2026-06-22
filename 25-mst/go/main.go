@@ -11,8 +11,7 @@ type input struct {
 	Edges [][]int `json:"edges"`
 }
 
-func solve(n int, edges [][]int) int {
-	// TODO: return the total weight of the minimum spanning tree
+func solve(n int, edges [][]int) int64 {
 	_ = n
 	_ = edges
 	return 0

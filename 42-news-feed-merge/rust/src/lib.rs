@@ -12,8 +12,6 @@ pub struct Input {
 }
 
 pub fn solve(feeds: &[Vec<Event>]) -> Vec<i64> {
-    // TODO: merge the K sorted feeds by ts (tie-break feed index, then id);
-    // return a flat vec [ts, id, ts, id, ...] in merged order
     let _ = feeds;
     todo!()
 }

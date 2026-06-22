@@ -7,12 +7,11 @@ import (
 )
 
 type input struct {
-	K     int   `json:"k"`
-	Pages []int `json:"pages"`
+	K     int     `json:"k"`
+	Pages []int64 `json:"pages"`
 }
 
-func solve(k int, pages []int) int {
-	// TODO: return the minimum possible value of the largest contiguous block sum
+func solve(k int, pages []int64) int64 {
 	_ = k
 	_ = pages
 	return 0

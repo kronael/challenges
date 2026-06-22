@@ -7,7 +7,6 @@ pub struct Input {
 }
 
 pub fn solve(seq: &[i32]) -> usize {
-    // TODO: return the length of the longest strictly increasing subsequence
     let _ = seq;
     todo!()
 }

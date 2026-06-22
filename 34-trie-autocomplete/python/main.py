@@ -3,8 +3,7 @@ import sys
 
 
 def solve(words, queries):
-    # TODO: build a trie; for each query return up to 3 lex-smallest completions
-    # Return query results joined by ";", completions within a result joined by " "
+    # Join query results with ";", and words inside one result with " ".
     pass
 
 

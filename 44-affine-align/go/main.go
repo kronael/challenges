@@ -51,7 +51,7 @@ type input struct {
 }
 
 func solve(s, t string) int {
-	// TODO: return the maximum global affine-gap alignment score under BLOSUM62
+	_, _ = s, t
 	return 0
 }
 

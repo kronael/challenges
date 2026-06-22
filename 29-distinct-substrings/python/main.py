@@ -3,7 +3,6 @@ import sys
 
 
 def solve(s):
-    # TODO: count the number of distinct non-empty substrings of s
     pass
 
 

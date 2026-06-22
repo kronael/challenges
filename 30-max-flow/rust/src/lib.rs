@@ -7,7 +7,6 @@ pub struct Input {
 }
 
 pub fn solve(n: usize, edges: &[Vec<i64>]) -> i64 {
-    // TODO: return the maximum flow from node 1 to node n
     let _ = (n, edges);
     todo!()
 }

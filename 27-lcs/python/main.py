@@ -3,7 +3,6 @@ import sys
 
 
 def solve(s, t):
-    # TODO: return the length of the longest common subsequence of s and t
     pass
 
 

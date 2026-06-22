@@ -3,7 +3,6 @@ import sys
 
 
 def solve(n, edges):
-    # TODO: return the maximum flow from node 1 to node n
     pass
 
 

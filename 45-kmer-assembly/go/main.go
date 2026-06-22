@@ -12,7 +12,6 @@ type input struct {
 }
 
 func solve(k int, kmers []string) string {
-	// TODO: reconstruct and return the original DNA string from the k-mers
 	_ = k
 	_ = kmers
 	return ""

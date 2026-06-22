@@ -3,7 +3,6 @@ import sys
 
 
 def solve(k, arr):
-    # TODO: return the maximum of each window of k readings, left to right
     pass
 
 

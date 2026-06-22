@@ -49,8 +49,6 @@ func (in *input) UnmarshalJSON(b []byte) error {
 }
 
 func solve(n int, initial []int64, queries []query) []int64 {
-	// TODO: Fenwick tree — handle "sum" i and "update" i delta queries
-	// Return results of "sum" queries (1-indexed) in order
 	_ = n
 	_ = initial
 	_ = queries

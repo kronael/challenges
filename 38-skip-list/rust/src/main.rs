@@ -6,5 +6,12 @@ fn main() {
     io::stdin().read_to_string(&mut buf).unwrap();
     let inp: Input = serde_json::from_str(&buf).unwrap();
     let result = solve(&inp.ops);
-    println!("{}", result.iter().map(|v| v.to_string()).collect::<Vec<_>>().join(" "));
+    println!(
+        "{}",
+        result
+            .iter()
+            .map(|v| v.to_string())
+            .collect::<Vec<_>>()
+            .join(" ")
+    );
 }

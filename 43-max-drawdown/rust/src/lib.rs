@@ -7,7 +7,6 @@ pub struct Input {
 }
 
 pub fn solve(prices: &[i32]) -> i64 {
-    // TODO: return the maximum drawdown, max over i<j of (prices[i] - prices[j])
     let _ = prices;
     todo!()
 }

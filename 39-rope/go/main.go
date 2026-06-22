@@ -12,8 +12,8 @@ type input struct {
 }
 
 func solve(parts []string, queries [][]int) string {
-	// TODO: build a rope from parts, answer [lo, hi) substring queries
-	// Return extracted substrings joined by "|"
+	_ = parts
+	_ = queries
 	return ""
 }
 

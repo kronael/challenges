@@ -3,8 +3,7 @@ import sys
 
 
 def solve(capacity, ops):
-    # TODO: LRU cache — return list of get results (-1 if miss)
-    # ops: list of ["put", k, v] or ["get", k]
+    _ = (capacity, ops)
     pass
 
 

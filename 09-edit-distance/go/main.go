@@ -12,7 +12,6 @@ type input struct {
 }
 
 func solve(s, t string) int {
-	// TODO: return the minimum number of single-character edits from s to t
 	_ = s
 	_ = t
 	return 0

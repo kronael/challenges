@@ -11,7 +11,6 @@ pub struct Input {
 }
 
 pub fn solve(n: usize, values: &[i64], ops: &[Op]) -> Vec<i64> {
-    // TODO: return the list of sum-query answers, in order
     let _ = (n, values, ops);
     todo!()
 }

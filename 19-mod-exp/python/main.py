@@ -3,7 +3,6 @@ import sys
 
 
 def solve(base, exp, mod):
-    # TODO: return (base ** exp) % mod, computed in O(log exp)
     pass
 
 

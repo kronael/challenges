@@ -6,7 +6,6 @@ pub struct Input {
 }
 
 pub fn solve(arr: &[i64]) -> i64 {
-    // TODO: return the maximum contiguous subarray sum
     let _ = arr;
     todo!()
 }

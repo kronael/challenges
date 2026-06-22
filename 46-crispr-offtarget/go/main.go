@@ -14,8 +14,6 @@ type input struct {
 }
 
 func solve(d, length int, genome string, guides []string) []int {
-	// TODO: for each guide, count the length-`length` windows of `genome` within
-	// Hamming distance `d` of it. Return one count per guide, in input order.
 	_ = d
 	_ = length
 	_ = genome

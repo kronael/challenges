@@ -3,7 +3,6 @@ import sys
 
 
 def solve(k, pages):
-    # TODO: return the minimum possible value of the largest contiguous block sum
     pass
 
 

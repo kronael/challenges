@@ -3,7 +3,6 @@ import sys
 
 
 def solve(amount, coins):
-    # TODO: return the minimum number of coins summing to amount, or -1 if impossible
     pass
 
 

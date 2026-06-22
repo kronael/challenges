@@ -12,7 +12,6 @@ type input struct {
 }
 
 func solve(intervals [][]int) int {
-	// TODO: return the maximum number of non-overlapping intervals
 	_ = intervals
 	return 0
 }

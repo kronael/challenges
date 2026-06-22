@@ -12,8 +12,8 @@ type input struct {
 }
 
 func solve(prices []int) int {
-	// TODO: return the maximum drawdown, max over i<j of (prices[i] - prices[j])
-	return 0
+	_ = prices
+	panic("TODO")
 }
 
 func main() {

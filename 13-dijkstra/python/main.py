@@ -3,7 +3,6 @@ import sys
 
 
 def solve(n, edges):
-    # TODO: return the shortest distance from node 0 to each node, -1 if unreachable
     pass
 
 

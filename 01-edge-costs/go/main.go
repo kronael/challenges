@@ -14,7 +14,6 @@ type input struct {
 }
 
 func solve(n int, edges [][2]int, loads []*int) []int {
-	// TODO: return loads with nil values filled in to minimise total
 	_ = n
 	return nil
 }

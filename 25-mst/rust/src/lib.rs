@@ -7,7 +7,6 @@ pub struct Input {
 }
 
 pub fn solve(n: usize, edges: &[Vec<i64>]) -> i64 {
-    // TODO: return the total weight of the minimum spanning tree
     let _ = n;
     let _ = edges;
     todo!()

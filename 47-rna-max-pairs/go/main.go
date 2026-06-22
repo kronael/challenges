@@ -13,11 +13,10 @@ type input struct {
 }
 
 func solve(rna string, minLoop int, allowWobble bool) int {
-	// TODO: return the maximum number of non-crossing base pairs
 	_ = rna
 	_ = minLoop
 	_ = allowWobble
-	return 0
+	panic("TODO")
 }
 
 func main() {

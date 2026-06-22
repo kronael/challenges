@@ -3,7 +3,6 @@ import sys
 
 
 def solve(intervals):
-    # TODO: return the maximum number of non-overlapping intervals
     pass
 
 

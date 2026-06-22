@@ -3,8 +3,7 @@ import sys
 
 
 def solve(text, pattern):
-    # TODO: return the 1-indexed start positions where pattern occurs in text
-    pass
+    raise NotImplementedError
 
 
 def main():

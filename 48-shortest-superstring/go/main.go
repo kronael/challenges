@@ -11,7 +11,6 @@ type input struct {
 }
 
 func solve(reads []string) string {
-	// TODO: return the shortest superstring containing every read (the reassembled chromosome)
 	return ""
 }
 

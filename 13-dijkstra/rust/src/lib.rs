@@ -7,7 +7,6 @@ pub struct Input {
 }
 
 pub fn solve(n: usize, edges: &[Vec<i64>]) -> Vec<i64> {
-    // TODO: return the shortest distance from node 0 to each node, -1 if unreachable
     let _ = n;
     let _ = edges;
     todo!()

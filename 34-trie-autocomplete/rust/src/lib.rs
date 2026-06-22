@@ -7,8 +7,7 @@ pub struct Input {
 }
 
 pub fn solve(words: &[String], queries: &[String]) -> String {
-    // TODO: build a trie, then for each query return up to 3 lex-smallest completions
-    // Return query results joined by ";", completions within a result joined by " "
+    // Join query results with ";", and words inside one result with " ".
     let _ = (words, queries);
     todo!()
 }

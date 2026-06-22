@@ -17,7 +17,6 @@ pub struct Input {
 /// Runs the order book and returns
 /// `[num_trades, p1, q1, p2, q2, ..., best_bid, bid_qty, best_ask, ask_qty]`.
 pub fn solve(orders: &[Order]) -> Vec<i64> {
-    // TODO: implement the matching engine
     let _ = orders;
     todo!()
 }

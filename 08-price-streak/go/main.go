@@ -12,8 +12,6 @@ type input struct {
 }
 
 func solve(seq []int) int {
-	// TODO: return the length of the longest strictly increasing subsequence
-	_ = seq
 	return 0
 }
 

@@ -3,7 +3,6 @@ import sys
 
 
 def solve(seq):
-    # TODO: return the length of the longest strictly increasing subsequence
     pass
 
 

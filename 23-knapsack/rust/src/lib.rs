@@ -13,7 +13,6 @@ pub struct Input {
 }
 
 pub fn solve(capacity: i64, items: &[Item]) -> i64 {
-    // TODO: return the maximum achievable total value
     let _ = capacity;
     let _ = items;
     todo!()

@@ -6,7 +6,6 @@ pub struct Input {
 }
 
 pub fn solve(s: &str) -> u64 {
-    // TODO: count the number of distinct non-empty substrings of s
     let _ = s;
     todo!()
 }

@@ -3,7 +3,6 @@ import sys
 
 
 def solve(arr):
-    # TODO: return the maximum contiguous subarray sum
     pass
 
 
