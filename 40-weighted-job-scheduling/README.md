@@ -34,11 +34,11 @@ Single integer: the maximum total weight of a non-overlapping subset.
 
 ## Examples
 
-**Example 1** — taking the two outer jobs beats any greedy pick.
+**Example 1** — taking two compatible jobs beats any greedy pick.
 ```
 jobs (0,6,60),(1,4,30),(3,5,10),(5,9,40) → 70
 ```
-Take (0,6,60) + (5,9,40); they don't overlap.
+Take (1,4,30) + (5,9,40); they don't overlap.
 
 **Example 2** — a single heavy job can beat several light ones.
 ```

@@ -1,4 +1,4 @@
-# 21 — KMP String Search
+# 21 — String Search
 
 **Task**: Find every position where a pattern P appears in a text T.
 
@@ -10,15 +10,14 @@
 Report every 1-indexed start position where `pattern` occurs in `text`,
 including overlapping matches.
 
-The text is long and highly repetitive — up to `|T| = 3·10⁵` characters with a
-`|P|` up to `10³`. The obvious scan that re-checks the pattern from scratch
-after every mismatch is O(|T|·|P|); on text full of near-matches that almost
-complete before failing, it does close to the full product of work and will not
-finish in time. Part of the challenge is matching in time linear in the input
-size.
+The text can be long and highly repetitive: up to `|T| = 3·10^5` characters,
+with `|P|` up to `10^3`. A scan that re-checks the pattern from scratch after
+each failed start can do close to `|T| * |P|` comparisons on inputs full of
+near-matches, so it will not finish within the time limit.
 
-Constraints: `|T|` up to 3·10⁵, `|P|` up to 10³, both lowercase a–z (the small
-cases also use spaces). `pattern` may be empty — report no positions.
+Constraints: `|T|` up to `3 * 10^5`, `|P|` up to `10^3`. Inputs are lowercase
+`a`-`z`; one small case includes a space to verify JSON parsing. `pattern` may
+be empty; report no positions.
 
 ## Input
 
@@ -32,12 +31,12 @@ The 1-indexed start positions in ascending order, space-separated (empty line if
 
 ## Examples
 
-**Example 1** — overlapping matches share characters
+**Example 1**
 ```
 text "aababab", pattern "abab" → 2 4
 ```
 
-**Example 2** — the case that wrecks the naive scan: many near-matches before each real one
+**Example 2**
 ```
 text "aaaaa", pattern "aa" → 1 2 3 4
 ```

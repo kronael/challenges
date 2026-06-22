@@ -16,4 +16,4 @@
   wants strict, so use `bisect_left`.
 
 The naive O(n²) DP (`dp[i] = 1 + max(dp[j] for j<i if seq[j]<seq[i])`) is what
-`golden/rotten.py` does — correct but it TIMEOUTs on the large cases.
+`rotten/main.py` does — correct but it TIMEOUTs on the large cases.

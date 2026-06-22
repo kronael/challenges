@@ -9,9 +9,9 @@
 
 You have an unlimited pile of coins in each given denomination. What's the minimum number of coins that sum to exactly `amount`? Return `-1` if no combination works.
 
-The tempting move is greedy: always grab the largest coin that fits. It works for real-world currency, which is *why* the trap is so easy to fall into — but it's wrong in general (see Example 2). The other trap is enumerating combinations: the number of ways to assemble an amount explodes exponentially, so any approach that tries them all blows up long before `amount` gets large.
+Some familiar coin systems make this look simpler than it is. In general, choosing the largest useful coin first can produce too many coins, and trying every possible assembly can grow far beyond the input size.
 
-Constraints: `amount` up to 2·10⁶, denominations are positive ints.
+Constraints: `0 <= amount <= 2,000,000`; denominations are positive integers. The list of denominations may be empty.
 
 ## Input
 
@@ -30,7 +30,7 @@ A single integer: minimum coin count, or `-1` if the amount can't be made.
 {"amount":11,"coins":[1,2,5]} → 3
 ```
 
-**Example 2** — greedy takes 4 then is stuck (no way to make the remaining 2), but 3+3 = 2 coins
+**Example 2** — taking 4 first gives 4+1+1, but 3+3 uses fewer coins
 ```
 {"amount":6,"coins":[1,3,4]} → 2
 ```

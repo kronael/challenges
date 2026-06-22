@@ -20,9 +20,10 @@
   forward pointers must be spliced when wiring in (or unlinking) the target node.
   Get this splicing wrong at any single level and the structure silently loses
   elements.
-- **range_count(lo, hi)**: descend to the first node with `val >= lo`, then walk
-  level 0 forward counting nodes while `val <= hi`. (Without an extra width/span
-  field this walk is O(answer); a span-augmented skip list makes it O(log n).)
+- **range_count(lo, hi)**: descend to the first node with `val >= lo`, then count
+  nodes until `val > hi`. Carrying a width/span per forward pointer lets you
+  compute ranks and answer the count as `rank(hi) - rank(lo - 1)` in expected
+  O(log n); without spans, this step is output-sensitive.
 
 The naive approach — keep a plain sorted list (or rescan a linked list) and do an
 O(n) insert/search/count per op — is correct but O(n) per operation, so it

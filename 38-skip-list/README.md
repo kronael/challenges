@@ -1,14 +1,14 @@
-# 38 — Skip List
+# 38 — Ordered Set Queries
 
-**Task**: Implement a skip list supporting insert, delete, search, and range-count, all in expected O(log n).
+**Task**: Maintain an ordered set of integers under inserts, deletes, searches,
+and interval-count queries.
 
 **Difficulty**: hard
 **Time estimate**: ~75 min
 
 ## Problem
 
-Maintain a sorted multiset of integers under a stream of operations, answering
-each query in expected O(log n):
+Maintain a sorted set of integers under a stream of operations:
 
 - `insert v` — add `v` if not already present (duplicates are no-ops).
 - `delete v` — remove `v` if present.
@@ -16,15 +16,12 @@ each query in expected O(log n):
 - `range_count lo hi` — how many stored values lie in the closed interval
   `[lo, hi]`?
 
-A skip list is the structure named by this challenge: a sorted linked list
-augmented so that lookups need not walk every node. The catch is that its balance
-is *probabilistic*, not structural — there are no rotations to fall back on, and
-correctness must hold for any random choices the structure makes internally. A
-query that descends or splices a pointer one step wrong does not crash; it
-silently loses elements and returns a subtly wrong count. With up to `10^5`
-operations, the naive "rescan the whole list every time" approach is too slow.
+Correctness must hold across long mixed streams: duplicate inserts, missing
+deletes, negative values, and ranges touching only part of the current set. With
+up to `10^5` operations, rescanning all stored values for every query is too
+slow.
 
-Constraints: up to `10^5` operations; values fit in i32.
+Constraints: up to `10^5` operations; values fit in i32; `lo <= hi`.
 
 ## Input / Output
 
@@ -52,9 +49,10 @@ search0→0; range_count(-10,10)→0; insert0; search0→1; range_count(-10,10)�
 
 ```
 cd rust   && make
+cd go     && make
 cd python && make
 ```
 
 Stuck? See `HINTS.md`.
 
-Source: [Pugh, *Skip Lists: A Probabilistic Alternative to Balanced Trees* (CACM 1990)](https://15721.courses.cs.cmu.edu/spring2018/papers/08-oltpindexes1/pugh-skiplists-cacm1990.pdf)
+Source: [Pugh, CACM 1990](https://15721.courses.cs.cmu.edu/spring2018/papers/08-oltpindexes1/pugh-skiplists-cacm1990.pdf)

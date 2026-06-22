@@ -9,7 +9,7 @@
 
 You manage a single meeting room and have `n` requests, each with a start and end time. Book the largest set of meetings that don't overlap (touching at an endpoint is fine — the next meeting can start exactly when the last ends). Output how many meetings you book.
 
-The intuitive rules of thumb all fail somewhere: picking the shortest meeting first can split a pair that would have fit together, and picking the earliest-*starting* meeting first lets one long meeting hog the whole morning. Finding a rule that is provably optimal — not just usually good — is the point.
+The intuitive rules of thumb all fail somewhere: picking the shortest meeting first can split a pair that would have fit together, and picking the earliest-*starting* meeting first lets one long meeting hog the whole morning. Finding a rule that is provably optimal is the point.
 
 Constraints: n up to ~10⁵, times fit in i32.
 

@@ -1,4 +1,4 @@
-# 13 — Dijkstra Shortest Path
+# 13 — Route Costs
 
 **Task**: Compute the shortest distance from node 0 to every other node in a weighted directed graph.
 
@@ -10,7 +10,7 @@
 Given a directed graph with non-negative edge weights, output the shortest-path
 distance from node `0` to each node, or `-1` for any node you can't reach. The
 distance to a node is the minimum total weight over every directed path from
-node `0` to it.
+node `0` to it. Multiple directed edges between the same two nodes may appear.
 
 The graph is large — up to ~10⁵ nodes and ~5·10⁵ edges — so the distances must
 come back fast. A direct edge to a node is not necessarily the cheapest way to
@@ -19,7 +19,8 @@ trust the first edge you see into a node. The cost of getting the formulation
 wrong is either a quadratic blow-up that will not finish at this scale, or a
 wrong answer when a cheaper detour is overlooked.
 
-Constraints: n up to ~10⁵, edges up to ~5·10⁵, weights non-negative, distances fit in i64.
+Constraints: `1 <= n <= 10^5`, `0 <= len(edges) <= 5*10^5`, edge endpoints are
+valid node ids, weights are non-negative integers, and distances fit in i64.
 
 ## Input
 

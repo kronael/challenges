@@ -16,7 +16,7 @@
   has O(log n) depth. A naive left fold builds a degenerate O(n) right-leaning
   chain, and every index/extract then walks that whole chain.
 
-The naive approach `golden/rotten.py` style — building a degenerate chain and
+The naive approach in `rotten/main.py` — building a degenerate chain and
 indexing it one character per query, or re-flattening/re-joining the whole
 string per query — is correct but TIMEOUTs on the large cases. `rotten/main.py`
 does this.

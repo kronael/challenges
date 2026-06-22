@@ -12,6 +12,6 @@
   current student until the next book would exceed the cap, then start a new student.
   Counting the students this needs is one O(n) pass per probe.
 
-The naive approach — enumerate every way to cut the row into blocks (or an
-exponential recursion over split points) — is what `rotten/main.py` does: correct,
-but it TIMEOUTs on the large cases.
+The naive approach — enumerate every way to cut the row into blocks, or recurse
+over split points — is what `rotten/main.py` does: correct, but it TIMEOUTs on the
+large cases.

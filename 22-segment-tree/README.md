@@ -1,6 +1,6 @@
-# 22 — Segment Tree
+# 22 — Dynamic Range Sums
 
-**Task**: Support point updates and range-sum queries on an array, both in O(log n).
+**Task**: Maintain an array under point assignments and inclusive range-sum queries.
 
 **Difficulty**: hard
 **Time estimate**: ~50 min
@@ -16,12 +16,11 @@ interleaved in any order:
 Indices are 1-based and ranges are inclusive. Emit one answer per `sum`, in the
 order the `sum` operations appear.
 
-The catch is the mix. A plain array answers `update` in O(1) but `sum` in O(n);
-a prefix-sum array flips that — O(1) `sum` but O(n) to rebuild after an
-`update`. With both kinds of operation interleaved heavily (`n` and the number
-of operations both up to 2·10⁵), either one-sided choice degrades to O(n) per
-operation and will not finish in time. You need a structure that keeps *both*
-operations at O(log n).
+The catch is the mix. A plain array makes each `update` cheap but may need to
+scan a long range for `sum`; a prefix-sum array makes each `sum` cheap but may
+need a long rebuild after an `update`. With both kinds of operation interleaved
+heavily (`n` and the number of operations both up to 2·10⁵), either one-sided
+choice can do too much work.
 
 Constraints: `n` and the number of operations each up to 2·10⁵; values and the
 running sums fit in a 64-bit signed integer.

@@ -18,8 +18,8 @@ exponentially, so you cannot enumerate the splits and pick the best — at `N = 
 that search never finishes. You need a way to home in on the answer without ever
 materialising a split.
 
-Constraints: `N` up to 2·10⁵, `K` up to `N`, page counts fit in i32, the total fits
-in i64.
+Constraints: `1 <= N <= 2·10^5`, `1 <= K <= N`, each page count is a positive
+32-bit signed integer, and the total page count fits in a signed 64-bit integer.
 
 ## Input
 
@@ -35,12 +35,14 @@ A single integer: the minimum possible value of the largest block sum.
 
 **Example 1** — balance the small books against the big one
 ```
-k=2, pages [10,20,30,40] → 60   ([10,20,30] | [40])
+k=2, pages [10,20,30,40] -> 60
+One optimal split is [10,20,30] | [40].
 ```
 
 **Example 2** — one huge book sets a floor no split can beat
 ```
-k=2, pages [5,5,100] → 100   ([5,5] | [100])
+k=2, pages [5,5,100] -> 100
+One optimal split is [5,5] | [100].
 ```
 
 ## Run

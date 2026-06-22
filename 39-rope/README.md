@@ -11,7 +11,8 @@ You are given an ordered list of string fragments `parts` and a list of
 half-open queries `[lo, hi)`. Conceptually the fragments are concatenated, in
 order, into one logical string; each query asks for the substring covering
 positions `lo` up to (but not including) `hi` of that logical string. Each `lo`
-and `hi` is clamped to `[0, total)`, where `total` is the combined length.
+and `hi` is clamped to `[0, total]`, where `total` is the combined length. If
+the clamped range is empty, the answer for that query is the empty string.
 
 The catch is scale: there can be thousands of fragments and tens of thousands of
 queries, and the combined string can run into the megabytes. Naively flattening
@@ -25,7 +26,7 @@ touching one fragment at a time either.
 ```json
 {"parts": ["abc", "def", "ghi", "jkl"], "queries": [[0, 5], [3, 9], [6, 12]]}
 ```
-Queries are half-open `[lo, hi)`, clamped to `[0, total)`. Output the extracted
+Queries are half-open `[lo, hi)`, clamped to `[0, total]`. Output the extracted
 substrings joined by `|`.
 
 ## Examples
@@ -47,6 +48,7 @@ parts ["hello","world","foo"], queries [[0,8],[5,5],[2,6]]
 ```
 cd rust   && make
 cd python && make
+cd go     && make
 ```
 
 Stuck? See `HINTS.md`.

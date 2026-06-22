@@ -6,6 +6,10 @@
   phase K from phase K+1. The not-yet-reset count leaks across rounds, so a fast
   thread that loops into the next phase sees the stale value and is released
   early.
+- **Use the waiter handle**: the scaffold gives each participant its own state:
+  `let mut waiter = barrier.waiter()` in Rust, or
+  `waiter := barrier.NewWaiter()` in Go. Keep that waiter private to one
+  thread or goroutine and call `wait`/`Wait` on it for every phase.
 - **Sense reversal**: give each thread a *local* sense bit (pass it in, or use a
   `thread_local!`), plus one *shared* sense bit. Threads spin on the shared
   sense, never on the count. The last arriver resets the count to N and *flips*

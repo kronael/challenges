@@ -12,6 +12,6 @@
 - **Impossibility via sentinel**: seed unreachable amounts with an infinite cost
   (e.g. `amount + 1`), so an untouched `dp[amount]` maps cleanly to `-1`.
 
-The naive recursion (try every coin at each step, recurse on the remainder, take the
-min) is what `rotten/main.py` does — correct, but it re-solves the same sub-amounts
-exponentially many times and TIMEOUTs on the large cases.
+The naive reference in `rotten/main.py` is correct but intentionally slow: it checks
+every split of every amount instead of iterating over the small denomination list.
+That quadratic scan still passes the small cases, then TIMEOUTs on the large ones.

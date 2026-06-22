@@ -1,4 +1,4 @@
-# 14 — Union-Find
+# 14 — Friend Groups
 
 **Task**: Maintain friend groups as friendships form, and answer whether two people are connected.
 
@@ -12,14 +12,15 @@ answer: are these two people already in the same friend group? Connectivity is
 transitive — if A is friended to B and B to C, then A and C are in the same
 group even with no direct link.
 
-You are given `n` people (numbered `0..n-1`), a list of friendships to apply in
+You are given `n` people, numbered `0..n-1`, a list of friendships to apply in
 order, then a list of pairs to test. For each test pair, report whether the two
-people end up in the same group.
+people end in the same group.
 
-The merges arrive in arbitrary order, so you can't pre-sort, and the network is
-large — up to `2·10⁵` people with as many merges and queries. The naive approach
-that re-walks a friendship list (or relabels a whole group) on every operation
-degrades to quadratic and will not finish in time at that scale.
+The friendships arrive in arbitrary order, so you cannot pre-sort the input into
+one static graph walk. The network is large — up to `2·10⁵` people, with as many
+friendships and queries. Re-walking the friendship list or relabeling a whole
+group on every operation degrades to quadratic time and will not finish at that
+scale.
 
 ## Input
 
@@ -33,7 +34,7 @@ One value per query on a single line: `1` if the pair shares a component, else `
 
 ## Examples
 
-**Example 1** — connectivity is transitive across a chain of merges
+**Example 1** — connectivity is transitive across a chain of friendships
 ```
 n=5, unions [0,1][1,2][3,4], queries [0,2][0,3][3,4] → 1 0 1
 ```

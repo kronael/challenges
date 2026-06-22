@@ -2,6 +2,15 @@
 
 > Spoilers. Open only when stuck.
 
+- **Where the race comes from**: a Treiber stack pushes and pops by
+  compare-and-swapping a single `head` pointer. The hard part is reclamation.
+  One thread can load `head` and be about to read the node while another thread
+  removes that same node and returns it to the allocator.
+- **ABA**: a CAS compares the pointer value, not the node's lifetime. If node A
+  is popped, node B is popped, and A is later pushed again, a stale CAS from A to
+  A's old `next` can succeed even though that `next` no longer belongs to the
+  same stack state. The result can be a lost node, a duplicate pop, or a read
+  from reclaimed memory.
 - **Hazard pointers**: before dereferencing a pointer you *publish* it to a
   per-thread hazard slot, then *re-validate* that `head` is unchanged; the
   reclaimer only ever frees a node that no hazard slot currently points at. This

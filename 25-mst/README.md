@@ -1,4 +1,4 @@
-# 25 — Minimum Spanning Tree
+# 25 — Cheapest Road Network
 
 **Task**: Find the cheapest set of roads that connects all `n` cities.
 

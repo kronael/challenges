@@ -23,10 +23,9 @@ fragments back along those overlaps spells the original string, which is
 The input is guaranteed to admit exactly one such linear reconstruction, so the
 answer is unique.
 
-The collection is large — up to `2·10⁵` k-mers. The obvious approach — for each
-fragment, scan all the others to find the one whose first `k - 1` letters match
-this fragment's last `k - 1` letters — is quadratic and will not finish in time
-at that scale; part of the challenge is finding a formulation that does.
+The collection is large — up to `2·10⁵` k-mers. Pairwise comparison of fragments
+is quadratic and will not finish in time at that scale; part of the challenge is
+finding a formulation that does.
 
 Constraints: `2 ≤ k ≤ 32`; up to `2·10⁵` k-mers; alphabet `{A, C, G, T}`;
 a unique reconstruction is guaranteed.

@@ -14,6 +14,9 @@
 - **`running_average` is a scan, not a slice-and-divide**: carry `(count, total)`
   as state, and for each input yield `total / count`. One output per input, no
   growing list.
+- **Laziness is observable**: `next(primes())` should return `2` immediately
+  with no precomputation and no upper bound chosen up front. After that, the
+  same generator should still be able to yield `3, 5, 7, ...`.
 - **`itertools` helpers** fit the pipeline shape: `takewhile`, `tee`, `islice`,
   and `count` let you compose and split infinite streams without exhausting them.
 - **`unfold` mirrors Haskell's `unfoldr`**: loop while `f(state)` returns a

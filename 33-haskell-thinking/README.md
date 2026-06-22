@@ -12,7 +12,7 @@ is computed before it is asked for.
 Fill in eight functions in `python/main.py`. Each returns (or transforms) a
 *potentially infinite* sequence of values. None of them may take a length up
 front, build a finite list, and return it — the sequence has no end, and the
-consumer alone decides where to stop (e.g. by taking the first `k`).
+consumer alone decides where to stop.
 
 The functions and the values they produce:
 
@@ -22,8 +22,7 @@ The functions and the values they produce:
 - `primes()` — `2, 3, 5, 7, 11, …` forever.
 - `fibonacci()` — `0, 1, 1, 2, 3, 5, 8, …` forever.
 - `running_average(nums)` — for input `x₀, x₁, x₂, …` yield the average of every
-  prefix: `x₀`, `(x₀+x₁)/2`, `(x₀+x₁+x₂)/3`, …, one output per input, no growing
-  list.
+  prefix: `x₀`, `(x₀+x₁)/2`, `(x₀+x₁+x₂)/3`, …, one output per input.
 - `collatz(n)` — `n`, then repeatedly `n/2` if even else `3n+1`, continuing past
   `1` into the `1, 4, 2, 1, …` cycle.
 - `zipWith(f, xs, ys)` — apply `f` element-wise to two (possibly infinite)
@@ -33,13 +32,15 @@ The functions and the values they produce:
 
 The hard part is the discipline, not the math. The imperative reflex —
 `for i in range(n)`, accumulate into a list, return the list — is exactly what
-this challenge forbids. You must *define the infinite structure itself* and
-compose transforms over it, so that `next(primes())` returns `2` immediately
-with no precomputation and no upper bound chosen in advance. `running_average`
-must carry its state forward, not re-sum a slice. The test that matters asserts
-the streams are genuinely lazy: it pulls one element, checks it came back fast,
-then keeps pulling — a materialised list would either be impossible (the stream
-is infinite) or too slow.
+this challenge forbids. The tests pull only the prefix they need and expect the
+stream to keep working afterward. A materialised answer would either be
+impossible because the stream is infinite, or too slow because it chooses an
+upper bound the caller never asked for.
+
+This is a Python thinking exercise, not a JSON stdin/stdout challenge. There are
+no case files, no large-case benchmark, and no hidden reference answer in the
+solver scaffold. The tests in `python/` describe the contract; the implementation
+belongs in `python/main.py`.
 
 ## Run
 

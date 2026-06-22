@@ -24,20 +24,27 @@ tested have to be tamed for the search to finish.
 ## Input / Output
 
 ```json
-{}
+{"size": 5}
 ```
-The input is the empty object. Output a single integer: the smallest sum of a
-pairwise-compatible set of five primes.
+The input is an object with optional `size`, the number of primes to choose.
+When `size` is omitted, it defaults to `5`, so `{}` is the full challenge input.
+Output a single integer: the smallest sum of a pairwise-compatible set of that
+many primes.
 
 ## Examples
 
-**Example 1** — the only case; the whole challenge is one answer.
+**Example 1** — full challenge.
 ```
 {} → 26033
 ```
 
-The worked four-prime set above (sum 792) is given only to illustrate the
-compatibility rule — your job is the five-prime minimum.
+**Example 2** — smaller check case.
+```
+{"size": 4} → 792
+```
+
+The worked four-prime set above is given only to illustrate the compatibility
+rule — your job is the five-prime minimum.
 
 ## Run
 

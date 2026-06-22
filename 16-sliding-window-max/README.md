@@ -13,10 +13,8 @@ moving one position at a time. For each position, report the maximum reading
 visible in the window. The first window covers readings `0..k-1`; the last
 covers the final `k` readings. There are `n - k + 1` windows in all.
 
-The stream is long — the naive approach that rescans all `k` values for every
-window does O(nk) work and dies on long streams with a large window. The
-challenge is to answer every window without re-examining values you have
-already seen.
+The stream may be long, and the number of windows can be large. Your program
+must produce every requested maximum within the stated limits.
 
 Constraints: `n` up to 2·10⁵, `1 ≤ k ≤ n`, readings fit in i32.
 
@@ -32,12 +30,12 @@ The maximum of each window, in order, space-separated.
 
 ## Examples
 
-**Example 1** — the same max can win several consecutive windows
+**Example 1**
 ```
 k=3, arr [1,3,-1,-3,5,3,6,7] → 3 3 5 5 6 7
 ```
 
-**Example 2** — when the max scrolls out, the next-best must already be remembered
+**Example 2**
 ```
 k=2, arr [9,1,1,1] → 9 1 1
 ```

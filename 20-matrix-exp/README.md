@@ -1,4 +1,4 @@
-# 20 — Matrix Exponentiation
+# 20 — Huge Fibonacci
 
 **Task**: Compute the Nth Fibonacci number mod 10^9+7, where N can be as large as 10^18.
 
@@ -30,14 +30,28 @@ A single integer: `F(n) mod 1_000_000_007`.
 
 ## Examples
 
-**Example 1** — small case
-```
-n=10 → 55
+**Example 1**
+
+Input:
+```json
+{"n": 10}
 ```
 
-**Example 2** — n far beyond what O(n) iteration could reach
+Output:
+```text
+55
 ```
-n=1000000000 → 21
+
+**Example 2**
+
+Input:
+```json
+{"n": 1000000000}
+```
+
+Output:
+```text
+21
 ```
 
 ## Run

@@ -1,33 +1,28 @@
-# 06 — Hazard-Pointer Treiber Stack
+# 06 — Lock-Free Stack Reclamation
 
-**Task**: Implement a lock-free Treiber stack whose nodes are reclaimed safely, so a freed node is never dereferenced by another thread — no garbage collector, no leaks, no use-after-free.
+**Task**: Implement a lock-free stack whose nodes are reclaimed safely. A node
+must never be dereferenced after it is removed, and every value that is pushed
+must be popped exactly once.
 
 **Difficulty**: expert
 **Time estimate**: ~120 min
 
 ## Problem
 
-A Treiber stack pushes and pops by compare-and-swapping a single `head` pointer.
-Concurrency makes reclamation the hard part: the moment one thread pops a node
-and frees it, another thread may still be holding that same pointer, loaded an
-instant earlier, and about to dereference it.
+The stack is shared by many threads. Each thread repeatedly pushes and pops while
+other threads are changing the same top pointer. Removing a node is not enough:
+the implementation must also decide when that node can be returned to the
+allocator without racing a thread that already loaded it.
 
-A CAS compares the pointer value, not its generation, which opens the ABA trap:
-pop node A, pop node B, push A back, and a stale CAS that swaps `head` from A to
-A's *old* `next` succeeds — even though that `next` was freed in the meantime and
-now points at reclaimed memory. The stack is silently corrupted, a node is lost
-or double-freed, and a reader can dereference memory that has already been handed
-back to the allocator.
+The stress test checks three invariants:
 
-The stress test hammers the stack from many threads, each interleaving pushes and
-pops, and asserts three invariants: every pushed value is popped exactly once (no
-loss, no duplication), no popped node carries poisoned/reclaimed contents (no
-use-after-free), and total allocations equal total frees at the end (no leak, no
-double-free). A solution that frees a node the instant it is popped passes a
-single-threaded run and fails this.
+- every pushed value is popped exactly once
+- no popped value comes from memory that has already been reclaimed
+- all allocated nodes and payloads are released when the stack is dropped
 
-Constraints: many concurrent threads (16 in the test), each performing ~10⁴
-push/pop operations; the stack must be lock-free and reclaim memory without a GC.
+Constraints: 16 concurrent threads in the test, each performing about 10,000
+operations. The stack must remain lock-free and must reclaim memory without a
+garbage collector.
 
 ## Run
 
@@ -37,4 +32,4 @@ cd rust && make test
 
 Stuck? See `HINTS.md`.
 
-Source: [Michael, *Hazard Pointers* (IEEE TPDS 2004)](https://www.cs.otago.ac.nz/cosc440/readings/hazard-pointers.pdf)
+Source: [Maged M. Michael, IEEE TPDS 2004](https://www.cs.otago.ac.nz/cosc440/readings/hazard-pointers.pdf)

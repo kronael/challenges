@@ -16,7 +16,10 @@ cheaper than replacing, and you can't know which without looking ahead. Trying
 every sequence of edits explodes exponentially, so the obvious recursion won't
 finish at scale — the strings run up to a few thousand characters each.
 
-Constraints: |s|, |t| up to a few thousand.
+Constraints:
+
+- `0 <= |s|, |t| <= 4000`
+- `s` and `t` contain only lowercase ASCII letters.
 
 ## Input
 
@@ -30,7 +33,7 @@ A single integer: the minimum number of edits.
 
 ## Examples
 
-**Example 1** — kitten → sitten (replace) → sittin (replace) → sitting (insert)
+**Example 1** — kitten → sitten, replace → sittin, replace → sitting, insert
 ```
 {"s":"kitten","t":"sitting"} → 3
 ```

@@ -1,4 +1,4 @@
-# 18 — Prime Sieve
+# 18 — Count Primes
 
 **Task**: Count how many prime numbers are strictly less than N.
 
@@ -49,4 +49,4 @@ cd python && make
 
 Stuck? See `HINTS.md`.
 
-Source: https://projecteuler.net/problem=10
+Source: https://leetcode.com/problems/count-primes/

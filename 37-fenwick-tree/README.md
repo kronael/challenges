@@ -1,6 +1,7 @@
-# 37 — Fenwick Tree (Binary Indexed Tree)
+# 37 — Dynamic Prefix Sums
 
-**Task**: Support two operations on an array — add a value to element i, and query the prefix sum up to index i — both in O(log n).
+**Task**: Support two operations on an array: add a value to element `i`, and
+query the prefix sum up to index `i`.
 
 **Difficulty**: medium
 **Time estimate**: ~40 min
@@ -17,8 +18,7 @@ Process a mix of point updates and prefix-sum queries over a large array (2·10�
 operations). The naive approaches each lose on one side: a plain array makes
 updates O(1) but every `sum` is O(n); precomputing a prefix-sum array flips it,
 making `sum` O(1) but every `update` O(n). Either way a query-heavy or
-update-heavy stream is quadratic and will not finish in time. You need *both*
-operations to run in O(log n).
+update-heavy stream can do too much repeated work and will not finish in time.
 
 Sums can be large: with `n = 2·10⁵` elements and values up to ~`10¹⁸`, a prefix
 sum overflows 32 bits, so accumulate in 64-bit integers.
@@ -56,5 +56,3 @@ cd python && make
 ```
 
 Stuck? See `HINTS.md`.
-
-Source: [CP-Algorithms — Fenwick Tree](https://cp-algorithms.com/data_structures/fenwick.html)

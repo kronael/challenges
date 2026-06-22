@@ -21,3 +21,5 @@
 The naive O(n) per-operation approach (rescan the array for every `sum`, or
 recompute the prefix array after every `update`) is what `rotten/main.py` does —
 correct, but it TIMEOUTs on the large cases.
+
+Source: [CP-Algorithms — Fenwick Tree](https://cp-algorithms.com/data_structures/fenwick.html)

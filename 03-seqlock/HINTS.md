@@ -25,3 +25,5 @@
 The wrong-but-tempting version (`rotten/main.c`) just `memcpy`s the payload with
 no sequence counter and no fence. It passes a single-threaded check but tears
 under a concurrent writer.
+
+Source: [Wikipedia — Seqlock](https://en.wikipedia.org/wiki/Seqlock)

@@ -1,4 +1,4 @@
-# 35 — LRU Cache
+# 35 — Cache Eviction
 
 **Task**: Implement a fixed-capacity cache that evicts the least-recently-used key when full, with `get` and `put` both in O(1).
 
@@ -23,8 +23,8 @@ constant time *on average*, including finding and evicting the least-recently-us
 entry. The operation stream is long — up to 2·10⁵ ops — so any approach that scans
 the cache to locate the eviction victim is too slow and will not finish in time.
 
-Constraints: `capacity` up to 3000, up to 2·10⁵ operations, keys and values fit in
-i32.
+Constraints: `1 <= capacity <= 3000`, up to 2·10⁵ operations, keys and values
+fit in i32.
 
 ## Input / Output
 
@@ -36,7 +36,7 @@ line if there are no gets).
 
 ## Examples
 
-**Example 1** — putting key 3 evicts key 2 (LRU), so its later get misses.
+**Example 1** — putting key 3 evicts key 2, so its later get misses.
 ```
 cap 2: put1 put2 get1→1 put3 get2→-1 put4 get1→-1 get3→3 get4→4
   → 1 -1 -1 3 4

@@ -16,9 +16,13 @@ The array is long — up to `n = 10⁶` elements — and the answer must come ba
 Checking every (start, end) pair is quadratic and will not finish in time at that
 scale; part of the challenge is finding a formulation that does.
 
-Constraints: `n` up to 10⁶, values fit in i64 sums.
+Constraints: `1 <= n <= 10⁶`; values and sums fit in signed 64-bit integers.
 
 ## Input
+
+A JSON object with one field:
+
+- `arr`: a non-empty list of integers.
 
 ```json
 {"arr": [-2, 1, -3, 4, -1, 2, 1, -5, 4]}

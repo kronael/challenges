@@ -12,7 +12,7 @@
   earliest-finishing pick without losing meetings — that is the proof of
   optimality.
 
-The naive approach — try every subset of meetings (or every starting choice via
-recursion) and keep the largest non-overlapping one — is correct but
+The naive approach tries every subset of meetings, or every starting choice via
+recursion, and keeps the largest non-overlapping one. It is correct but
 exponential, so it TIMEOUTs on the large cases. That is what `rotten/main.py`
 does.

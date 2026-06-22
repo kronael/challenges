@@ -60,4 +60,4 @@ cd python && make
 
 Stuck? See `HINTS.md`.
 
-Source: CLRS §6.5 (merging sorted sequences)
+Source: CLRS §6.5

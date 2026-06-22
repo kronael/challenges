@@ -1,4 +1,4 @@
-# 24 — Topological Sort
+# 24 — Task Ordering
 
 **Task**: Order tasks so every prerequisite comes before the task that needs it, or report a cycle.
 

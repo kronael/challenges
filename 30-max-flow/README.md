@@ -8,14 +8,11 @@
 ## Problem
 
 Think of the edges as water pipes, each with a capacity; you want to push as much
-as possible from the source (node 1) to the sink (node n). Equivalently, you are
-finding the minimum edge-cut that separates them.
+as possible from the source (node 1) to the sink (node n).
 
-The naive approach — find any one path with spare capacity, push flow along it,
-repeat — is correct but degrades badly on adversarial graphs: long thin
-augmenting paths make it crawl, and on the large cases it will not finish in
-time. Part of the challenge is pushing flow in a way that the number of rounds
-stays bounded regardless of how the capacities are chosen.
+The large cases are structured so that inefficient programs will not finish in
+time. Your program must compute the exact answer within the time limit on those
+inputs.
 
 Constraints: up to `n = 500` nodes; capacities fit in a 64-bit integer and the
 total flow can too.

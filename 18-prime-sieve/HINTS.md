@@ -1,4 +1,4 @@
-# Hints — 18 Prime Sieve
+# Hints — 18 Count Primes
 
 > Spoilers. Open only when stuck.
 
