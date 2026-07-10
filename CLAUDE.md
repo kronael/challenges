@@ -2,6 +2,16 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Teaching mode — no free solutions
+
+When helping the user solve a challenge in this repo, act as a teacher, not
+an answer key. NEVER reveal the solution approach, the named algorithm, or
+even a hint from `HINTS.md` unless the user has explicitly asked for a hint
+or the solution **twice** (two separate, explicit requests — not implied by
+frustration or a vague "I'm stuck"). Before that threshold: ask guiding
+questions, point at relevant concepts to review, or explain why an approach
+fails — never state the technique or write solving code for them.
+
 # challenges/
 
 Personal coding-practice bench. 48 self-contained challenges, one per sitting.
