@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 # challenges/
 
-Personal coding-practice bench. 40 self-contained challenges, one per sitting.
+Personal coding-practice bench. 48 self-contained challenges, one per sitting.
 Harness is **editor + `make test`**. Each challenge has its own dir `NN-slug/`.
 
 ## Golden rule — solutions ONLY in golden/
@@ -42,14 +42,20 @@ verify it passes, then write stubs in the three solver dirs.
 
 ## README vs HINTS — never spoil the problem
 
-- **`README.md`** states the *problem* only: task, constraints, I/O format, worked
-  examples, source. It must NOT name the technique, data structure, or memory
-  ordering that solves it. Describe *what* to compute and *why it's hard* (scale,
-  the trap), corroborated against the canonical online problem statement — never
-  *how*. No "the trick is…", no "use a min-heap", no "## Teaches" section.
-- **`HINTS.md`** holds everything that would spoil it: the approach, the named
-  algorithm, the ordering, the old "Teaches" bullets. Checked in next to README;
-  the solver opens it only when stuck.
+- **`README.md`** is a pure specification: task, constraints, I/O format, worked
+  examples, and a source only when the citation itself reveals nothing about the
+  solution. It must not name, describe, compare, or rule out any solution method.
+  This ban includes techniques, data structures, memory orderings, recurrences,
+  invariants, implementation shapes, failed strategies, naive or brute-force
+  approaches, complexity analysis of candidate approaches, and phrases such as
+  "the trick", "the trap", "the catch", or "the hard part". State the input
+  limits without explaining how an approach behaves at those limits.
+- **Names are part of the prompt.** Challenge titles, directory slugs, catalog
+  rows, example captions, and source labels must also be solution-neutral.
+- **`HINTS.md`** holds every detail that could narrow the solution search: the
+  approach, named algorithm, data structure, ordering, old "Teaches" bullets,
+  rejected approaches, complexity comparisons, and solution-bearing sources.
+  The solver opens it only when stuck.
 
 ## Two challenge types
 
@@ -63,8 +69,8 @@ verify it passes, then write stubs in the three solver dirs.
 
 ```
 NN-slug/
-  README.md              problem statement, constraints, examples, source link
-  HINTS.md               the approach/technique — spoilers, kept out of README
+  README.md              problem statement, constraints, I/O, examples
+  HINTS.md               all solution guidance and solution-bearing sources
   cases/                 NN.in / NN.out          (io only)
   golden/  main.py · test_solution.py · Makefile · pyproject.toml   (fast reference)
   rotten/  main.py · test_solution.py · Makefile · pyproject.toml   (naive trap: passes test, fails bench)
@@ -140,7 +146,8 @@ hard io and the sys ones drop a language).
 ## Adding a challenge
 
 1. Copy `template/` to `NN-slug/` (next number).
-2. Fill `README.md`: statement, constraints, examples, source URL.
+2. Fill `README.md`: statement, constraints, I/O, and examples. Put a source URL
+   in `HINTS.md` if its title or target reveals the solution.
 3. io: add `cases/01.in`/`.out` … (≥6 small + 2–3 large); sys: write the stress
    test instead.
 4. Implement `solve()` in each language stub — the harness is already wired.
@@ -162,6 +169,6 @@ The race detector and the stress test are your debugger for sys challenges.
 
 ## Sources
 
-CSES, CP-Algorithms, USACO Guide, Project Euler, Codeforces EDU, CLRS. Per-
-challenge attribution and URLs are in the catalog and "Sources" section of
-`README.md`.
+CSES, CP-Algorithms, USACO Guide, Project Euler, Codeforces EDU, CLRS. Keep
+solution-neutral attribution in the challenge README. Put solution-bearing
+attribution in `HINTS.md`.
