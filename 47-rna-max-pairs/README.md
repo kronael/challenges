@@ -26,10 +26,6 @@ large as possible, subject to these rules:
 
 Output the maximum number of pairs achievable.
 
-The strand can be up to 400 bases long. Enumerating fold choices position by
-position branches exponentially and will not finish at that scale; the challenge
-is to find a formulation that does.
-
 Constraints: `1 ≤ len(rna) ≤ 400`; the alphabet is exactly `A`, `C`, `G`, `U`;
 `0 ≤ min_loop`; `allow_wobble` is a boolean.
 
@@ -64,6 +60,3 @@ cd python && make
 ```
 
 Stuck? See `HINTS.md`.
-
-Source: Nussinov et al., "Algorithms for loop matchings" (1978),
-https://pubmed.ncbi.nlm.nih.gov/6161375/

@@ -1,0 +1,11 @@
+use fenwick_tree::{solve, Input};
+use std::io::{self, Read};
+
+fn main() {
+    let mut buf = String::new();
+    io::stdin().read_to_string(&mut buf).unwrap();
+    let inp: Input = serde_json::from_str(&buf).unwrap();
+    let result = solve(inp.n, &inp.initial, &inp.queries);
+    let parts: Vec<String> = result.iter().map(|v| v.to_string()).collect();
+    println!("{}", parts.join(" "));
+}

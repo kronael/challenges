@@ -17,3 +17,5 @@
 
 The naive O(n²) DP (`dp[i] = 1 + max(dp[j] for j<i if seq[j]<seq[i])`) is what
 `rotten/main.py` does — correct but it TIMEOUTs on the large cases.
+
+Source: CLRS §15.4, longest increasing subsequence

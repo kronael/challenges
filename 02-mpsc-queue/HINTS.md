@@ -29,3 +29,5 @@
 
 The wrong version that "works" single-threaded but loses messages under load
 (returns `Empty` in the broken-link window) is in `rotten/main.c`.
+
+Source: [1024cores.net — Intrusive MPSC node-based queue](https://www.1024cores.net/home/lock-free-algorithms/queues/intrusive-mpsc-node-based-queue)

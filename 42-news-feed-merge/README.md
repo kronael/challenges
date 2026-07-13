@@ -14,11 +14,6 @@ of all events in global timestamp order.
 When two events share a timestamp, order them by which feed they came from (lower
 feed index first); if they are still tied, by ascending `id`.
 
-There can be many feeds and many events in total — concatenating everything and
-sorting from scratch throws away the fact that each feed already arrives in order,
-and is needlessly slow at scale. The challenge is to merge while preserving the
-existing per-feed order.
-
 Constraints: total events up to 2·10⁵ across up to ~10⁴ feeds; `ts` and `id` fit
 in i64; a feed may be empty.
 
@@ -59,5 +54,3 @@ cd python && make
 ```
 
 Stuck? See `HINTS.md`.
-
-Source: CLRS §6.5

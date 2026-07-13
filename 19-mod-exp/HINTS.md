@@ -15,3 +15,5 @@
 The naive O(exp) loop (`for _ in range(exp): result = result * base % mod`) is
 what `rotten/main.py` does — correct on tiny exponents but it TIMEOUTs on the
 large cases.
+
+Source: CLRS §31.6

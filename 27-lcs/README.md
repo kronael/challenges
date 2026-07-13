@@ -16,13 +16,6 @@ This is *not* the longest common *substring*: a subsequence may skip over
 characters in either string, so `"ABC"` is a subsequence of `"AXBXC"` even
 though it never appears as a contiguous block.
 
-The strings are long — up to a few thousand characters each — and the answer
-must come back fast. The obvious recursive formulation (at each mismatch, try
-dropping a character from one side or the other and take the better result)
-re-explores the same pairs of prefixes over and over; its running time blows up
-exponentially and it will not finish at this scale. Part of the challenge is
-finding a formulation that does.
-
 Constraints: `|s|`, `|t|` up to a few thousand; characters are printable ASCII.
 
 ## Input
@@ -56,5 +49,3 @@ cd python && make
 ```
 
 Stuck? See `HINTS.md`.
-
-Source: CLRS §15.4 (longest common subsequence)

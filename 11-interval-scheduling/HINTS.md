@@ -16,3 +16,5 @@ The naive approach tries every subset of meetings, or every starting choice via
 recursion, and keeps the largest non-overlapping one. It is correct but
 exponential, so it TIMEOUTs on the large cases. That is what `rotten/main.py`
 does.
+
+Source: CLRS §16.1

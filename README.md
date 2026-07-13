@@ -19,7 +19,7 @@ From the repo root, verify the whole bench at once:
 ```bash
 make test    # every golden + rotten passes its case suite
 make golden  # every golden passes test AND bench (stays fast)
-make rotten  # every naive rotten passes test BUT times out on bench
+make rotten  # verify every rotten reference behaves as expected
 make sys     # the sys (02-07) C stress tests pass
 ```
 
@@ -39,18 +39,19 @@ Every language directory has the same five targets:
 
 ```
 NN-slug/
-  README.md      ← the problem only: task, constraints, I/O, examples, source
+  README.md      ← the problem only: task, constraints, I/O, examples
   HINTS.md       ← the approach/technique — spoilers, open only when stuck
   cases/         ← NN.in / NN.out  (small correctness + large bench)
   golden/        ← optimised reference; always passes make test
-  rotten/        ← naive trap: passes make test, times out on make bench
+  rotten/        ← benchmark-control reference
   python/        ← stub: implement solve() in main.py
   go/            ← stub: implement solve() in main.go
   rust/          ← stub: implement solve() in src/main.rs
 ```
 
-The `README.md` never names the technique — that lives in `HINTS.md`. `rotten/`
-is the obvious slow approach the problem punishes; beating it is the point.
+The `README.md`, challenge title, directory slug, and catalog never narrow the
+solution search. All guidance, including rejected approaches and complexity
+comparisons, lives in `HINTS.md`.
 
 **Two challenge types:**
 - **io** — reads JSON from stdin, writes space-separated values to stdout
@@ -63,56 +64,56 @@ parsing is real work rather than splitting whitespace.
 
 ## Challenges
 
-| # | Name | Key concept | Diff | Source | Lang |
-|---|------|------------|------|--------|------|
-| [01](01-edge-costs/) | Vertex Load Assignment | multi-source max-propagation | med | original | py go rs |
-| [02](02-mpsc-queue/) | Vyukov MPSC Queue | lock-free, broken-link window | hard | [1024cores.net](https://www.1024cores.net/home/lock-free-algorithms/queues/non-intrusive-mpsc-node-based-queue) | go rs |
-| [03](03-seqlock/) | Seqlock | memory ordering, torn reads | hard | [Boehm MSPC 2012](https://dl.acm.org/doi/10.1145/2247684.2247688) | go rs |
-| [04](04-work-stealing-deque/) | Chase-Lev Work-Stealing Deque | lock-free, seq_cst last element | expert | [Chase & Lev SPAA 2005](https://fzn.fr/readings/ppopp13.pdf) | rs |
-| [05](05-spsc-ring-buffer/) | SPSC Ring Buffer | false sharing, shadow counter | hard | [LMAX Disruptor](https://lmax-exchange.github.io/disruptor/disruptor.html) | go rs |
-| [06](06-hazard-pointer-stack/) | Hazard-Pointer Stack | ABA, guess-publish-verify | expert | [Maged Michael 2004](https://www.cs.otago.ac.nz/cosc440/readings/hazard-pointers.pdf) | rs |
-| [07](07-sense-barrier/) | Sense-Reversing Barrier | barrier reuse, fence ordering | hard | [Herlihy & Shavit](https://dl.acm.org/doi/10.1145/62527.62529) | go rs |
-| [08](08-price-streak/) | Price Streak | longest strictly rising run | med | CLRS §15.4 | py go rs |
-| [09](09-edit-distance/) | Edit Distance | 2-D DP, Levenshtein | med | CLRS §15.5 | py go rs |
-| [10](10-coin-change/) | Coin Change | unbounded knapsack DP | med | CLRS | py go rs |
-| [11](11-interval-scheduling/) | Interval Scheduling | greedy + exchange argument | med | CLRS §16.1 | py go rs |
-| [12](12-count-inversions/) | Count Inversions | merge-sort invariant | med | CLRS | py go rs |
-| [13](13-dijkstra/) | Dijkstra's Algorithm | priority-queue shortest path | med | CLRS §24.3 | py go rs |
-| [14](14-union-find/) | Union-Find (DSU) | path compression + rank | med | CLRS §21 | py go rs |
-| [15](15-binary-search-answer/) | Binary Search on Answer | predicate + monotone search | med | [CF EDU](https://codeforces.com/edu/courses) | py go rs |
-| [16](16-sliding-window-max/) | Sliding Window Maximum | monotone deque | med | [LeetCode 239](https://leetcode.com/problems/sliding-window-maximum/) | py go rs |
-| [17](17-max-subarray/) | Maximum Subarray (Kadane) | DP, online algorithm | easy | CLRS §4.1 | py go rs |
-| [18](18-prime-sieve/) | Sieve of Eratosthenes | prime generation, segmented sieve | med | [PE #10](https://projecteuler.net/problem=10) | py go rs |
-| [19](19-mod-exp/) | Fast Modular Exponentiation | repeated squaring | easy | CLRS §31.6 | py go rs |
-| [20](20-matrix-exp/) | Matrix Exponentiation | linear recurrence in O(log n) | med | competitive classic | py go rs |
-| [21](21-kmp/) | KMP + Z-function | failure function, Z-array | med | [CSES #2107](https://cses.fi/problemset/task/2107) | py go rs |
-| [22](22-segment-tree/) | Segment Tree | range queries, point updates | hard | [CSES EDU](https://cses.fi/problemset/) | py go rs |
-| [23](23-knapsack/) | Knapsack 0/1 | bounded DP | med | CLRS | py go rs |
-| [24](24-toposort/) | Topological Sort | Kahn's BFS, cycle detection | med | CLRS §22.4 | py go rs |
-| [25](25-mst/) | Minimum Spanning Tree | Kruskal + DSU | med | CLRS §23 | py go rs |
-| [26](26-matrix-chain/) | Matrix Chain Multiplication | interval DP | hard | CLRS §15.2 | py go rs |
-| [27](27-lcs/) | Longest Common Subsequence | 2-D DP | med | CLRS §15.4 | py go rs |
-| [28](28-prime-pair-sets/) | Prime Pair Sets | Miller-Rabin + clique search | hard | [PE #60](https://projecteuler.net/problem=60) | py go rs |
-| [29](29-distinct-substrings/) | Distinct Substrings | suffix array + LCP | hard | [CSES #2105](https://cses.fi/problemset/task/2105) | py go rs |
-| [30](30-max-flow/) | Max Flow / Min Cut | Dinic's algorithm | hard | [CSES #1694](https://cses.fi/problemset/task/1694) | py go rs |
-| [31](31-go-memory-model/) | Go Memory Model Quizzes | happens-before, atomics | hard | [go.dev/ref/mem](https://go.dev/ref/mem) | go |
-| [32](32-prolog-thinking/) | Relational Programming | CSP, predicates run backward | med | python-constraint | py |
-| [33](33-haskell-thinking/) | Lazy Evaluation & Corecursion | infinite generators, pipelines | med | itertools | py |
-| [34](34-trie-autocomplete/) | Trie + Autocomplete | DFS, lexicographic suggestions | med | [LeetCode 1268](https://leetcode.com/problems/search-suggestions-system/) | py go rs |
-| [35](35-lru-cache/) | LRU Cache | doubly-linked list + hashmap | med | [LeetCode 146](https://leetcode.com/problems/lru-cache/) | py go rs |
-| [36](36-running-median/) | Running Median | two-heap balance invariant | med | [LeetCode 295](https://leetcode.com/problems/find-median-from-data-stream/) | py go rs |
-| [37](37-fenwick-tree/) | Fenwick Tree (BIT) | prefix sums, i&(-i) trick | med | [CP-Algorithms](https://cp-algorithms.com/data_structures/fenwick.html) | py go rs |
-| [38](38-skip-list/) | Skip List | probabilistic linked list | hard | [Pugh CACM 1990](https://dl.acm.org/doi/10.1145/78973.78977) | py rs |
-| [39](39-rope/) | Rope | binary tree of string fragments | hard | [Boehm et al. 1995](https://dl.acm.org/doi/10.1145/214438.214444) | py rs |
-| [40](40-weighted-job-scheduling/) | Weighted Job Scheduling | DP + binary search, O(n log n) | med | [CLRS §16.3](https://en.wikipedia.org/wiki/Introduction_to_Algorithms) · [LC 1235](https://leetcode.com/problems/maximum-profit-in-job-scheduling/) | py go rs |
-| [41](41-order-book/) | Order Book | limit-order matching engine | hard | original | py go rs |
-| [42](42-news-feed-merge/) | News Feed Merge | merge k sorted event streams | med | original | py go rs |
-| [43](43-max-drawdown/) | Max Drawdown | largest peak-to-trough drop | easy | original | py go rs |
-| [44](44-affine-align/) | Affine Alignment Score | protein sequence alignment | hard | [Rosalind GAFF](https://rosalind.info/problems/gaff/) | py go rs |
-| [45](45-kmer-assembly/) | K-mer Assembly | reconstruct a genome from k-mers | hard | [Rosalind PCOV](https://rosalind.info/problems/pcov/) | py go rs |
-| [46](46-crispr-offtarget/) | CRISPR Off-Targets | approximate genome matching | hard | [Cas-OFFinder](https://academic.oup.com/bioinformatics/article/30/10/1473/267560) | py go rs |
-| [47](47-rna-max-pairs/) | RNA Max Pairs | maximum valid base-pairing | hard | [Nussinov 1980](https://pubmed.ncbi.nlm.nih.gov/6161375/) | py go rs |
-| [48](48-shortest-superstring/) | Shortest Superstring | DNA fragment assembly | hard | [Rosalind LONG](https://rosalind.info/problems/long/) | py go rs |
+| # | Name | Diff | Lang |
+|---|------|------|------|
+| [01](01-edge-costs/) | Vertex Load Assignment | med | py go rs |
+| [02](02-mpsc-queue/) | Multi-Producer Queue | hard | go rs |
+| [03](03-consistent-tick-snapshot/) | Consistent Tick Snapshot | hard | go rs |
+| [04](04-work-stealing-deque/) | Concurrent Owner/Thief Deque | expert | rs |
+| [05](05-two-thread-buffer/) | Two-Thread Buffer | hard | go rs |
+| [06](06-lock-free-stack-reclamation/) | Lock-Free Stack Reclamation | expert | rs |
+| [07](07-reusable-spin-barrier/) | Reusable Spin Barrier | hard | go rs |
+| [08](08-price-streak/) | Price Streak | med | py go rs |
+| [09](09-edit-distance/) | Edit Distance | med | py go rs |
+| [10](10-coin-change/) | Coin Change | med | py go rs |
+| [11](11-interval-scheduling/) | Interval Scheduling | med | py go rs |
+| [12](12-count-inversions/) | Count Inversions | med | py go rs |
+| [13](13-route-costs/) | Route Costs | med | py go rs |
+| [14](14-friend-groups/) | Friend Groups | med | py go rs |
+| [15](15-textbook-split/) | Textbook Split | med | py go rs |
+| [16](16-sliding-window-max/) | Sliding Window Maximum | med | py go rs |
+| [17](17-max-subarray/) | Maximum Subarray | easy | py go rs |
+| [18](18-count-primes/) | Count Primes | med | py go rs |
+| [19](19-mod-exp/) | Modular Power | easy | py go rs |
+| [20](20-huge-fibonacci/) | Huge Fibonacci | med | py go rs |
+| [21](21-string-search/) | String Search | med | py go rs |
+| [22](22-dynamic-range-sums/) | Dynamic Range Sums | hard | py go rs |
+| [23](23-knapsack/) | 0/1 Knapsack | med | py go rs |
+| [24](24-task-ordering/) | Task Ordering | med | py go rs |
+| [25](25-mst/) | Cheapest Road Network | med | py go rs |
+| [26](26-matrix-chain/) | Matrix Chain Multiplication | hard | py go rs |
+| [27](27-lcs/) | Longest Common Subsequence | med | py go rs |
+| [28](28-prime-pair-sets/) | Prime Pair Sets | hard | py go rs |
+| [29](29-distinct-substrings/) | Distinct Substrings | hard | py go rs |
+| [30](30-max-flow/) | Maximum Network Flow | hard | py go rs |
+| [31](31-go-memory-model/) | Go Concurrency Quizzes | hard | go |
+| [32](32-constraint-puzzles/) | Constraint Puzzles | med | py |
+| [33](33-unbounded-sequences/) | Unbounded Sequences | med | py |
+| [34](34-search-suggestions/) | Search Suggestions | med | py go rs |
+| [35](35-lru-cache/) | Cache Eviction | med | py go rs |
+| [36](36-running-median/) | Running Median | med | py go rs |
+| [37](37-dynamic-prefix-sums/) | Dynamic Prefix Sums | med | py go rs |
+| [38](38-ordered-set-queries/) | Ordered Set Queries | hard | py rs |
+| [39](39-fragmented-string-queries/) | Fragmented String Queries | hard | py rs |
+| [40](40-weighted-job-scheduling/) | Weighted Job Scheduling | med | py go rs |
+| [41](41-order-book/) | Order Book | hard | py go rs |
+| [42](42-news-feed-merge/) | News Feed Merge | med | py go rs |
+| [43](43-max-drawdown/) | Max Drawdown | easy | py go rs |
+| [44](44-affine-align/) | Affine Alignment Score | hard | py go rs |
+| [45](45-kmer-assembly/) | K-mer Assembly | hard | py go rs |
+| [46](46-crispr-offtarget/) | CRISPR Off-Targets | hard | py go rs |
+| [47](47-rna-max-pairs/) | RNA Max Pairs | hard | py go rs |
+| [48](48-shortest-superstring/) | Shortest Superstring | hard | py go rs |
 
 ---
 
@@ -125,30 +126,8 @@ The harness is already wired — `make` will work immediately.
 
 ## Sources
 
-| Source | What's there |
-|--------|-------------|
-| [CSES Problem Set](https://cses.fi/problemset/) | 300 problems, clean I/O, all categories |
-| [Project Euler](https://projecteuler.net) | math-heavy; 1–100 are one afternoon each |
-| [USACO Contests](https://usaco.org/index.php?page=contests) | competitive programming olympiad; Platinum = hard |
-| [USACO Guide](https://usaco.guide) | Bronze → Platinum with explanations |
-| [CP-Algorithms](https://cp-algorithms.com) | reference proofs + implementations |
-| [Codeforces EDU](https://codeforces.com/edu/courses) | segment trees, strings, network flows |
-| [LeetCode](https://leetcode.com) | clean single-concept problems |
-| [CLRS](https://en.wikipedia.org/wiki/Introduction_to_Algorithms) | *Introduction to Algorithms* — the canonical reference |
-| [Go Memory Model](https://go.dev/ref/mem) | the formal spec behind challenge 31 |
-
-**Papers cited in the systems challenges (02–07):**
-
-| Paper | Challenge |
-|-------|-----------|
-| Dmitry Vyukov — [Non-intrusive MPSC queue](https://www.1024cores.net/home/lock-free-algorithms/queues/non-intrusive-mpsc-node-based-queue) | 02 |
-| Boehm — [Can Seqlocks Get Along With Programming Language Memory Models?](https://dl.acm.org/doi/10.1145/2247684.2247688) MSPC 2012 | 03 |
-| Chase & Lev — [Dynamic Circular Work-Stealing Deque](https://fzn.fr/readings/ppopp13.pdf) SPAA 2005 | 04 |
-| LMAX — [Disruptor Technical Paper](https://lmax-exchange.github.io/disruptor/disruptor.html) | 05 |
-| Maged Michael — [Hazard Pointers](https://www.cs.otago.ac.nz/cosc440/readings/hazard-pointers.pdf) IEEE TPDS 2004 | 06 |
-| Herlihy & Shavit — [The Art of Multiprocessor Programming](https://dl.acm.org/doi/10.1145/62527.62529) | 07 |
-| Pugh — [Skip Lists: A Probabilistic Alternative](https://dl.acm.org/doi/10.1145/78973.78977) CACM 1990 | 38 |
-| Boehm et al. — [Ropes: An Alternative to Strings](https://dl.acm.org/doi/10.1145/214438.214444) 1995 | 39 |
+Each challenge keeps solution-neutral attribution in its `README.md`.
+Solution-bearing references live in `HINTS.md`.
 
 ---
 

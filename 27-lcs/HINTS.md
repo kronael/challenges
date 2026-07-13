@@ -18,3 +18,5 @@ The naive exponential recursion (`lcs(i,j)` recursing on `(i-1,j)` and
 `(i,j-1)` at every mismatch, with no memoization) is what `rotten/main.py`
 does — correct, but it recomputes overlapping subproblems and TIMEOUTs on the
 large cases.
+
+Source: CLRS §15.4, longest common subsequence

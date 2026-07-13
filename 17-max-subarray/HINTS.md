@@ -13,3 +13,5 @@
 
 The naive O(n²) approach — sum every `(start, end)` pair and take the max — is what
 `rotten/main.py` does. It is correct but TIMEOUTs on the large cases.
+
+Source: CLRS §4.1, maximum-subarray problem

@@ -10,11 +10,6 @@
 A string of length `n` has `n(n+1)/2` substrings counted by position, but many of
 them coincide. Count how many *distinct* non-empty substrings the string has.
 
-The naive route — generate every substring and drop it into a set — is `O(n²)`
-substrings of up to `O(n)` characters each, so it is quadratic in memory and
-cubic in time. At `n = 10⁵` it never finishes and never fits; clearing that wall
-is the point of the challenge.
-
 Constraints: `1 ≤ n ≤ 10⁵`, characters are lowercase `a`–`z`. The answer can
 exceed a 32-bit integer.
 

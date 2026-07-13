@@ -15,12 +15,6 @@ sum, 792, is the lowest sum for any such set of *four* primes.
 Find the lowest sum for a set of *five* primes that are pairwise compatible: for
 every pair you pick, both concatenations must be prime.
 
-The search space is brutal. The five primes are not small, so the candidate pool
-runs into the thousands and the number of 5-subsets is astronomical. The
-concatenations grow past eight digits, so any primality test that trial-divides
-will fall over. Both the candidate explosion and the size of the numbers being
-tested have to be tamed for the search to finish.
-
 ## Input / Output
 
 ```json

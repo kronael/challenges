@@ -12,10 +12,6 @@ negative numbers, so taking everything isn't always best — sometimes the best 
 sits in the middle, flanked by losses you must skip, and sometimes every element is
 negative so the answer is a single least-bad value.
 
-The array is long — up to `n = 10⁶` elements — and the answer must come back fast.
-Checking every (start, end) pair is quadratic and will not finish in time at that
-scale; part of the challenge is finding a formulation that does.
-
 Constraints: `1 <= n <= 10⁶`; values and sums fit in signed 64-bit integers.
 
 ## Input
@@ -53,5 +49,3 @@ cd python && make
 ```
 
 Stuck? See `HINTS.md`.
-
-Source: CLRS §4.1 (maximum-subarray problem)

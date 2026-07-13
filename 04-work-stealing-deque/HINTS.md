@@ -22,3 +22,5 @@
 - **Steal return values**: distinguish "deque empty" (`Empty`) from "lost the
   CAS, try again" (`Retry`). Thieves spin on `Retry` and only give up on
   `Empty` once the owner signals it is done producing.
+
+Source: [Chase & Lev, *Dynamic Circular Work-Stealing Deque* (SPAA 2005)](https://www.di.ens.fr/~zappa/readings/ppopp13.pdf)

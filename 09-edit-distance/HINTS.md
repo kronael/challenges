@@ -18,3 +18,5 @@
 The naive recursion (`rec(i,j)` branching into insert/delete/substitute with no
 memoization) is what `rotten/main.py` does — correct, but exponential, so it
 TIMEOUTs on the large cases.
+
+Source: CLRS §15.5

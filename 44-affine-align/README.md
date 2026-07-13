@@ -30,11 +30,6 @@ Report the maximum achievable alignment score over all valid global alignments.
 
 Both strings use the 20 standard amino acids `ARNDCQEGHILKMFPSTWYV`.
 
-The strings are long — up to 2000 residues each. The obvious formulation that,
-for each pair of positions, considers every possible length of trailing gap is
-cubic and will not finish in time at that scale; part of the challenge is finding
-a formulation that does.
-
 Constraints: `1 ≤ |s|, |t| ≤ 2000`; both strings over the 20 standard amino
 acids; the score fits in a signed 32-bit integer.
 

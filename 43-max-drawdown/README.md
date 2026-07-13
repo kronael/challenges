@@ -20,12 +20,6 @@ The trough must come *after* the peak (`i < j`), so you cannot pair a low early
 day with a high later day. If prices never fall — every day is at least as high
 as all days before it — the maximum drawdown is `0`.
 
-The series is long — up to `n = 2·10⁵` days — and the answer must come back fast.
-Comparing every earlier day against every later day is quadratic and will not
-finish in time at that scale; part of the challenge is finding a formulation that
-does, and not being fooled into pairing the global maximum with the global
-minimum when the minimum happens *before* the maximum.
-
 Constraints: `n` up to 2·10⁵, prices fit in i32.
 
 ## Input

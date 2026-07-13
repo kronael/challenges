@@ -20,11 +20,6 @@ For **each** guide, output how many of the genome's length-`L` windows are
 off-targets. Windows overlap: every starting offset `0 … |genome|−L` is its own
 window, and the same window can be an off-target of several guides.
 
-The genome is long — up to `2·10⁵` bases — and there can be up to `10³` guides.
-Comparing every guide against every window base-by-base is
-`guides × windows × L` work, which is far too slow at this scale; part of the
-challenge is avoiding that scan.
-
 Constraints: genome length up to `2·10⁵`; `L` in `8 … 20`; up to `10³` guides;
 `d` in `0 … 4`; alphabet `{A, C, G, T}`.
 
@@ -62,6 +57,3 @@ cd python && make
 ```
 
 Stuck? See `HINTS.md`.
-
-Source: Bae, Park & Kim, "Cas-OFFinder" — Bioinformatics 30(10):1473 (2014),
-https://academic.oup.com/bioinformatics/article/30/10/1473/267560

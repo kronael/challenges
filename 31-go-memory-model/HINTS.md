@@ -54,3 +54,5 @@
   cases are ready, `select` does not prefer the first case.
 - **10 — False sharing**: the padded layout should be faster under multi-core
   contention because the two atomic counters no longer share a cache line.
+
+Source: [The Go Memory Model](https://go.dev/ref/mem)

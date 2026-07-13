@@ -16,3 +16,5 @@
 
 The naive exponential approach (try every subset, or recurse take/skip with no
 memo) is what `rotten/main.py` does — correct, but it TIMEOUTs on the large cases.
+
+Source: CLRS §15

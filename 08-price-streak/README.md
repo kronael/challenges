@@ -15,11 +15,6 @@ length.
 "Subsequence", not "substring": you may skip any days you like, but you cannot
 reorder them. Strictly increasing means equal prices do not extend a run.
 
-The series is long — up to `n = 2·10⁵` days — and the answer must come back fast.
-The straightforward day-by-day comparison that re-scans all earlier days is
-quadratic and will not finish in time at that scale; part of the challenge is
-finding a formulation that does.
-
 Constraints: `n` up to 2·10⁵, prices fit in i32.
 
 ## Input
@@ -53,5 +48,3 @@ cd python && make
 ```
 
 Stuck? See `HINTS.md`.
-
-Source: CLRS §15.4 (longest increasing subsequence)

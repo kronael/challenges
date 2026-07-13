@@ -12,11 +12,6 @@ number arrives, output the median of all values seen so far: the middle value
 when the count is odd, the average of the two middle values when the count is
 even.
 
-The stream is long — up to `n = 2·10⁵` numbers — and you must emit a median per
-insertion. Re-sorting the whole prefix at each step is O(n log n) per insertion,
-O(n² log n) over the stream, and will not finish in time at that scale. The
-challenge is to keep enough order online that each new median is cheap to read.
-
 Constraints: `n` up to 2·10⁵, values fit in i32.
 
 ## Input

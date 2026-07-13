@@ -16,3 +16,5 @@ The naive approach — recursively trying every split point with no memoization 
 recomputes the same subranges over and over and runs in exponential (Catalan)
 time. That is what `rotten/main.py` does: correct on the small cases, but it
 TIMEOUTs on the large ones.
+
+Source: CLRS §15.2, matrix-chain multiplication

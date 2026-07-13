@@ -18,10 +18,7 @@ Both `get` and a `put` on an existing key count as *using* that key. When a `put
 inserts a new key and the cache is already at `capacity`, the entry that has gone
 untouched the longest (the least recently used) is evicted to make room.
 
-The catch is the dual O(1) requirement: every `get` and every `put` must run in
-constant time *on average*, including finding and evicting the least-recently-used
-entry. The operation stream is long — up to 2·10⁵ ops — so any approach that scans
-the cache to locate the eviction victim is too slow and will not finish in time.
+Every `get` and every `put` must run in constant time on average.
 
 Constraints: `1 <= capacity <= 3000`, up to 2·10⁵ operations, keys and values
 fit in i32.

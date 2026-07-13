@@ -21,3 +21,5 @@
 The naive approach — at every step, scan all `K` feed heads to find the
 smallest — is what `rotten/main.py` does. Correct, but `O(N*K)`: it loses the
 `O(N log K)` advantage and TIMEOUTs on the large cases with many feeds.
+
+Source: CLRS §6.5

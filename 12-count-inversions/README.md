@@ -9,8 +9,6 @@
 
 An array is "almost sorted" if it has few *inversions*: index pairs `i < j` where `arr[i] > arr[j]`. A sorted array has 0; a fully reversed array of `n` elements has the maximum, n(n−1)/2. Count the exact number for a given array.
 
-Checking every pair is O(n²) — fine for n=1000, hopeless at n=10⁵ (that's 5 billion comparisons). The count alone must come back fast, so the all-pairs scan is the trap to avoid.
-
 Constraints: n up to 10⁵, values fit in i32; the count can exceed i32 — use i64.
 
 ## Input

@@ -20,3 +20,5 @@
 The naive O(n²) DP (for each job, scan all earlier jobs to find the best
 compatible predecessor) is what `rotten/main.py` does — correct, but it
 TIMEOUTs on the large case.
+
+Sources: [CLRS §16.3](https://en.wikipedia.org/wiki/Introduction_to_Algorithms) and [LeetCode 1235](https://leetcode.com/problems/maximum-profit-in-job-scheduling/)

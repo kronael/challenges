@@ -11,11 +11,6 @@ A user typed `s`; you think they meant `t`. Compute the minimum number of
 single-character edits — insert, delete, or replace — that transforms `s` into
 `t`. This is the number a spell-checker uses to rank suggestions.
 
-The greedy "fix the first mismatch" instinct fails: sometimes deleting is
-cheaper than replacing, and you can't know which without looking ahead. Trying
-every sequence of edits explodes exponentially, so the obvious recursion won't
-finish at scale — the strings run up to a few thousand characters each.
-
 Constraints:
 
 - `0 <= |s|, |t| <= 4000`
@@ -52,5 +47,3 @@ cd python && make
 ```
 
 Stuck? See `HINTS.md`.
-
-Source: CLRS §15.5

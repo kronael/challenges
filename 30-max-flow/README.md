@@ -10,10 +10,6 @@
 Think of the edges as water pipes, each with a capacity; you want to push as much
 as possible from the source (node 1) to the sink (node n).
 
-The large cases are structured so that inefficient programs will not finish in
-time. Your program must compute the exact answer within the time limit on those
-inputs.
-
 Constraints: up to `n = 500` nodes; capacities fit in a 64-bit integer and the
 total flow can too.
 

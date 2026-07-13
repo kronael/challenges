@@ -16,3 +16,5 @@ The naive approach — for each candidate edge, walk the partial tree (BFS/DFS)
 to see whether its endpoints are already connected — is correct but
 O(m · (n + m)). That is what `rotten/main.py` does: it matches the answer on
 small cases but TIMEOUTs on the large ones.
+
+Source: CLRS §23, minimum spanning trees

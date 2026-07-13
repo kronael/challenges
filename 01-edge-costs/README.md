@@ -9,8 +9,6 @@
 
 You're provisioning a network. Adjacent nodes share a link, so their bandwidth may differ by at most 1. A few nodes have a fixed requirement; the rest are `null` and yours to set. Assign non-negative loads to the free nodes so the constraint holds everywhere and the sum is as small as possible.
 
-The catch: the graph can be large enough that repeatedly recomputing the effect of each fixed node on the whole network is too slow.
-
 Constraints: the graph is connected and usually a tree, `n` is up to a few thousand, loads fit in `i64`, and the fixed requirements are mutually feasible.
 
 ## Input

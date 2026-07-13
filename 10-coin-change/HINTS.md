@@ -15,3 +15,5 @@
 The naive reference in `rotten/main.py` is correct but intentionally slow: it checks
 every split of every amount instead of iterating over the small denomination list.
 That quadratic scan still passes the small cases, then TIMEOUTs on the large ones.
+
+Additional source: CLRS

@@ -12,14 +12,8 @@ has a construction cost. Choose a subset of the roads so that every city is
 reachable from every other city, and the total construction cost is as small as
 possible. Output that minimum total cost.
 
-The graph is connected, so a connecting subset always exists; the minimal one is
-a spanning tree (`n − 1` roads). The trap is scale and cycles: with up to
-`m = 2·10⁵` candidate roads you cannot afford to recheck the whole partial
-network every time you consider adding a road, and any road that closes a loop
-must be rejected — detecting that cheaply is the hard part.
-
 Constraints: `n` up to 10⁴, `m` up to 2·10⁵, costs fit in i32, the graph is
-connected (a spanning tree exists).
+connected.
 
 ## Input
 
@@ -31,7 +25,7 @@ connected (a spanning tree exists).
 
 ## Output
 
-A single integer: the total weight of the minimum spanning tree.
+A single integer: the minimum total construction cost.
 
 ## Examples
 
@@ -54,5 +48,3 @@ cd python && make
 ```
 
 Stuck? See `HINTS.md`.
-
-Source: CLRS §23 (minimum spanning trees)

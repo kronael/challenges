@@ -17,10 +17,6 @@ work, and a good order versus a bad one can differ by orders of magnitude.
 Given the dimension list, output the minimum number of scalar multiplications
 needed to compute the whole product.
 
-The catch is the number of orderings. The count of distinct parenthesizations
-grows extremely quickly as `k` increases, so trying them all is hopeless once the
-chain is long. Your program must handle chains with up to `k = 500` matrices.
-
 Constraints: `k` up to 500 matrices (so up to 501 dimensions), each dimension up
 to 100.
 
@@ -57,5 +53,3 @@ cd python && make
 ```
 
 Stuck? See `HINTS.md`.
-
-Source: CLRS §15.2 (matrix-chain multiplication)

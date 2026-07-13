@@ -38,11 +38,6 @@ The two order types differ only in how far they are willing to match:
   remainder is **discarded**, never rested. (Its `price` field is ignored; cases
   use `0`.)
 
-The stream is long — up to `2·10⁵` orders. An engine that re-sorts or rescans
-the whole resting book on every incoming order is too slow to finish at that
-scale; part of the challenge is keeping the best price reachable cheaply as
-orders rest and fill.
-
 Constraints: up to `2·10⁵` orders; prices and quantities are positive integers
 fitting in i32 (a market order's price may be `0`).
 

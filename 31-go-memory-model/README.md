@@ -1,4 +1,4 @@
-# 31 — Go Memory Model
+# 31 — Go Concurrency Quizzes
 
 **Task**: Ten short Go programs live in `quizzes/`. For each one, predict its
 output (and whether that output is deterministic) and write a one-line
@@ -20,14 +20,6 @@ answer the questions in its header comment before running it:
   different runs (or different hardware)?
 - Why — what in the program (if anything) forces that result?
 
-The hard part is that "it printed the right value on my machine" is not an
-answer. A write performed by one goroutine is not guaranteed to be visible to
-another goroutine unless something in the program orders them. Some constructs
-provide that ordering and some that look like they should do not. Several
-quizzes deliberately separate observed behavior from guaranteed behavior; quiz
-10 instead asks you to predict and measure a performance difference between two
-memory layouts that are both correct.
-
 Treat a prediction as wrong if it relies on observed behaviour rather than a rule
 that guarantees it.
 
@@ -46,5 +38,3 @@ reports a race and exits nonzero. Quiz 10 is a benchmark and has no `main`
 program output.
 
 Stuck? See `HINTS.md`.
-
-Source: [The Go Memory Model (go.dev/ref/mem)](https://go.dev/ref/mem)
