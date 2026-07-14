@@ -1,16 +1,13 @@
-import json
 import pathlib
 import subprocess
 import sys
 
 import pytest
 
-CASES = sorted(
-    p for p in pathlib.Path("../cases").glob("*.in") if "_large_" not in p.name
-)
+CASES = sorted(pathlib.Path("../cases").glob("*.in"))
 
 if not CASES:
-    pytest.fail("no small cases found in ../cases", pytrace=False)
+    pytest.fail("no cases found in ../cases", pytrace=False)
 
 
 @pytest.mark.parametrize("inp", CASES, ids=lambda p: p.stem)

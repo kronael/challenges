@@ -6,6 +6,8 @@ from main import solve
 # golden/ tests ALL cases including large — it must always pass
 CASES = sorted(pathlib.Path("../cases").glob("*.in"))
 
+assert CASES, "no cases found in ../cases"
+
 
 @pytest.mark.parametrize("inp", CASES, ids=lambda p: p.stem)
 def test_case(inp):

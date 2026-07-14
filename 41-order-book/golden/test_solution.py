@@ -1,4 +1,3 @@
-import json
 import pathlib
 import subprocess
 import sys
@@ -6,6 +5,8 @@ import sys
 import pytest
 
 CASES = sorted(pathlib.Path("../cases").glob("*.in"))
+
+assert CASES, "no cases found in ../cases"
 
 
 @pytest.mark.parametrize("inp", CASES, ids=lambda p: p.stem)

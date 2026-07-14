@@ -1,4 +1,3 @@
-import json
 import pathlib
 import subprocess
 import sys
@@ -11,6 +10,8 @@ CASES = sorted(pathlib.Path("../cases").glob("*.in"))
 def test_cases_exist():
     assert CASES, "no cases found in ../cases"
 
+assert CASES, "no cases found in ../cases"
+
 
 @pytest.mark.parametrize("inp", CASES, ids=lambda p: p.stem)
 def test_case(inp):
@@ -20,6 +21,7 @@ def test_case(inp):
         capture_output=True,
         text=True,
     )
+    assert result.returncode == 0, result.stderr
     got = result.stdout.strip()
     want = inp.with_suffix(".out").read_text().strip()
     assert got == want, f"got {got!r}, want {want!r}"

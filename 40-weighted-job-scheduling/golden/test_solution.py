@@ -4,7 +4,10 @@ import sys
 
 import pytest
 
-CASES = sorted(p for p in pathlib.Path("../cases").glob("*.in") if "_large_" not in p.name)
+CASES = sorted(pathlib.Path("../cases").glob("*.in"))
+
+if not CASES:
+    pytest.fail("no cases found in ../cases", pytrace=False)
 
 
 @pytest.mark.parametrize("inp", CASES, ids=lambda p: p.stem)
@@ -15,6 +18,7 @@ def test_case(inp):
         capture_output=True,
         text=True,
     )
+    assert result.returncode == 0, result.stderr
     got = result.stdout.strip()
     want = inp.with_suffix(".out").read_text().strip()
     assert got == want, f"got {got!r}, want {want!r}"
