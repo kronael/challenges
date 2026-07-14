@@ -108,13 +108,16 @@ sys challenges have no `python/`; rust-only sys challenges (04, 06) have no `go/
 | `lint`  | static analysis (ruff check / go vet / cargo clippy) |
 | `check` | fmt then lint |
 | `test`  | build + check + test suite — **small cases only** (no `_large_`) |
-| `bench` | build, then time binary on every `??_large_*.in` |
+| `bench` | build, check output for every `??_large_*.in`, then report elapsed time |
 | `help`  | print all targets |
 
 Running `make` (no target) = fmt + build + lint + test.
 
-`make bench` uses `timeout -k 2 $(TIMEOUT)` — SIGTERM then SIGKILL 2s later,
-so the loop can **never hang** regardless of what the binary does.
+`make bench` captures stdout and compares it byte-for-byte with the matching
+`.out`. A timeout, missing expected output, runtime error, or mismatch fails the
+target.
+It uses `timeout -k 2 $(TIMEOUT)` — SIGTERM then SIGKILL 2s later, so the loop
+can **never hang** regardless of what the binary does.
 Defaults: **5s** Rust/Go, **10s** Python. Override: `make bench TIMEOUT=30`.
 
 `golden/` has `all: test` and adds a `regen` target to regenerate `.out` files.
@@ -142,7 +145,7 @@ the README examples.
 ## Large cases
 
 Named `??_large_NAME.in` / `.out` (e.g. `09_large_increasing.in`). Only these
-are timed by `bench`; the `??_large_` glob is what selects them.
+are checked and timed by `bench`; the `??_large_` glob is what selects them.
 
 ## Languages
 

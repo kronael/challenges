@@ -11,7 +11,7 @@ and Rust. Run `make` in any language directory to format, build, lint, and test.
 ```bash
 # pick a challenge, pick a language
 cd 08-price-streak/rust && make       # fmt → build → lint → test
-cd 08-price-streak/go   && make bench # time your solution on large inputs
+cd 08-price-streak/go   && make bench # check and time your solution on large inputs
 ```
 
 From the repo root, verify the whole bench at once:
@@ -29,7 +29,7 @@ Every language directory has the same five targets:
 |---------|------|
 | `make`  | fmt → build → lint → test (default) |
 | `make test`  | correctness — small cases only, fast |
-| `make bench` | speed — large inputs, 5s timeout per case |
+| `make bench` | correctness + speed — compare every large result, then report time |
 | `make fmt`   | format in place |
 | `make help`  | list all targets |
 

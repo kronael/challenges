@@ -39,9 +39,15 @@ golden:
 	  printf "golden %-33s " "$$d"; \
 	  if ! (cd $$d && make test) >/tmp/pgold.log 2>&1; then echo "TEST FAIL"; fail=1; continue; fi; \
 	  if grep -q '^bench:' $$d/Makefile; then \
-	    if (cd $$d && make bench TIMEOUT=$(GOLDEN_TIMEOUT)) 2>/dev/null | grep -q TIMEOUT; then \
-	      echo "BENCH TIMEOUT — golden too slow!"; fail=1; \
-	    else echo "ok (test + bench)"; fi; \
+	    if (cd $$d && make bench TIMEOUT=$(GOLDEN_TIMEOUT)) >/tmp/pgold-bench.log 2>&1; then \
+	      if grep -q TIMEOUT /tmp/pgold-bench.log; then \
+	        echo "BENCH TIMEOUT — golden too slow!"; fail=1; \
+	      else echo "ok (test + bench)"; fi; \
+	    else \
+	      if grep -q TIMEOUT /tmp/pgold-bench.log; then echo "BENCH TIMEOUT — golden too slow!"; \
+	      else echo "BENCH FAIL"; sed 's/^/    /' /tmp/pgold-bench.log | tail -3; fi; \
+	      fail=1; \
+	    fi; \
 	  else echo "ok (test; no bench)"; fi; \
 	done; \
 	[ $$fail -eq 0 ] && echo "all golden pass test and bench" || { echo "FAILURES above"; exit 1; }
@@ -50,7 +56,9 @@ rotten:
 	@fail=0; \
 	for d in $(ROTTEN); do \
 	  printf "rotten %-33s " "$$d"; \
-	  if ! (cd $$d && make test) >/tmp/prot.log 2>&1; then echo "TEST FAIL — rotten must pass small cases"; fail=1; continue; fi; \
+	  if ! (cd $$d && make test) >/tmp/prot.log 2>&1; then \
+	    echo "TEST FAIL — rotten must pass small cases"; sed 's/^/    /' /tmp/prot.log | tail -3; fail=1; continue; \
+	  fi; \
 	  if (cd $$d && make bench TIMEOUT=$(ROTTEN_TIMEOUT)) 2>/dev/null | grep -q TIMEOUT; then \
 	    echo "ok (passes test, times out on bench)"; \
 	  else echo "NO TIMEOUT — rotten is not slow enough to be a trap"; fail=1; fi; \

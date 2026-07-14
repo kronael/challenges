@@ -1,6 +1,7 @@
 package barrier
 
 import (
+	"sync"
 	"sync/atomic"
 	"testing"
 	"time"
@@ -46,4 +47,28 @@ func TestNoEarlyPassNoStall(t *testing.T) {
 	if got := early.Load(); got != 0 {
 		t.Fatalf("barrier released a goroutine before all %d arrived: %d stale reads", n, got)
 	}
+}
+
+func BenchmarkReusableBarrier(b *testing.B) {
+	const participants = 8
+
+	barrier := New(participants)
+	start := make(chan struct{})
+	var workers sync.WaitGroup
+	workers.Add(participants)
+
+	for range participants {
+		go func() {
+			defer workers.Done()
+			waiter := barrier.NewWaiter()
+			<-start
+			for range b.N {
+				waiter.Wait()
+			}
+		}()
+	}
+
+	b.ResetTimer()
+	close(start)
+	workers.Wait()
 }
