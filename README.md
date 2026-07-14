@@ -1,6 +1,6 @@
 # Coding Challenges
 
-52 self-contained algorithm and systems challenges. Most use file-based cases,
+57 self-contained algorithm and systems challenges. Most use file-based cases,
 an optimized reference, a deliberately naive benchmark control, and stubs in
 Python, Go, and Rust. A few exercises use an API test suite or a systems stress
 test instead. Run `make` in a language directory to format, build, lint, and test.
@@ -126,6 +126,11 @@ implementation burden, and the constraints enforced by `make bench`.
 | [50](50-hard-tree-sequence-likelihood/) | Tree Sequence Likelihood | hard | py go rs |
 | [51](51-hard-deadline-scheduler/) | Deadline Scheduler | hard | py go rs |
 | [52](52-hard-service-pairing/) | Service Pairing | hard | py go rs |
+| [53](53-hard-circular-genome-distance/) | Circular Genome Distance | hard | py go rs |
+| [54](54-hard-spectrum-peptide-recovery/) | Spectrum Peptide Recovery | hard | py go rs |
+| [55](55-hard-changing-network-queries/) | Changing Network Queries | hard | py go rs |
+| [56](56-hard-orthogonal-segment-crossings/) | Orthogonal Segment Crossings | hard | py go rs |
+| [57](57-hard-causal-event-replay/) | Causal Event Replay | hard | py go rs |
 
 ---
 

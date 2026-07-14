@@ -1,0 +1,1 @@
+{"processes":4,"events":[{"id":80,"process":3,"clock":[2,1,1,2]},{"id":30,"process":2,"clock":[0,0,1,0]},{"id":10,"process":0,"clock":[1,0,0,0]},{"id":40,"process":3,"clock":[0,0,0,1]},{"id":20,"process":1,"clock":[0,1,0,0]},{"id":70,"process":0,"clock":[2,1,1,1]}]}

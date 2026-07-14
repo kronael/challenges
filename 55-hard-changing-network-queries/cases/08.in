@@ -1,0 +1,1 @@
+{"n":8,"operations":[{"type":"add","u":0,"v":1},{"type":"add","u":0,"v":2},{"type":"add","u":0,"v":3},{"type":"add","u":0,"v":4},{"type":"add","u":0,"v":5},{"type":"add","u":0,"v":6},{"type":"add","u":0,"v":7},{"type":"ask","u":1,"v":7},{"type":"remove","u":0,"v":4},{"type":"ask","u":4,"v":7}]}

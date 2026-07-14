@@ -14,7 +14,7 @@ fails — never state the technique or write solving code for them.
 
 # challenges/
 
-Personal coding-practice bench. 52 self-contained challenges, one per sitting.
+Personal coding-practice bench. 57 self-contained challenges, one per sitting.
 Harness is **editor + `make test`**. Each challenge has its own dir
 `NN-level-slug/`.
 
@@ -201,7 +201,7 @@ The race detector and the stress test are your debugger for sys challenges.
 
 ## State of the repo
 
-- 01–20, 23–28, 35–39, 41–52: io challenges with cases and language harnesses.
+- 01–20, 23–28, 35–39, 41–57: io challenges with cases and language harnesses.
 - 21–22: Python API exercises with direct tests and no rotten reference.
 - 29–34: sys challenges with stress tests.
 - 40: standalone Go concurrency quizzes.
