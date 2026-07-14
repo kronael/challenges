@@ -1,0 +1,32 @@
+use prime_pair_sets::{solve, Input};
+use std::{fs, path::PathBuf};
+
+#[test]
+fn cases() {
+    let mut ins: Vec<PathBuf> = fs::read_dir("../cases")
+        .unwrap()
+        .filter_map(|e| e.ok())
+        .map(|e| e.path())
+        .filter(|p| {
+            p.extension().map_or(false, |x| x == "in")
+                && !p.file_name().unwrap().to_str().unwrap().contains("_large_")
+        })
+        .collect();
+    ins.sort();
+    assert!(!ins.is_empty(), "no small cases found in ../cases");
+    for inp in ins {
+        let src = fs::read_to_string(&inp).unwrap();
+        let want: i64 = fs::read_to_string(inp.with_extension("out"))
+            .unwrap()
+            .trim()
+            .parse()
+            .unwrap();
+        let parsed: Input = serde_json::from_str(&src).unwrap();
+        assert_eq!(
+            solve(parsed.size(), parsed.limit()),
+            want,
+            "{:?}",
+            inp.file_name().unwrap()
+        );
+    }
+}

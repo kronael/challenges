@@ -5,7 +5,7 @@ Eighty-two case-driven Python test modules parametrize directly from a filesyste
 - **Severity:** medium
 - **Scope:** Python solver and reference case harnesses
 - **Affected:** solver harnesses for 01, 08–13, 15–19, 26–29, 34, 37–44, and 48 (26 files); both `golden/` and `rotten/` harnesses for 01, 08–12, 15–19, 21, 26–29, 34–35, 37–44, and 47–48 (28 files each); `template/python/test_solution.py`
-- **Source:** `08-price-streak/python/test_solution.py:5`, `08-price-streak/golden/test_solution.py:8`, `08-price-streak/rotten/test_solution.py:9`, `template/python/test_solution.py:6`
+- **Source:** `05-medium-price-streak/python/test_solution.py:5`, `05-medium-price-streak/golden/test_solution.py:8`, `05-medium-price-streak/rotten/test_solution.py:9`, `template/python/test_solution.py:6`
 - **Status:** resolved-not-yet-removed
 - **Fix:** 9e500ba
 
@@ -16,7 +16,7 @@ Forty-seven golden/rotten test modules compare captured stdout but never assert 
 - **Severity:** medium
 - **Scope:** Python golden and rotten subprocess harnesses
 - **Affected:** `golden/` for 08, 10–11, 15–17, 19, 21–22, 24, 26–30, 34, 37–40, and 42–44 (23 files); `rotten/` for the same challenges plus 01 (24 files)
-- **Source:** `21-string-search/golden/test_solution.py:13`, `21-string-search/rotten/test_solution.py:14`, `21-string-search/cases/06.out`
+- **Source:** `16-medium-string-search/golden/test_solution.py:13`, `16-medium-string-search/rotten/test_solution.py:14`, `16-medium-string-search/cases/06.out`
 - **Status:** resolved-not-yet-removed
 - **Fix:** 9e500ba
 
@@ -26,7 +26,7 @@ The Go harness for challenge 37 is the only case-driven Go suite that neither fa
 
 - **Severity:** medium
 - **Scope:** Go correctness harness
-- **Affected:** `37-dynamic-prefix-sums/go/solution_test.go`
-- **Source:** `37-dynamic-prefix-sums/go/solution_test.go:14`, `37-dynamic-prefix-sums/go/solution_test.go:24`, `37-dynamic-prefix-sums/go/solution_test.go:29`, `37-dynamic-prefix-sums/go/solution_test.go:32`
+- **Affected:** `26-medium-dynamic-prefix-sums/go/solution_test.go`
+- **Source:** `26-medium-dynamic-prefix-sums/go/solution_test.go:14`, `26-medium-dynamic-prefix-sums/go/solution_test.go:24`, `26-medium-dynamic-prefix-sums/go/solution_test.go:29`, `26-medium-dynamic-prefix-sums/go/solution_test.go:32`
 - **Status:** resolved-not-yet-removed
 - **Fix:** 9e500ba
