@@ -1,0 +1,1 @@
+{"n":3,"initial":[1,2,3],"queries":[["update",1,10],["update",3,-3],["update",2,5]]}

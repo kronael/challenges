@@ -2,7 +2,7 @@
 
 > Spoilers. Open only when stuck.
 
-- **K-way merge with a min-heap**: each feed is already sorted by `ts`, so you
+- **K-way merge with a min-heap**: each feed is already sorted by `(ts, id)`, so you
   never need to sort the whole thing. Seed a binary min-heap with the first
   event of every non-empty feed, then repeatedly pop the smallest and push that
   feed's next event. Popping `N` events with a heap of size `K` costs

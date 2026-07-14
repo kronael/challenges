@@ -7,9 +7,9 @@
 
 ## Problem
 
-You are given `K` news feeds. Each feed is a list of events, and within a feed the
-events are already sorted by ascending timestamp `ts`. Produce one combined stream
-of all events in global timestamp order.
+You are given `K` news feeds. Each feed is a list of events sorted by ascending
+timestamp `ts`; events with the same timestamp are sorted by ascending `id`.
+Produce one combined stream of all events in global timestamp order.
 
 When two events share a timestamp, order them by which feed they came from (lower
 feed index first); if they are still tied, by ascending `id`.
