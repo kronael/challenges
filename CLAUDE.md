@@ -14,8 +14,9 @@ fails — never state the technique or write solving code for them.
 
 # challenges/
 
-Personal coding-practice bench. 48 self-contained challenges, one per sitting.
-Harness is **editor + `make test`**. Each challenge has its own dir `NN-slug/`.
+Personal coding-practice bench. 52 self-contained challenges, one per sitting.
+Harness is **editor + `make test`**. Each challenge has its own dir
+`NN-level-slug/`.
 
 ## Golden rule — solutions ONLY in golden/
 
@@ -32,6 +33,26 @@ Harness is **editor + `make test`**. Each challenge has its own dir `NN-slug/`.
   challenges: `rotten/main.c` is the obvious-but-wrong version — torn reads, false
   sharing, ABA — that passes a weak check but fails the stress test / race
   detector.)
+  Every rotten implementation must be short, obviously correct on small inputs,
+  and deliberately naive. Put a concise code-level comment next to the naive
+  operation that states what is recomputed or enumerated, its complexity, and why
+  the large cases time out. Never add sleeps, busy-work, input-name checks, wrong
+  answers, or other artificial benchmark sabotage.
+  For io challenges this is an executable contract: `make test` must finish
+  promptly and match every non-`_large_` fixture, and every `??_large_*.in` must
+  independently exercise the documented naive bottleneck at the default timeout.
+  A small fixture must never duplicate a large fixture byte-for-byte. Rotten code
+  must remain correct for every input allowed by `README.md`, not only the checked
+  fixtures. Keep it as the shortest direct formulation; do not retain memoization,
+  compatibility caches, branch-and-bound pruning, fast precomputation, or other
+  optimizations that obscure the intended complexity wall.
+  For sys challenges, separate a weak sanity target that passes from an adversarial
+  `stress`, `race`, or `bench` target that reliably exposes the documented failure.
+  Do not depend on architecture luck, an unbounded hang, or an implementation
+  spin cutoff. Prefer barrier-controlled interleavings. Performance traps require
+  pinned, warmed-up, repeated measurements and an asserted regression.
+  The root `make sys-rotten` target enforces the sanity-pass/adversarial-fail
+  contract and rejects hangs.
 - **`python/main.py`, `go/main.go`, `rust/src/main.rs`** — stubs ONLY.
   Only the algorithm body is a stub (`pass` / `return nil` / `todo!()`); the
   scaffold around it must be COMPLETE — `solve(...)` signature matches the Input,
@@ -39,7 +60,7 @@ Harness is **editor + `make test`**. Each challenge has its own dir `NN-slug/`.
   the cases through `solve`. A finished stub builds and its tests run (and fail
   only on the unimplemented body), never on harness/parse errors.
 
-**sys challenges** (02–07): Python is inappropriate (GIL prevents real concurrency).
+**sys challenges** (29–34): Python is inappropriate (GIL prevents real concurrency).
 Use **`golden/main.c`** as the reference implementation instead of `main.py`.
 `golden/main.c` contains the complete algorithm + a pthreads stress test in one file.
 `golden/Makefile` builds with `gcc -std=c11 -O2 -pthread` and `make test` runs `./main`.
@@ -67,18 +88,22 @@ verify it passes, then write stubs in the three solver dirs.
   rejected approaches, complexity comparisons, and solution-bearing sources.
   The solver opens it only when stuck.
 
-## Two challenge types
+## Challenge types
 
-- **io** (01, 08–30): program reads JSON from stdin, writes the answer to
-  stdout. Correctness is checked against files in `cases/`.
-- **sys** (02–07): concurrent / lock-free systems challenge. No `cases/`, no
+- **io**: program reads JSON from stdin, writes the answer to stdout.
+  Correctness is checked against files in `cases/`.
+- **api** (21–22): Python functions checked directly by a test suite. These do
+  not use file fixtures or a `rotten/` benchmark control.
+- **sys** (29–34): concurrent / lock-free systems challenge. No `cases/`, no
   stdin/stdout. The test *is* a stress test written in the language (many
   threads, barrier-synced, assert the invariant).
+- **quiz** (40): standalone Go memory-model exercises. This does not use the
+  golden/rotten layout.
 
 ## Layout
 
 ```
-NN-slug/
+NN-level-slug/
   README.md              problem statement, constraints, I/O, examples
   HINTS.md               all solution guidance and solution-bearing sources
   cases/                 NN.in / NN.out          (io only)
@@ -93,7 +118,7 @@ sys challenges have no `python/`; rust-only sys challenges (04, 06) have no `go/
 
 ## Input / output format
 
-- **Input is always JSON**, structured to match the problem
+- **I/O challenge input is always JSON**, structured to match the problem
   (`{"n": 4, "edges": [...], "loads": [...]}`). Deliberate: forces real
   parsing into an `Input` struct, not `line.split()`.
 - **Output is space-separated values on one line** (ints or floats).
@@ -158,7 +183,7 @@ hard io and the sys ones drop a language).
 
 ## Adding a challenge
 
-1. Copy `template/` to `NN-slug/` (next number).
+1. Copy `template/` to `NN-level-slug/` (next number).
 2. Fill `README.md`: statement, constraints, I/O, and examples. Put a source URL
    in `HINTS.md` if its title or target reveals the solution.
 3. io: add `cases/01.in`/`.out` … (≥6 small + 2–3 large); sys: write the stress
@@ -176,12 +201,14 @@ The race detector and the stress test are your debugger for sys challenges.
 
 ## State of the repo
 
-- 01, 08–20, 34–40: full cases + tests (ready to solve).
-- 21–33: README + harness scaffolded, `cases/` still empty (need generating).
-- 02–07: sys challenges, stress tests in place.
+- 01–20, 23–28, 35–39, 41–52: io challenges with cases and language harnesses.
+- 21–22: Python API exercises with direct tests and no rotten reference.
+- 29–34: sys challenges with stress tests.
+- 40: standalone Go concurrency quizzes.
 
 ## Sources
 
-CSES, CP-Algorithms, USACO Guide, Project Euler, Codeforces EDU, CLRS. Keep
+CSES, CP-Algorithms, USACO Guide, Project Euler, Codeforces EDU, CLRS,
+peer-reviewed papers, and official technical documentation. Keep
 solution-neutral attribution in the challenge README. Put solution-bearing
 attribution in `HINTS.md`.
