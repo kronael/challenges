@@ -212,3 +212,10 @@ CSES, CP-Algorithms, USACO Guide, Project Euler, Codeforces EDU, CLRS,
 peer-reviewed papers, and official technical documentation. Keep
 solution-neutral attribution in the challenge README. Put solution-bearing
 attribution in `HINTS.md`.
+
+# Project Memory
+
+- Rotten references should be the shortest obviously correct naive formulation,
+  with an adjacent complexity/timeout comment. Every large fixture must exercise
+  that bottleneck independently; systems controls pair a passing weak sanity test
+  with a deterministic adversarial failure.
