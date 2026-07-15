@@ -65,7 +65,7 @@ def peptide_cases():
     challenge = "54-hard-spectrum-peptide-recovery"
     planted = [
         ("01", [57, 71], [57]),
-        ("02", [57, 71], [57, 71]),
+        ("02", [71, 57], [57, 71]),
         ("03", [113, 128, 186], [113, 128, 186]),
         ("04", [57, 71], [57, 57, 71]),
         ("05", [71, 87, 97, 101], [71, 87, 97, 101]),
@@ -99,10 +99,10 @@ def op(kind, u, v):
 def network_cases():
     challenge = "55-hard-changing-network-queries"
     cases = [
-        ("01", 1, [op("ask", 0, 0)]),
+        ("01", 1, []),
         ("02", 3, [op("ask", 0, 2)]),
         ("03", 3, [op("add", 0, 1), op("ask", 0, 1), op("ask", 0, 2)]),
-        ("04", 3, [op("add", 0, 1), op("remove", 0, 1), op("ask", 0, 1)]),
+        ("04", 3, [op("add", 0, 1), op("remove", 1, 0), op("ask", 0, 1)]),
         (
             "05",
             5,

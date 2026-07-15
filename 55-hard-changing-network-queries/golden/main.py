@@ -40,9 +40,6 @@ def solve(n, operations):
     tree = [[] for _ in range(max(1, 4 * count))]
     opened = {}
 
-    def edge(op):
-        return tuple(sorted((op["u"], op["v"])))
-
     def add_interval(node, left, right, start, end, value):
         if start >= right or end <= left:
             return
@@ -54,10 +51,12 @@ def solve(n, operations):
         add_interval(node * 2 + 1, middle, right, start, end, value)
 
     for time, op in enumerate(operations):
-        value = edge(op)
+        if op["type"] == "ask":
+            continue
+        value = tuple(sorted((op["u"], op["v"])))
         if op["type"] == "add":
             opened[value] = time
-        elif op["type"] == "remove":
+        else:
             add_interval(1, 0, count, opened.pop(value), time, value)
     for value, start in opened.items():
         add_interval(1, 0, count, start, count, value)

@@ -18,23 +18,22 @@ def cyclic_spectrum(peptide):
 
 
 def solve(masses, spectrum):
-    target = sorted(spectrum)
-    parent = target[-1]
+    parent = spectrum[-1]
     matches = []
 
     # Naive: enumerate every mass sequence whose sum can reach the parent, then
     # build its full spectrum. Correct, but exponential branching TIMEOUTs.
     def visit(peptide, total):
         if total == parent:
-            if cyclic_spectrum(peptide) == target:
+            if cyclic_spectrum(peptide) == spectrum:
                 matches.append(peptide)
             return
         for mass in masses:
             if total + mass <= parent:
-                visit(peptide + (mass,), total + mass)
+                visit(peptide + [mass], total + mass)
 
-    visit((), 0)
-    return list(min(matches)) if matches else None
+    visit([], 0)
+    return min(matches, default=None)
 
 
 def main():

@@ -33,17 +33,16 @@ def solve(a, b):
     cycles = 0
     # Naive: find every alternating partner by rescanning all n edges. Correct,
     # but O(n²) repeated lookup TIMEOUTs on the large genomes.
-    for edge in red:
-        for start in edge:
-            if start in seen:
-                continue
-            cycles += 1
-            node = start
-            while node not in seen:
-                seen.add(node)
-                node = find_partner(red, node)
-                seen.add(node)
-                node = find_partner(blue, node)
+    for start, _ in red:
+        if start in seen:
+            continue
+        cycles += 1
+        node = start
+        while node not in seen:
+            seen.add(node)
+            node = find_partner(red, node)
+            seen.add(node)
+            node = find_partner(blue, node)
     return len(red) - cycles
 
 

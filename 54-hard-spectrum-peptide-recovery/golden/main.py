@@ -30,19 +30,18 @@ def cyclic_spectrum(peptide):
 
 
 def solve(masses, spectrum):
-    target = sorted(spectrum)
-    target_counts = Counter(target)
-    parent = target[-1]
-    candidates = [()]
+    target_counts = Counter(spectrum)
+    parent = spectrum[-1]
+    candidates = [[]]
     matches = []
     while candidates:
         next_candidates = []
         for candidate in candidates:
             for mass in masses:
-                peptide = candidate + (mass,)
+                peptide = candidate + [mass]
                 total = sum(peptide)
                 if total == parent:
-                    if cyclic_spectrum(peptide) == target:
+                    if cyclic_spectrum(peptide) == spectrum:
                         matches.append(peptide)
                 elif total < parent:
                     counts = Counter(linear_spectrum(peptide))
@@ -51,7 +50,7 @@ def solve(masses, spectrum):
                     ):
                         next_candidates.append(peptide)
         candidates = next_candidates
-    return list(min(matches)) if matches else None
+    return min(matches, default=None)
 
 
 def main():

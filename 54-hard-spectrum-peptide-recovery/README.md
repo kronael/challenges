@@ -17,8 +17,8 @@ peptide whose spectrum matches exactly. Several rotations or different peptides
 may match. Print the lexicographically smallest mass sequence among all matches.
 Print `NONE` if no peptide matches.
 
-Constraints: 1 to 18 allowed masses, parent mass at most 2000, and at most 20
-amino acids in any matching peptide.
+Constraints: 1 to 18 distinct positive allowed masses, parent mass at most 2000,
+and at most 20 amino acids in any matching peptide.
 
 ## Input
 

@@ -14,12 +14,12 @@ def solve(processes, events):
     for index, event in enumerate(events):
         process = event["process"]
         sequence = event["clock"][process]
-        dependencies = set()
+        dependencies = []
         if sequence > 1:
-            dependencies.add(by_sequence[(process, sequence - 1)])
+            dependencies.append(by_sequence[(process, sequence - 1)])
         for other in range(processes):
             if other != process and event["clock"][other] > 0:
-                dependencies.add(by_sequence[(other, event["clock"][other])])
+                dependencies.append(by_sequence[(other, event["clock"][other])])
         indegree[index] = len(dependencies)
         for dependency in dependencies:
             outgoing[dependency].append(index)
