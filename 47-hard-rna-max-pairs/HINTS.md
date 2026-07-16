@@ -24,4 +24,4 @@ memoization**, re-solving overlapping subintervals exponentially many times —
 correct on tiny strands, TIMEOUTs on the large cases.
 
 Source: Nussinov et al., "Algorithms for loop matchings" (1978),
-https://pubmed.ncbi.nlm.nih.gov/6161375/
+https://doi.org/10.1137/0135006

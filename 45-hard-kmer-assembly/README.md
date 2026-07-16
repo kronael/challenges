@@ -1,30 +1,29 @@
 # 45 — Hard — K-mer Assembly
 
-**Task**: Given the shuffled multiset of all length-`k` fragments that tile one
-DNA molecule, reconstruct the original DNA string.
+**Task**: Given the shuffled, complete multiset of length-`k` substrings from one
+DNA string, reconstruct that string.
 
 **Difficulty**: hard
 **Time estimate**: ~40 min
 
 ## Problem
 
-A sequencing machine reads one contiguous DNA molecule and reports every
-length-`k` substring (a *k-mer*) it contains — with multiplicity, but in
-arbitrary order. If the molecule is `GGCTTACCA` and `k = 4`, the reported k-mers
-are the six windows `GGCT`, `GCTT`, `CTTA`, `TTAC`, `TACC`, `ACCA`, shuffled.
+The input is an error-free, complete *k-mer multiset* from one linear DNA
+string. It contains the length-`k` substring at every starting offset, including
+repeated copies when the same substring occurs more than once. The k-mers arrive
+in arbitrary order. For `GGCTTACCA` and `k = 4`, the multiset contains `GGCT`,
+`GCTT`, `CTTA`, `TTAC`, `TACC`, and `ACCA`.
 
-Your job is the inverse: given the shuffled multiset of k-mers, rebuild the
-single DNA string they came from. The fragments tile the molecule so that each
-consecutive pair overlaps in exactly `k - 1` characters — the last `k - 1`
-letters of one fragment are the first `k - 1` letters of the next. Stitching the
-fragments back along those overlaps spells the original string, which is
-`(number of k-mers) + k - 1` letters long.
+Rebuild the single DNA string that produced the multiset. Consecutive k-mers in
+that string overlap in exactly `k - 1` characters. The answer therefore has
+`number of k-mers + k - 1` characters.
 
 The input is guaranteed to admit exactly one such linear reconstruction, so the
 answer is unique.
 
-Constraints: `2 ≤ k ≤ 32`; up to `2·10⁵` k-mers; alphabet `{A, C, G, T}`;
-a unique reconstruction is guaranteed.
+Constraints: `2 ≤ k ≤ 32`; `1 ≤ number of k-mers ≤ 2·10⁵`; every k-mer has
+length `k` and uses only `A`, `C`, `G`, `T`; a unique linear reconstruction is
+guaranteed.
 
 ## Input
 
@@ -51,12 +50,9 @@ A single DNA string on one line — the reconstructed molecule.
 ## Run
 
 ```
-cd rust   && make
-cd go     && make
-cd python && make
+make -C rust
+make -C go
+make -C python
 ```
 
 Stuck? See `HINTS.md`.
-
-Source: https://rosalind.info/problems/pcov/ (Compeau, Pevzner & Tesler,
-*Nature Biotechnology* 2011)

@@ -2,8 +2,10 @@
 
 > Spoilers. Open only when stuck.
 
-- This is maximum-score decoding in a hidden Markov model. The scores can be
-  treated as log probabilities, so multiplication becomes addition.
+- Treat the inputs as additive scores, also called log-potentials. They need not
+  be normalized probabilities. The same maximum-score recurrence becomes
+  standard hidden Markov model decoding when `start`, `transition`, and
+  `emission` are logarithms of normalized probability distributions.
 - For every sequence position and current state, keep the best score of a path
   ending there. Try every previous state when filling that value.
 - Store the winning previous-state index for each cell. Start at the best final

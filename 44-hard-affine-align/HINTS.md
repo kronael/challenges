@@ -25,3 +25,6 @@
   possible trailing-gap length `k = 1..j` and `k = 1..i`. That is `O(|s|·|t|·
   (|s|+|t|))` — cubic — correct on the small cases but it TIMEOUTs on the large
   ones.
+
+Source: [Rosalind — Global Alignment with Scoring Matrix and Affine Gap
+Penalty](https://rosalind.info/problems/gaff/)

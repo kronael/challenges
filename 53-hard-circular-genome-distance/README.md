@@ -41,9 +41,9 @@ Print the minimum number of rearrangements as one integer.
 ## Run
 
 ```bash
-cd python && make
-cd go     && make
-cd rust   && make
+make -C python
+make -C go
+make -C rust
 ```
 
 Stuck? See `HINTS.md`.

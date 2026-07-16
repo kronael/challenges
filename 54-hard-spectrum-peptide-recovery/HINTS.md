@@ -5,7 +5,7 @@
 - Expand candidate peptides one mass at a time. Discard any candidate whose
   total already exceeds the parent mass, the largest spectrum value.
 - Compute a candidate's linear spectrum before it closes into a cycle. Its mass
-  multiset must be contained in the experimental spectrum multiset. Otherwise
+  multiset must be contained in the target spectrum multiset. Otherwise
   no extension can become a match.
 - When a candidate reaches the parent mass, compare its complete cyclic spectrum
   with the input. Keep all matches long enough to choose the lexicographically

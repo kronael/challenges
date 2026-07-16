@@ -21,8 +21,9 @@ large as possible, subject to these rules:
   other) or `i < j < k < l` (one entirely before the other). The interleaved case
   `i < k < j < l` is forbidden.
 - **Minimum loop length.** A pair `(i, j)` with `i < j` is only allowed when
-  `j - i > min_loop`; that is, at least `min_loop` unpaired positions would sit
-  between the two paired bases. With `min_loop = 0`, adjacent positions may pair.
+  `j - i > min_loop`; that is, at least `min_loop` sequence positions lie between
+  the paired bases. Those intervening positions may themselves form nested
+  pairs. With `min_loop = 0`, adjacent positions may pair.
 
 Output the maximum number of pairs achievable.
 
@@ -54,9 +55,9 @@ A single integer: the maximum number of non-crossing base pairs.
 ## Run
 
 ```
-cd rust   && make
-cd go     && make
-cd python && make
+make -C rust
+make -C go
+make -C python
 ```
 
 Stuck? See `HINTS.md`.

@@ -24,10 +24,13 @@ are unknown and must all contribute to the final probability.
 }
 ```
 
-Node `0` is the root. For every other node `i`, `parent[i] < i`. A `null`
-sequence marks an internal node. Every leaf has a DNA string, and all leaf
-strings have the same non-zero length. Matrix rows and columns use `A`, `C`,
-`G`, `T` order.
+`parent` and `sequences` have the same length, the number of nodes. Node `0` is
+the root and `parent[0] = -1`. Every other node `i` satisfies
+`0 ≤ parent[i] < i`. Thus every parent appears before its children.
+
+`sequences[i]` is `null` exactly when node `i` is internal. Every leaf has a DNA
+string, and all leaf strings have the same non-zero length. Entries in `prior`,
+and rows and columns in `transition`, use `A`, `C`, `G`, `T` order.
 
 Constraints: `3 ≤ nodes ≤ 255`; every internal node has at least two children;
 all probabilities are positive finite decimals; `prior` and every transition
@@ -48,9 +51,9 @@ digits after the decimal point.
 ## Run
 
 ```text
-cd rust   && make
-cd go     && make
-cd python && make
+make -C rust
+make -C go
+make -C python
 ```
 
 Stuck? See `HINTS.md`.

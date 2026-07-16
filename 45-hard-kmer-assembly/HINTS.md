@@ -23,6 +23,17 @@
   ((k-1) chars), then for each subsequent node append only its *last* character.
   Result length = `n + k − 1`.
 
-The naive O(n²·k) approach — for each read, scan all others for the one whose
-(k-1) prefix equals this read's (k-1) suffix, then walk the chain — is what
-`rotten/main.py` does. Correct, but it TIMEOUTs on the large cases.
+A correct naive baseline tries every k-mer occurrence as the first fragment and
+backtracks over the rest. At each step, try every unused k-mer whose prefix
+matches the current suffix, and accept a branch only after it uses every
+occurrence. This exhaustive edge-order search is correct, but exponential on
+ambiguous prefixes and unsuitable for the large cases.
+
+Related sources:
+
+- [Rosalind — Genome Assembly with Perfect Coverage](https://rosalind.info/problems/pcov/)
+  studies the related circular case under a simple-cycle guarantee. This
+  challenge instead asks for a unique linear reconstruction.
+- [Compeau, Pevzner, and Tesler — How to apply de Bruijn graphs to genome
+  assembly](https://doi.org/10.1038/nbt.2023) gives the broader genome-assembly
+  context.

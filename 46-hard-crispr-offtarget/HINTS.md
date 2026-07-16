@@ -26,5 +26,7 @@ The naive trap (`rotten/`) is the triple loop: every guide × every window ×
 every base. Correct, but `O(guides × genome × L)` — it TIMEOUTs on the large
 genome × many-guides case.
 
-Source: Bae, Park & Kim, "Cas-OFFinder", Bioinformatics 30(10):1473 (2014),
-https://academic.oup.com/bioinformatics/article/30/10/1473/267560
+Biological context: Bae, Park, and Kim, ["Cas-OFFinder," Bioinformatics
+30(10):1473, 2014](https://academic.oup.com/bioinformatics/article/30/10/1473/267560).
+Cas-OFFinder accounts for PAM patterns and is not the source of the seed filter
+described above.
