@@ -5,7 +5,7 @@ import sys
 def solve(n, edges):
     # Naive Ford-Fulkerson with DFS-found augmenting paths: correct, but each
     # augmentation may add one unit after scanning O(E) edges. The O(E * F)
-    # worst case TIMEOUTs on 09_large_random, whose maximum flow F is large.
+    # worst case TIMEOUTs on the large cases, whose maximum flow F is large.
     graph = [[] for _ in range(n + 1)]
     cap = []
     to = []
