@@ -1,6 +1,11 @@
-# NN — TODO title
+# NN — TODO level — TODO title
 
-TODO: one-paragraph problem statement. State the constraints and what makes it hard.
+TODO: state the task in one paragraph. Keep this file solution-neutral; put all
+guidance in `HINTS.md`.
+
+## Constraints
+
+TODO: list valid ranges and required behavior.
 
 ## Input
 
@@ -8,12 +13,12 @@ TODO: one-paragraph problem statement. State the constraints and what makes it h
 {"n": 0, "data": []}
 ```
 
-TODO: constraints, e.g. `1 ≤ n ≤ 10⁵`.
+TODO: describe each JSON field.
 
 ## Output
 
 ```
-TODO: space-separated values on one line
+TODO: exact single-line output format
 ```
 
 ## Example
@@ -22,14 +27,17 @@ TODO: space-separated values on one line
 TODO input   →   TODO output
 ```
 
-Source: TODO url
-
 ## Run
 
+From the challenge directory:
+
 ```
-cd rust   && make test && make bench
-cd go     && make test && make bench
-cd python && make test && make bench
+make -C rust test
+make -C rust bench
+make -C go test
+make -C go bench
+make -C python test
+make -C python bench
 ```
 
 > No debug prints. Extra stdout breaks the test harness and signals you don't

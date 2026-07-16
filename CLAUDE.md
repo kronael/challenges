@@ -68,8 +68,8 @@ Use **`golden/main.c`** as the reference implementation instead of `main.py`.
 **Never put a working solution in `python/`, `go/`, or `rust/`.** If you find one,
 move it to `golden/` and replace the original with a stub.
 
-When scaffolding a new challenge: write the reference first in `golden/main.py`,
-verify it passes, then write stubs in the three solver dirs.
+When scaffolding a new I/O challenge: write the reference first in
+`golden/main.py`, verify it passes, then write stubs in the three solver dirs.
 
 ## README vs HINTS — never spoil the problem
 
@@ -114,16 +114,19 @@ NN-level-slug/
   rust/    src/lib.rs · src/main.rs · tests/ · Cargo.toml · Makefile
 ```
 
-sys challenges have no `python/`; rust-only sys challenges (04, 06) have no `go/`.
+sys challenges have no `python/`; rust-only sys challenges 31 and 33 have no `go/`.
 
 ## Input / output format
 
 - **I/O challenge input is always JSON**, structured to match the problem
   (`{"n": 4, "edges": [...], "loads": [...]}`). Deliberate: forces real
   parsing into an `Input` struct, not `line.split()`.
-- **Output is space-separated values on one line** (ints or floats).
+- **Output is exactly one line** in the format documented by the challenge
+  `README.md`.
 
-## Make targets (identical in every language dir)
+## Make targets
+
+I/O solver directories share these targets:
 
 | target  | does |
 |---------|------|
@@ -138,39 +141,38 @@ sys challenges have no `python/`; rust-only sys challenges (04, 06) have no `go/
 
 Running `make` (no target) = fmt + build + lint + test.
 
-`make bench` captures stdout and compares it byte-for-byte with the matching
-`.out`. A timeout, missing expected output, runtime error, or mismatch fails the
-target.
+For I/O solvers, `make bench` captures stdout and compares it byte-for-byte with
+the matching `.out`. A timeout, missing expected output, runtime error, or
+mismatch fails the target.
 It uses `timeout -k 2 $(TIMEOUT)` — SIGTERM then SIGKILL 2s later, so the loop
 can **never hang** regardless of what the binary does.
 Defaults: **5s** Rust/Go, **10s** Python. Override: `make bench TIMEOUT=30`.
 
-`golden/` has `all: test` and adds a `regen` target to regenerate `.out` files.
+I/O `golden/` has `all: test` and adds a `regen` target to regenerate `.out`
+files. API, sys, and quiz challenges use targets specific to their test style;
+check their README and `make help` instead of assuming this table applies.
 
 ## Test case coverage
 
-**Every challenge must cover these categories in its 8 small cases:**
-- Minimal / degenerate input (n=0 or n=1 where valid)
-- All-null / all-set inputs
-- Single fixed value, all others propagate from it
-- Two fixed values that meet in the middle
-- Cycle / star / path — at least two graph shapes
-- Values that propagate to the zero floor
-- An already-correct input (no changes needed)
-- Maximum constraint stress at small scale (n=8, densest graph)
+Every I/O challenge must have at least eight challenge-appropriate small cases.
+Cover valid boundary or degenerate inputs, representative ordinary inputs, a
+no-op or already-valid input where meaningful, adversarial inputs for common
+mistakes, and the largest useful input that still belongs in the small suite.
+For graph inputs, include at least two relevant shapes such as a path, star,
+cycle, or dense graph.
 
-**Large cases (`09_large_*`, `10_large_*`):**
-- One that punishes O(n²): e.g. long path, 200k nodes
-- One with different structure: star, caterpillar, or dense graph
+Every I/O challenge must also have at least two structurally distinct large
+cases. Each one must independently exercise the documented rotten bottleneck at
+the default timeout.
 
-When writing cases: if you can construct a valid input the naive algorithm
-gets wrong or slow, include it. Edge cases are the point — don't just use
-the README examples.
+When writing cases, include valid inputs that expose likely implementation
+mistakes. Edge cases are the point — don't just use the README examples.
 
 ## Large cases
 
-Named `??_large_NAME.in` / `.out` (e.g. `09_large_increasing.in`). Only these
-are checked and timed by `bench`; the `??_large_` glob is what selects them.
+Name each pair `??_large_NAME.in` and `??_large_NAME.out`, such as
+`09_large_path.in` and `09_large_path.out`. Only files selected by the
+`??_large_*.in` glob are checked and timed by `bench`.
 
 ## Languages
 
@@ -181,15 +183,20 @@ are checked and timed by `bench`; the `??_large_` glob is what selects them.
 Per-challenge language set is in the README catalog (most are `py go rs`; some
 hard io and the sys ones drop a language).
 
-## Adding a challenge
+## Adding an I/O challenge
 
 1. Copy `template/` to `NN-level-slug/` (next number).
-2. Fill `README.md`: statement, constraints, I/O, and examples. Put a source URL
-   in `HINTS.md` if its title or target reveals the solution.
-3. io: add `cases/01.in`/`.out` … (≥6 small + 2–3 large); sys: write the stress
-   test instead.
-4. Implement `solve()` in each language stub — the harness is already wired.
-5. Add a row to the catalog table in the repo `README.md`.
+2. Fill `README.md`: statement, constraints, I/O, and examples. Put all solution
+   guidance and solution-bearing sources in `HINTS.md`.
+3. Add at least eight small fixture pairs and at least two large pairs.
+4. Implement only `golden/` and `rotten/`. Tailor each solver scaffold to the
+   input contract, but keep its `solve()` body stubbed.
+5. Verify the golden test and bench pass, the rotten small test passes, and every
+   large case exceeds the rotten timeout.
+6. Add a row to the catalog table in the repo `README.md`.
+
+For an API, sys, or quiz challenge, copy the closest matching challenge instead
+of the I/O template and preserve that challenge type's test contract.
 
 ## No debug prints
 

@@ -11,33 +11,39 @@ test instead. Run `make` in a language directory to format, build, lint, and tes
 
 ```bash
 # pick a challenge, pick a language
-cd 05-medium-price-streak/rust && make       # fmt → build → lint → test
-cd 05-medium-price-streak/go   && make bench # check and time your solution on large inputs
+make -C 05-medium-price-streak/rust       # fmt → build → lint → test
+make -C 05-medium-price-streak/go bench   # check and time your solution on large inputs
 ```
 
 From the repo root, verify the whole bench at once:
 
 ```bash
-make test    # every golden + rotten passes its case suite
-make golden  # every golden passes test AND bench (stays fast)
-make rotten  # verify every rotten reference behaves as expected
-make sys     # the sys (29-34) C stress tests pass
-make sys-rotten # sys controls pass sanity and fail controlled stress
+make test        # I/O and API golden suites; I/O rotten small suites pass
+make golden      # I/O and API golden tests pass; I/O benchmarks stay fast
+make rotten      # I/O rotten controls pass small cases; every large case times out
+make sys         # systems golden C stress tests pass
+make sys-rotten  # systems controls pass sanity and fail controlled stress
 ```
 
-Every language directory has the same five targets:
+I/O solver directories share these targets:
 
 | target  | does |
 |---------|------|
 | `make`  | fmt → build → lint → test (default) |
+| `make build` | compile or syntax-check |
+| `make fmt`   | format in place |
+| `make lint`  | run static analysis |
+| `make check` | format, then lint |
 | `make test`  | correctness — small cases only, fast |
 | `make bench` | correctness + speed — compare every large result, then report time |
-| `make fmt`   | format in place |
 | `make help`  | list all targets |
+
+API, systems, and quiz challenges use targets suited to their test style. Their
+challenge README and `make help` list the available commands.
 
 ---
 
-## Structure
+## I/O challenge structure
 
 ```
 NN-level-slug/
@@ -55,11 +61,12 @@ The `README.md`, challenge title, directory slug, and catalog never narrow the
 solution search. All guidance, including rejected approaches and complexity
 comparisons, lives in `HINTS.md`.
 
-**Two challenge types:**
+**Four challenge types:**
 
-- **io** — reads JSON from stdin, writes space-separated values to stdout
+- **io** — reads JSON from stdin and writes one line in the documented format
 - **api** — implements functions checked directly by a language test suite
 - **sys** — exposes a systems API; the test is a stress test rather than files
+- **quiz** — asks for predictions about standalone programs, then checks them
 
 I/O challenge input is always JSON
 (`{"n":4,"edges":[[0,1]],"loads":[10,null]}`), so parsing is real work rather
@@ -136,8 +143,16 @@ implementation burden, and the constraints enforced by `make bench`.
 
 ## Adding a challenge
 
-Copy `template/`, fill in `README.md`, add `cases/`, implement `solve()`.
-The harness is already wired — `make` will work immediately.
+1. Copy `template/` to the next numbered directory.
+2. Write the pure specification in `README.md`. Put all solution guidance and
+   solution-bearing sources in `HINTS.md`.
+3. Add the optimized implementation in `golden/` and the short, correct, naive
+   control in `rotten/`. Keep every solver `solve` body stubbed.
+4. Add at least eight small fixture pairs and at least two large pairs. Each
+   large input must independently make the rotten implementation exceed its
+   timeout.
+5. Run the root `make golden` and `make rotten` contract checks.
+6. Add the challenge to the catalog above.
 
 ---
 
