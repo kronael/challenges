@@ -12,8 +12,8 @@ lexicographically smallest words that have the query as a prefix — exactly wha
 search box shows as you type. An empty query matches every word, so it returns the
 three smallest words overall; a query with no matching word returns nothing.
 
-Constraints: up to 5·10⁴ words and 5·10³ queries; words are lowercase `a`–`z`,
-each up to 20 characters; the word list arrives already sorted.
+Constraints: up to 5·10⁴ distinct words and 5·10³ queries; words are lowercase
+`a`–`z`, each up to 20 characters; the word list arrives already sorted.
 
 ## Input / Output
 
@@ -40,9 +40,9 @@ words ["a","ab","abc"], queries ["a","ab","abc","abcd","x"]
 ## Run
 
 ```
-cd rust   && make
-cd go     && make
-cd python && make
+make -C rust
+make -C go
+make -C python
 ```
 
 Stuck? See `HINTS.md`.

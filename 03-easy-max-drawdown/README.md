@@ -20,7 +20,9 @@ The trough must come *after* the peak (`i < j`), so you cannot pair a low early
 day with a high later day. If prices never fall — every day is at least as high
 as all days before it — the maximum drawdown is `0`.
 
-Constraints: `n` up to 2·10⁵, prices fit in i32.
+Constraints: `1 <= n <= 2·10⁵`, `n` equals the length of `prices`, and each
+price fits in a signed 32-bit integer. The maximum drawdown fits in a signed
+64-bit integer.
 
 ## Input
 
@@ -30,7 +32,7 @@ Constraints: `n` up to 2·10⁵, prices fit in i32.
 
 ## Output
 
-A single integer: the maximum drawdown (a non-negative value).
+A single signed 64-bit integer: the maximum drawdown, which is non-negative.
 
 ## Examples
 
@@ -47,9 +49,9 @@ A single integer: the maximum drawdown (a non-negative value).
 ## Run
 
 ```
-cd rust   && make
-cd go     && make
-cd python && make
+make -C rust
+make -C go
+make -C python
 ```
 
 Stuck? See `HINTS.md`.

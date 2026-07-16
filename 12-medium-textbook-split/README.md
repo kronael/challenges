@@ -28,13 +28,13 @@ A single integer: the minimum possible value of the largest block sum.
 
 ## Examples
 
-**Example 1** — balance the small books against the big one
+**Example 1** — four books and two students
 ```
 k=2, pages [10,20,30,40] -> 60
 One optimal split is [10,20,30] | [40].
 ```
 
-**Example 2** — one huge book sets a floor no split can beat
+**Example 2** — one book is much larger than the others
 ```
 k=2, pages [5,5,100] -> 100
 One optimal split is [5,5] | [100].
@@ -43,9 +43,9 @@ One optimal split is [5,5] | [100].
 ## Run
 
 ```
-cd rust && make
-cd go   && make
-cd python && make
+make -C rust
+make -C go
+make -C python
 ```
 
 Stuck? See `HINTS.md`.

@@ -48,9 +48,9 @@ cap 2: put(1,1) put(1,2) get1→2 put2 put(1,3) get1→3 get2→2
 ## Run
 
 ```
-cd rust   && make
-cd go     && make
-cd python && make
+make -C rust
+make -C go
+make -C python
 ```
 
 Stuck? See `HINTS.md`.

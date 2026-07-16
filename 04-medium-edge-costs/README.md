@@ -9,7 +9,10 @@
 
 You're provisioning a network. Adjacent nodes share a link, so their bandwidth may differ by at most 1. A few nodes have a fixed requirement; the rest are `null` and yours to set. Assign non-negative loads to the free nodes so the constraint holds everywhere and the sum is as small as possible.
 
-Constraints: the graph is connected and usually a tree, `n` is up to a few thousand, loads fit in `i64`, and the fixed requirements are mutually feasible.
+The graph is undirected and connected. Constraints: `1 <= n <= 200001`, every
+edge endpoint is in `0..n-1`, and `loads` has exactly `n` entries. Each entry in
+`loads` is either `null` or a non-negative signed 64-bit integer. The fixed
+requirements are mutually feasible.
 
 ## Input
 
@@ -37,9 +40,9 @@ The assigned loads, space-separated on one line.
 ## Run
 
 ```
-cd rust   && make
-cd go     && make
-cd python && make
+make -C rust
+make -C go
+make -C python
 ```
 
 Stuck? See `HINTS.md`.

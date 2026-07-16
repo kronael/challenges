@@ -11,8 +11,7 @@
   length is its lowest set bit.
 - **Why it works**: the binary form of `i` partitions `[1, i]` into O(log n)
   power-of-two blocks, and the down-walk visits exactly one stored block per set
-  bit. It is prefix-only and invertible — simpler than a full segment tree
-  (challenge 22).
+  bit. It is prefix-only and invertible — simpler than a full segment tree.
 - **Building the initial array**: just call `update(i, a[i])` for each element,
   or fill the tree in O(n) with a direct propagation pass.
 - **Range sums** if you need them: `sum(r) - sum(l-1)`. (This problem only asks

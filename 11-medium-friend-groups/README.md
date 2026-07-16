@@ -16,6 +16,11 @@ You are given `n` people, numbered `0..n-1`, a list of friendships to apply in
 order, then a list of pairs to test. For each test pair, report whether the two
 people end in the same group.
 
+Constraints: `1 <= n <= 200000`, with at most 200000 friendships and 200000
+queries. Every person ID is in `0..n-1`. Self-friendships, repeated
+friendships, and repeated queries are valid. A query may also contain the same
+person twice.
+
 ## Input
 
 ```json
@@ -41,9 +46,9 @@ n=3, unions [], queries [0,1] → 0
 ## Run
 
 ```
-cd rust && make
-cd go   && make
-cd python && make
+make -C rust
+make -C go
+make -C python
 ```
 
 Stuck? See `HINTS.md`.

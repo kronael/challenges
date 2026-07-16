@@ -12,7 +12,7 @@ You are given `n` jobs. Job `i` runs over the half-open interval
 not overlap in time and maximise the total weight collected. A job that ends at
 time `X` does not conflict with one that starts at time `X`.
 
-This is *weighted* scheduling, not plain interval scheduling (challenge 11):
+This is *weighted* scheduling, not plain interval scheduling (challenge 08):
 there you maximise the *count* of jobs, while here each job carries a weight and
 you maximise the *sum*.
 
@@ -43,9 +43,9 @@ All overlap, so only one job fits; the heaviest is weight 7.
 ## Run
 
 ```
-cd rust   && make
-cd go     && make
-cd python && make
+make -C rust
+make -C go
+make -C python
 ```
 
 Stuck? See `HINTS.md`.

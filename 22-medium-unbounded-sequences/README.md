@@ -35,7 +35,7 @@ belongs in `python/main.py`.
 ## Run
 
 ```
-cd python && make
+make -C python
 ```
 
 Stuck? See `HINTS.md`.

@@ -9,6 +9,9 @@
 
 Given three integers `base`, `exp`, and `mod`, compute `(base^exp) mod m`.
 
+When `exp = 0`, return `1 % mod`. This is `0` when `mod = 1` and `1`
+otherwise, including when `base = 0`.
+
 Constraints: `0 ≤ base, exp ≤ 10^18`, `1 ≤ mod ≤ 10^18`.
 
 ## Input
@@ -36,9 +39,9 @@ base=2, exp=1000000000000000000, mod=1000000007 → 719476260
 ## Run
 
 ```
-cd rust && make
-cd go   && make
-cd python && make
+make -C rust
+make -C go
+make -C python
 ```
 
 Stuck? See `HINTS.md`.

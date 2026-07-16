@@ -9,7 +9,8 @@
 
 You manage a single meeting room and have `n` requests, each with a start and end time. Book the largest set of meetings that don't overlap (touching at an endpoint is fine — the next meeting can start exactly when the last ends). Output how many meetings you book.
 
-Constraints: n up to ~10⁵, times fit in i32.
+Constraints: `0 <= n <= 200000`, `n` equals the length of `intervals`, and each
+interval has `start < end`. Start and end times fit in signed 32-bit integers.
 
 ## Input
 
@@ -36,9 +37,9 @@ A single integer: the maximum number of non-overlapping meetings.
 ## Run
 
 ```
-cd rust   && make
-cd go     && make
-cd python && make
+make -C rust
+make -C go
+make -C python
 ```
 
 Stuck? See `HINTS.md`.

@@ -48,9 +48,9 @@ The merged events on one line, space-separated, each emitted as `ts` then `id`:
 ## Run
 
 ```
-cd rust   && make
-cd go     && make
-cd python && make
+make -C rust
+make -C go
+make -C python
 ```
 
 Stuck? See `HINTS.md`.

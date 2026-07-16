@@ -10,9 +10,9 @@
 Report every 1-indexed start position where `pattern` occurs in `text`,
 including overlapping matches.
 
-Constraints: `|T|` up to `3 * 10^5`, `|P|` up to `10^3`. Inputs are lowercase
-`a`-`z`; one small case includes a space to verify JSON parsing. `pattern` may
-be empty; report no positions.
+Constraints: `|T|` is at most `3 * 10^5` and `|P|` is at most `10^3`. Both
+strings contain printable ASCII characters, including spaces. `pattern` may be
+empty; report no positions.
 
 ## Input
 
@@ -39,9 +39,9 @@ text "aaaaa", pattern "aa" → 1 2 3 4
 ## Run
 
 ```
-cd rust && make
-cd go   && make
-cd python && make
+make -C rust
+make -C go
+make -C python
 ```
 
 Stuck? See `HINTS.md`.

@@ -36,9 +36,9 @@ A single integer: minimum coin count, or `-1` if the amount can't be made.
 ## Run
 
 ```
-cd rust   && make
-cd go     && make
-cd python && make
+make -C rust
+make -C go
+make -C python
 ```
 
 Stuck? See `HINTS.md`.

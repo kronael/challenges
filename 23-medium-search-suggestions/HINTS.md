@@ -2,10 +2,11 @@
 
 > Spoilers. Open only when stuck.
 
-- **Trie (prefix tree)**: build it once over the whole dictionary in O(|words|),
-  with one node per character and 26 possible children (`a`–`z`). Reaching the node
-  for a query then costs O(|query|), independent of how many words are in the
-  dictionary — that is what kills the per-query re-scan.
+- **Trie (prefix tree)**: build it once in time proportional to the total number
+  of input characters, with one node per character and 26 possible children
+  (`a`–`z`). Reaching the node for a query then costs O(|query|), independent of
+  how many words are in the dictionary — that is what kills the per-query
+  re-scan.
 - **Walk to the prefix node, then explore its subtree**: a query first walks down
   the trie character by character; if any character is missing the query has no
   matches and you emit the empty segment. Otherwise every word in the subtree

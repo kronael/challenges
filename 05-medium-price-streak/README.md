@@ -15,7 +15,8 @@ length.
 "Subsequence", not "substring": you may skip any days you like, but you cannot
 reorder them. Strictly increasing means equal prices do not extend a run.
 
-Constraints: `n` up to 2·10⁵, prices fit in i32.
+Constraints: `0 <= n <= 2·10⁵`, `n` equals the length of `seq`, and each value
+fits in a signed 32-bit integer.
 
 ## Input
 
@@ -42,9 +43,9 @@ A single integer: the length of the longest strictly increasing subsequence.
 ## Run
 
 ```
-cd rust   && make
-cd go     && make
-cd python && make
+make -C rust
+make -C go
+make -C python
 ```
 
 Stuck? See `HINTS.md`.

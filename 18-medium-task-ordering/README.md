@@ -12,9 +12,9 @@ means task `A` must complete before task `B`. Produce an ordering of all `n`
 tasks in which every task appears after all of its prerequisites — like a build
 system or a course schedule.
 
-Many valid orderings can exist, so the output is pinned down: among the tasks
-that are ready to go at each step, always pick the smallest-numbered one. This
-makes the answer unique.
+Many valid orderings can exist. Return the lexicographically smallest valid
+ordering, comparing task numbers from left to right. This makes the answer
+unique.
 
 If the prerequisites contain a cycle, no valid ordering exists — output `CYCLE`.
 
@@ -28,11 +28,12 @@ Constraints: `n` up to `10⁵`, up to `2·10⁵` edges.
 
 ## Output
 
-A valid ordering on one line, space-separated, or `CYCLE`.
+The lexicographically smallest valid ordering on one line, space-separated, or
+`CYCLE`.
 
 ## Examples
 
-**Example 1** — always emitting the smallest ready task makes the order deterministic
+**Example 1** — a graph with several valid orderings
 ```
 n=6, edges [[5,2],[5,0],[4,0],[4,1],[2,3],[3,1]] → 4 5 0 2 3 1
 ```
@@ -45,9 +46,9 @@ n=2, edges [[0,1],[1,0]] → CYCLE
 ## Run
 
 ```
-cd rust && make
-cd go   && make
-cd python && make
+make -C rust
+make -C go
+make -C python
 ```
 
 Stuck? See `HINTS.md`.

@@ -41,9 +41,9 @@ Each edge is `[u, v, w]`: a directed edge u → v with weight w.
 ## Run
 
 ```
-cd rust   && make
-cd go     && make
-cd python && make
+make -C rust
+make -C go
+make -C python
 ```
 
 Stuck? See `HINTS.md`.

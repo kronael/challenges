@@ -12,8 +12,9 @@ has a construction cost. Choose a subset of the roads so that every city is
 reachable from every other city, and the total construction cost is as small as
 possible. Output that minimum total cost.
 
-Constraints: `n` up to 10⁴, `m` up to 2·10⁵, costs fit in i32, the graph is
-connected.
+Constraints: `n` up to 10⁴, `m` up to 2·10⁵, costs fit in signed 32-bit
+integers, and the graph is connected. The total cost and all accumulated values
+must fit in a signed 64-bit integer.
 
 ## Input
 
@@ -25,7 +26,7 @@ connected.
 
 ## Output
 
-A single integer: the minimum total construction cost.
+A single signed 64-bit integer: the minimum total construction cost.
 
 ## Examples
 
@@ -42,9 +43,9 @@ A single integer: the minimum total construction cost.
 ## Run
 
 ```
-cd rust && make
-cd go   && make
-cd python && make
+make -C rust
+make -C go
+make -C python
 ```
 
 Stuck? See `HINTS.md`.

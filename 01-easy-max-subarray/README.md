@@ -7,10 +7,8 @@
 
 ## Problem
 
-Find the contiguous, non-empty subarray with the largest sum. The array can hold
-negative numbers, so taking everything isn't always best — sometimes the best run
-sits in the middle, flanked by losses you must skip, and sometimes every element is
-negative so the answer is a single least-bad value.
+Find the contiguous, non-empty subarray with the largest sum. The subarray must
+contain at least one element.
 
 Constraints: `1 <= n <= 10⁶`; values and sums fit in signed 64-bit integers.
 
@@ -30,12 +28,12 @@ A single integer: the maximum contiguous subarray sum.
 
 ## Examples
 
-**Example 1** — the answer skips the leading and trailing negatives
+**Example 1** — mixed positive and negative values
 ```
 arr [-2,1,-3,4,-1,2,1,-5,4] → 6   (subarray [4,-1,2,1])
 ```
 
-**Example 2** — all negative, so the best is the single least-bad element
+**Example 2** — all negative values
 ```
 arr [-5,-2,-8] → -2
 ```
@@ -43,9 +41,9 @@ arr [-5,-2,-8] → -2
 ## Run
 
 ```
-cd rust && make
-cd go   && make
-cd python && make
+make -C rust
+make -C go
+make -C python
 ```
 
 Stuck? See `HINTS.md`.

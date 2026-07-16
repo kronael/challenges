@@ -14,10 +14,9 @@ operations, in order:
 - `update i d` — add `d` to element `i`.
 - `sum i` — report the prefix sum `a[1] + a[2] + … + a[i]`.
 
-Sums can be large: with `n = 2·10⁵` elements and values up to ~`10¹⁸`, a prefix
-sum overflows 32 bits, so accumulate in 64-bit integers.
-
-Constraints: `n` up to 2·10⁵, up to 2·10⁵ queries, indices are 1-based.
+Constraints: `n` is at most 2·10⁵, there are at most 2·10⁵ queries, and indices
+are 1-based. Every initial value, update delta, array value after an update, and
+reported prefix sum fits in a signed 64-bit integer.
 
 ## Input / Output
 
@@ -44,9 +43,9 @@ init [5,5,5]: sum3→15, update(1,-5), sum1→0, sum3→10
 ## Run
 
 ```
-cd rust   && make
-cd go     && make
-cd python && make
+make -C rust
+make -C go
+make -C python
 ```
 
 Stuck? See `HINTS.md`.

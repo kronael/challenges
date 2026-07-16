@@ -12,7 +12,8 @@ puzzle:
 
 - `solve_nqueens(n)` — place `n` queens on an `n×n` board so no two attack each
   other (no shared row, column, or diagonal). Return every placement as a tuple
-  where index = row and value = column. `n=4` has 2 solutions; `n=8` has 92.
+  where index = row and value = column. Valid inputs have `0 <= n <= 8`.
+  `n=0` returns `[()]`, `n=4` has 2 solutions, and `n=8` has 92.
 - `solve_graph_coloring(n, edges, k)` — assign one of `k` colors to each of the
   `n` nodes so that the two endpoints of every edge get different colors. Return
   every valid coloring as a dict mapping node → color. A triangle has 6 proper
@@ -31,7 +32,7 @@ The test suite checks exact solution counts and validity.
 ## Run
 
 ```
-cd python && make
+make -C python
 ```
 
 Stuck? See `HINTS.md`.
