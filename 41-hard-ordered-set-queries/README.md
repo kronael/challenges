@@ -46,9 +46,9 @@ search0→0; range_count(-10,10)→0; insert0; search0→1; range_count(-10,10)�
 ## Run
 
 ```
-cd rust   && make
-cd go     && make
-cd python && make
+make -C rust
+make -C go
+make -C python
 ```
 
 Stuck? See `HINTS.md`.

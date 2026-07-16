@@ -1,14 +1,16 @@
 # 36 — Hard — Matrix Chain Multiplication
 
-**Task**: Find the parenthesization of a matrix product that minimises scalar multiplications.
+**Task**: Find the minimum number of scalar multiplications needed for a matrix
+chain product.
 
 **Difficulty**: hard
 **Time estimate**: ~50 min
 
 ## Problem
 
-You need to multiply a chain of `k` matrices, `A₁ · A₂ · … · A_k`, where matrix
-`i` has dimensions `dims[i-1] × dims[i]`. Matrix multiplication is associative —
+You need to multiply a chain of `k` matrices, `A₀ · A₁ · … · Aₖ₋₁`, where
+zero-based matrix `i` has dimensions `dims[i] × dims[i+1]`. Matrix
+multiplication is associative —
 the final product is the same no matter how you parenthesize it — but the *cost*
 is not. Multiplying a `p×q` matrix by a `q×r` matrix takes `p·q·r` scalar
 multiplications, so the order in which you pair up the matrices decides the total
@@ -26,7 +28,8 @@ to 100.
 {"dims": [10, 30, 5, 60]}
 ```
 
-`k+1` dimensions for `k` matrices; matrix `i` is `dims[i] × dims[i+1]`.
+The list contains `k+1` dimensions for `k` matrices. Matrix indices start at
+zero, so matrix `i` is `dims[i] × dims[i+1]`.
 
 ## Output
 
@@ -47,9 +50,9 @@ dims [5,10,20] → 1000
 ## Run
 
 ```
-cd rust && make
-cd go   && make
-cd python && make
+make -C rust
+make -C go
+make -C python
 ```
 
 Stuck? See `HINTS.md`.

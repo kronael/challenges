@@ -26,8 +26,8 @@ is a fixed 64 bytes; no `Mutex` or OS blocking primitive.
 ## Run
 
 ```
-cd rust && make test
-cd go   && make test
+make -C rust test
+make -C go test
 ```
 
 Stuck? See `HINTS.md`.

@@ -20,6 +20,10 @@ answer the questions in its header comment before running it:
   different runs (or different hardware)?
 - Why — what in the program (if anything) forces that result?
 
+For Quiz 04, identify which version is race-free and what visibility its reads
+have after the store executes. Scheduler progress and termination are outside
+the question.
+
 Treat a prediction as wrong if it relies on observed behaviour rather than a rule
 that guarantees it.
 

@@ -1,7 +1,7 @@
 # 32 — Hard — Two-Thread Buffer
 
-**Task**: Implement a bounded single-producer single-consumer buffer that
-sustains 1B+ messages/second.
+**Task**: Implement a bounded single-producer single-consumer buffer with a
+non-blocking `push` and `pop` interface.
 
 **Difficulty**: hard
 **Time estimate**: ~60 min
@@ -14,14 +14,14 @@ of two. `push` returns false when the queue is full; `pop` returns nothing when
 it is empty. Every value the producer enqueues must come back to the consumer
 exactly once, in order — no loss, no duplicates, no reordering.
 
-The target is 1B+ messages/second. The stress test pushes many messages and
-asserts in-order delivery; the bench measures throughput.
+The stress test pushes many messages and asserts in-order delivery. The bench
+reports throughput for comparison between implementations.
 
 ## Run
 
 ```
-cd rust && make test
-cd go   && make test
+make -C rust test
+make -C go test
 ```
 
 Stuck? See `HINTS.md`.

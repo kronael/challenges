@@ -22,8 +22,8 @@ released before all N have arrived for the current phase or stalls forever.
 ## Run
 
 ```
-cd rust && make test
-cd go   && make test
+make -C rust test
+make -C go test
 ```
 
 Stuck? See `HINTS.md`.

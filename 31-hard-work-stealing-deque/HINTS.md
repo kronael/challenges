@@ -23,4 +23,10 @@
   CAS, try again" (`Retry`). Thieves spin on `Retry` and only give up on
   `Empty` once the owner signals it is done producing.
 
-Source: [Chase & Lev, *Dynamic Circular Work-Stealing Deque* (SPAA 2005)](https://www.di.ens.fr/~zappa/readings/ppopp13.pdf)
+Sources:
+
+- [Chase and Lev, *Dynamic Circular Work-Stealing Deque*, SPAA
+  2005](https://doi.org/10.1145/1073970.1073974) introduces the deque.
+- [Lê et al., *Correct and Efficient Work-Stealing for Weak Memory Models*,
+  PPoPP 2013](https://doi.org/10.1145/2442516.2442524) gives the portable C11
+  treatment behind the ordering guidance above.

@@ -8,13 +8,14 @@
   — even if it printed the right thing every time you ran it.
 - **Which operations synchronise**: channel send/receive, channel `close`,
   `Mutex` lock/unlock, `WaitGroup` `Done`/`Wait`, `sync.Once`, and properly
-  ordered `sync/atomic` reads/writes. Nothing else does — plain reads/writes,
-  `time.Sleep`, and the `go` statement itself establish no ordering between
-  goroutines.
-- **`go` starts a goroutine but does not synchronise it** against the rest of the
-  program, so two goroutines' prints can interleave in any order (quiz 05), and a
-  plain variable written by one may never become visible to another (quiz 01,
-  quiz 04 version A).
+  ordered `sync/atomic` reads/writes. Plain reads and writes and `time.Sleep` do
+  not synchronise goroutines.
+- **A `go` statement synchronises with the start of the new goroutine.** Writes
+  sequenced before that statement are visible when the new goroutine begins.
+  Creation does not order two sibling goroutines, decide when either runs, or
+  wait for either to finish. Their prints can therefore occur in either order in
+  quiz 05. A plain variable written after one goroutine starts may still race
+  with another goroutine's read, as in quiz 01 and quiz 04 version A.
 - **`select` with multiple ready cases chooses uniformly at random** — it is not
   FIFO and not ordered by case position (quiz 09).
 - **`close(c)` happens-before a receive of the zero value from `c`**, so a write
@@ -37,9 +38,10 @@
 - **03 — WaitGroup fence**: always prints `[0 1 4 9 16]`. Each goroutine writes a
   disjoint index before `Done`, and `Wait` returns only after those writes are
   ordered before the print.
-- **04 — Atomic vs plain read**: the plain-variable loop can run forever or
-  otherwise behave unpredictably because it has a data race. The atomic loop is
-  the one with the memory-ordering guarantee.
+- **04 — Atomic vs plain read**: the plain-variable version has a data race, so
+  it does not guarantee that the write becomes visible. The atomic version is
+  race-free. A load ordered after the executed store observes the stored value.
+  Atomics do not add a scheduler-fairness or termination guarantee.
 - **05 — Goroutine start ordering**: both `hello` then `world` and `world` then
   `hello` are possible. Starting goroutines does not order their prints relative
   to each other.

@@ -7,8 +7,9 @@
   pairwise-compatible 5-set is exactly a 5-clique in that graph. The answer is
   the cheapest 5-clique.
 - **Miller–Rabin primality**: deterministic over the 64-bit range, fast enough
-  to test millions of concatenations. Trial division dies once the
-  concatenations reach eight digits.
+  for the many concatenations considered during the search. One trial-division
+  check at this input size is manageable; repeating it across the full set of
+  candidate pairs is the expensive part.
 - **Clique search by extension**: backtrack, adding only primes compatible with
   *every* current member; this pruning is what makes 5-cliques tractable. Cache
   pair compatibility so each concatenation is tested once.

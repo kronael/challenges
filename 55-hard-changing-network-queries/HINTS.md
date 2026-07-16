@@ -14,4 +14,6 @@
 - Rebuilding adjacency and searching the live graph for every query is correct
   but can take quadratic work. That is the rotten reference.
 
-Source: [Holm, de Lichtenberg, and Thorup — Fully dynamic graph connectivity](https://doi.org/10.1145/276698.276715)
+Further reading: [Holm, de Lichtenberg, and Thorup — Fully dynamic graph
+connectivity](https://doi.org/10.1145/276698.276715) studies the online version
+of the problem. It does not use the offline method described above.

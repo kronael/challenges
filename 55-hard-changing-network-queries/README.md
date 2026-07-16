@@ -40,9 +40,9 @@ Print one `0` or `1` for each `ask`, in input order, separated by spaces.
 ## Run
 
 ```bash
-cd python && make
-cd go     && make
-cd rust   && make
+make -C python
+make -C go
+make -C rust
 ```
 
 Stuck? See `HINTS.md`.

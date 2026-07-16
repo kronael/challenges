@@ -21,8 +21,8 @@
   mirror for `head`). Relaxed loads suffice for an index a thread owns and reads
   back itself. No `SeqCst` is needed.
 
-The slow-but-correct version is the one in `rotten/main.c`: head and tail share a
-cache line, so it passes a single-threaded check but runs 3–5x slower than the
-padded version under the two-thread bench.
+The slow-but-correct version in `rotten/main.c` places head and tail on the same
+cache line. It passes the functional check, while the adversarial target rejects
+the layout that causes the contention.
 
 Source: [Drepper, *What Every Programmer Should Know About Memory*](https://people.freebsd.org/~lstewart/articles/cpumemory.pdf)

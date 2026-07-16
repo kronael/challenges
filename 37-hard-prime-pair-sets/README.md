@@ -46,9 +46,9 @@ rule — your job is the five-prime minimum.
 ## Run
 
 ```
-cd rust   && make
-cd go     && make
-cd python && make
+make -C rust
+make -C go
+make -C python
 ```
 
 Stuck? See `HINTS.md`.

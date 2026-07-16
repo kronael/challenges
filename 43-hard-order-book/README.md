@@ -89,9 +89,9 @@ The market buy takes 3 at 101, then 3 of the 4 at 103 (two trades), filling its
 ## Run
 
 ```
-cd rust   && make
-cd go     && make
-cd python && make
+make -C rust
+make -C go
+make -C python
 ```
 
 Stuck? See `HINTS.md`.

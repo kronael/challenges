@@ -1,5 +1,6 @@
 // QUIZ 04 — Atomic vs plain read
-// Predict: which of these two goroutines can loop forever? Which is guaranteed to terminate?
+// Predict: which version is race-free? If the store executes, what visibility
+// does each version guarantee? Do not assume scheduler fairness or termination.
 // Your answer: ________________________________
 
 package main

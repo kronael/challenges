@@ -26,7 +26,8 @@ Constraints: up to `200000` segments of each orientation, coordinates between
 
 ## Output
 
-Print the number of intersecting pairs as one integer.
+Print the number of intersecting pairs as one signed 64-bit integer. The result
+can exceed the 32-bit range.
 
 ## Example
 
@@ -37,9 +38,9 @@ Print the number of intersecting pairs as one integer.
 ## Run
 
 ```bash
-cd python && make
-cd go     && make
-cd rust   && make
+make -C python
+make -C go
+make -C rust
 ```
 
 Stuck? See `HINTS.md`.

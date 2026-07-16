@@ -19,15 +19,16 @@ The interface is three operations:
   (FIFO for thieves). `Retry` signals a transient race the caller should retry;
   `Empty` means there was nothing to take.
 
-The backing buffer is fixed power-of-two sized; you do not need to resize it.
-The stress test runs one owner against many thieves, interleaving pushes with
-the owner's own pops, then asserts that the multiset of everything consumed
-equals the multiset pushed.
+The backing buffer has a fixed capacity of 4,194,304 tasks. The number of tasks
+present at once will always stay below that capacity. Resizing and full-buffer
+handling are outside the contract. The stress test runs one owner against many
+thieves, interleaving pushes with the owner's own pops, then asserts that the
+multiset of everything consumed equals the multiset pushed.
 
 ## Run
 
 ```
-cd rust && make test
+make -C rust test
 ```
 
 Stuck? See `HINTS.md`.
