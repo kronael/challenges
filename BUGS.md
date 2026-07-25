@@ -30,3 +30,19 @@ The Go harness for challenge 37 is the only case-driven Go suite that neither fa
 - **Source:** `26-medium-dynamic-prefix-sums/go/solution_test.go:14`, `26-medium-dynamic-prefix-sums/go/solution_test.go:24`, `26-medium-dynamic-prefix-sums/go/solution_test.go:29`, `26-medium-dynamic-prefix-sums/go/solution_test.go:32`
 - **Status:** resolved-not-yet-removed
 - **Fix:** 9e500ba
+
+## T4 — 22's golden reference is an unimplemented stub
+
+`22-medium-unbounded-sequences/golden/main.py` is byte-for-byte the solver stub:
+all eight functions are a docstring followed by `pass`. There is no reference
+implementation for the challenge, so nothing verifies that the contract in
+`python/test_solution.py` is satisfiable as written. `ruff check` rejects the
+nine `pass` statements (PIE790), which makes `golden/`'s own `make lint` fail
+and is the single failure in the repo-wide `make test`.
+
+- **Severity:** medium
+- **Scope:** challenge 22 reference implementation
+- **Affected:** `22-medium-unbounded-sequences/golden/main.py`
+- **Source:** `22-medium-unbounded-sequences/golden/main.py:6`, `22-medium-unbounded-sequences/golden/Makefile:12`
+- **Status:** open
+- **Found:** 2026-07-25, while running the repo-wide `make test` after adding the C and Go solver stubs. Pre-existing; unrelated to that change.
