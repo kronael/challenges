@@ -35,6 +35,7 @@ belongs in `python/main.py`.
 ## Run
 
 ```
+make -C go
 make -C python
 ```
 

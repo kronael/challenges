@@ -45,6 +45,7 @@ All overlap, so only one job fits; the heaviest is weight 7.
 ```
 make -C rust
 make -C go
+make -C c
 make -C python
 ```
 

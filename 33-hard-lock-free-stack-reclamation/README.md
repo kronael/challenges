@@ -32,6 +32,7 @@ garbage collector.
 
 ```
 make -C rust test
+make -C c test
 ```
 
 Stuck? See `HINTS.md`.

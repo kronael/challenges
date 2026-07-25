@@ -43,6 +43,7 @@ the middle of everything seen so far.
 ```
 make -C rust
 make -C go
+make -C c
 make -C python
 ```
 

@@ -38,6 +38,7 @@ A single integer: minimum coin count, or `-1` if the amount can't be made.
 ```
 make -C rust
 make -C go
+make -C c
 make -C python
 ```
 

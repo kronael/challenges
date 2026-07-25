@@ -41,6 +41,7 @@ text "aaaaa", pattern "aa" → 1 2 3 4
 ```
 make -C rust
 make -C go
+make -C c
 make -C python
 ```
 

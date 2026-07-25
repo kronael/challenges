@@ -19,6 +19,7 @@ The stress test asserts that every pushed message is popped exactly once.
 ```
 make -C rust test
 make -C go test
+make -C c test
 ```
 
 Stuck? See `HINTS.md`.

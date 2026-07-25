@@ -45,6 +45,7 @@ A single signed 64-bit integer: the minimum total construction cost.
 ```
 make -C rust
 make -C go
+make -C c
 make -C python
 ```
 

@@ -43,6 +43,7 @@ A single integer: the minimum number of edits.
 ```
 make -C rust
 make -C go
+make -C c
 make -C python
 ```
 

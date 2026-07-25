@@ -45,6 +45,7 @@ init [5,5,5]: sum3→15, update(1,-5), sum1→0, sum3→10
 ```
 make -C rust
 make -C go
+make -C c
 make -C python
 ```
 

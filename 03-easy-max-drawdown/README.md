@@ -51,6 +51,7 @@ A single signed 64-bit integer: the maximum drawdown, which is non-negative.
 ```
 make -C rust
 make -C go
+make -C c
 make -C python
 ```
 

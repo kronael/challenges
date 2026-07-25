@@ -50,6 +50,7 @@ cap 2: put(1,1) put(1,2) get1→2 put2 put(1,3) get1→3 get2→2
 ```
 make -C rust
 make -C go
+make -C c
 make -C python
 ```
 

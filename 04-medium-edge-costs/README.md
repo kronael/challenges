@@ -42,6 +42,7 @@ The assigned loads, space-separated on one line.
 ```
 make -C rust
 make -C go
+make -C c
 make -C python
 ```
 

@@ -57,6 +57,7 @@ A single integer: the maximum number of non-crossing base pairs.
 ```
 make -C rust
 make -C go
+make -C c
 make -C python
 ```
 

@@ -38,6 +38,7 @@ A single integer: the number of inversions.
 ```
 make -C rust
 make -C go
+make -C c
 make -C python
 ```
 

@@ -43,6 +43,7 @@ arr [-5,-2,-8] → -2
 ```
 make -C rust
 make -C go
+make -C c
 make -C python
 ```
 

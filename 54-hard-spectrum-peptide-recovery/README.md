@@ -51,6 +51,7 @@ Print the chosen masses separated by spaces, or `NONE`.
 ```bash
 make -C python
 make -C go
+make -C c
 make -C rust
 ```
 

@@ -43,6 +43,7 @@ Each edge is `[u, v, w]`: a directed edge u → v with weight w.
 ```
 make -C rust
 make -C go
+make -C c
 make -C python
 ```
 

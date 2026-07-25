@@ -46,6 +46,7 @@ values [7,8,9], [sum 2-2] → 8
 ```
 make -C rust
 make -C go
+make -C c
 make -C python
 ```
 

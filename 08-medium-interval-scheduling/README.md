@@ -39,6 +39,7 @@ A single integer: the maximum number of non-overlapping meetings.
 ```
 make -C rust
 make -C go
+make -C c
 make -C python
 ```
 

@@ -46,6 +46,7 @@ fires.
 ```text
 make -C rust
 make -C go
+make -C c
 make -C python
 ```
 

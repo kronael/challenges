@@ -42,8 +42,9 @@ parts ["hello","world","foo"], queries [[0,8],[5,5],[2,6]]
 
 ```
 make -C rust
-make -C python
 make -C go
+make -C c
+make -C python
 ```
 
 Stuck? See `HINTS.md`.

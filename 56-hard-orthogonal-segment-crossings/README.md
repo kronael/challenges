@@ -40,6 +40,7 @@ can exceed the 32-bit range.
 ```bash
 make -C python
 make -C go
+make -C c
 make -C rust
 ```
 

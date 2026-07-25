@@ -48,6 +48,7 @@ Print the state index for every base, separated by spaces.
 ```text
 make -C rust
 make -C go
+make -C c
 make -C python
 ```
 

@@ -53,6 +53,10 @@ Cargo.lock
 *.trace
 perf.data
 
-# Compiled sys C binaries (golden/rotten build to ./main)
+# Compiled C binaries (golden/rotten build to ./main; c/ builds these)
 */golden/main
 */rotten/main
+*/c/main
+*/c/run_tests
+*/c/stress
+*/c/benchmark

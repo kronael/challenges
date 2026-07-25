@@ -48,6 +48,7 @@ search0→0; range_count(-10,10)→0; insert0; search0→1; range_count(-10,10)�
 ```
 make -C rust
 make -C go
+make -C c
 make -C python
 ```
 

@@ -45,6 +45,7 @@ s "ABC", t "AXBXC" → 3   ("ABC")
 ```
 make -C rust
 make -C go
+make -C c
 make -C python
 ```
 

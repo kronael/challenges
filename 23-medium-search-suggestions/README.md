@@ -42,6 +42,7 @@ words ["a","ab","abc"], queries ["a","ab","abc","abcd","x"]
 ```
 make -C rust
 make -C go
+make -C c
 make -C python
 ```
 

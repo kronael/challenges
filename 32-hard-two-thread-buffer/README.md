@@ -22,6 +22,7 @@ reports throughput for comparison between implementations.
 ```
 make -C rust test
 make -C go test
+make -C c test
 ```
 
 Stuck? See `HINTS.md`.

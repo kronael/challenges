@@ -29,6 +29,7 @@ multiset of everything consumed equals the multiset pushed.
 
 ```
 make -C rust test
+make -C c test
 ```
 
 Stuck? See `HINTS.md`.

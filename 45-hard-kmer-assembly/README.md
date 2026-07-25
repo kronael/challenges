@@ -52,6 +52,7 @@ A single DNA string on one line — the reconstructed molecule.
 ```
 make -C rust
 make -C go
+make -C c
 make -C python
 ```
 

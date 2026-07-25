@@ -32,6 +32,7 @@ The test suite checks exact solution counts and validity.
 ## Run
 
 ```
+make -C go
 make -C python
 ```
 

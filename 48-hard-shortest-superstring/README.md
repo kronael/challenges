@@ -53,6 +53,7 @@ print an empty line.
 ```
 make -C rust
 make -C go
+make -C c
 make -C python
 ```
 

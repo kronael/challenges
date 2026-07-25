@@ -45,6 +45,7 @@ A single integer: the length of the longest strictly increasing subsequence.
 ```
 make -C rust
 make -C go
+make -C c
 make -C python
 ```
 

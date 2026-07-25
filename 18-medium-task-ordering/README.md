@@ -48,6 +48,7 @@ n=2, edges [[0,1],[1,0]] → CYCLE
 ```
 make -C rust
 make -C go
+make -C c
 make -C python
 ```
 

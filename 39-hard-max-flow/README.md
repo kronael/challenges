@@ -42,6 +42,7 @@ Path 1→2→4 carries 2, path 1→3→4 carries 4.
 ```
 make -C rust
 make -C go
+make -C c
 make -C python
 ```
 

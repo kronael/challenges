@@ -37,6 +37,7 @@ Single integer: the number of distinct non-empty substrings.
 ```
 make -C rust
 make -C go
+make -C c
 make -C python
 ```
 

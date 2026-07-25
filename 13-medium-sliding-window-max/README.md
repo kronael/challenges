@@ -45,6 +45,7 @@ k=2, arr [9,1,1,1] → 9 1 1
 ```
 make -C rust
 make -C go
+make -C c
 make -C python
 ```
 

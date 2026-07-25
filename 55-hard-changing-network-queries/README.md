@@ -42,6 +42,7 @@ Print one `0` or `1` for each `ask`, in input order, separated by spaces.
 ```bash
 make -C python
 make -C go
+make -C c
 make -C rust
 ```
 

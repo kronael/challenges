@@ -48,6 +48,7 @@ rule — your job is the five-prime minimum.
 ```
 make -C rust
 make -C go
+make -C c
 make -C python
 ```
 

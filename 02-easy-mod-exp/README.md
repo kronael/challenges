@@ -41,6 +41,7 @@ base=2, exp=1000000000000000000, mod=1000000007 → 719476260
 ```
 make -C rust
 make -C go
+make -C c
 make -C python
 ```
 

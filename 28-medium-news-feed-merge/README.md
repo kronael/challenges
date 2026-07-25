@@ -50,6 +50,7 @@ The merged events on one line, space-separated, each emitted as `ts` then `id`:
 ```
 make -C rust
 make -C go
+make -C c
 make -C python
 ```
 

@@ -2,8 +2,9 @@
 
 57 self-contained algorithm and systems challenges. Most use file-based cases,
 an optimized reference, a deliberately naive benchmark control, and stubs in
-Python, Go, and Rust. A few exercises use an API test suite or a systems stress
-test instead. Run `make` in a language directory to format, build, lint, and test.
+Python, Go, Rust, and C. A few exercises use an API test suite or a systems
+stress test instead. Run `make` in a language directory to format, build, lint,
+and test.
 
 ---
 
@@ -55,7 +56,12 @@ NN-level-slug/
   python/        ← stub: implement solve() in main.py
   go/            ← stub: implement solve() in main.go
   rust/          ← stub: implement solve() in src/main.rs
+  c/             ← stub: implement solve() in solution.c
 ```
+
+The C directory ships a finished scaffold — `json.h`, `harness.h`, `main.c`, and
+`test.c` are shared and identical everywhere. Only `solution.c` holds the stub:
+`input_parse` and `answer_print` are written for you, `solve()` is not.
 
 The `README.md`, challenge title, directory slug, and catalog never narrow the
 solution search. All guidance, including rejected approaches and complexity
@@ -81,63 +87,63 @@ implementation burden, and the constraints enforced by `make bench`.
 
 | # | Name | Level | Lang |
 |---|------|-------|------|
-| [01](01-easy-max-subarray/) | Maximum Subarray | easy | py go rs |
-| [02](02-easy-mod-exp/) | Modular Power | easy | py go rs |
-| [03](03-easy-max-drawdown/) | Max Drawdown | easy | py go rs |
-| [04](04-medium-edge-costs/) | Vertex Load Assignment | medium | py go rs |
-| [05](05-medium-price-streak/) | Price Streak | medium | py go rs |
-| [06](06-medium-edit-distance/) | Edit Distance | medium | py go rs |
-| [07](07-medium-coin-change/) | Coin Change | medium | py go rs |
-| [08](08-medium-interval-scheduling/) | Interval Scheduling | medium | py go rs |
-| [09](09-medium-count-inversions/) | Count Inversions | medium | py go rs |
-| [10](10-medium-route-costs/) | Route Costs | medium | py go rs |
-| [11](11-medium-friend-groups/) | Friend Groups | medium | py go rs |
-| [12](12-medium-textbook-split/) | Textbook Split | medium | py go rs |
-| [13](13-medium-sliding-window-max/) | Sliding Window Maximum | medium | py go rs |
-| [14](14-medium-count-primes/) | Count Primes | medium | py go rs |
-| [15](15-medium-huge-fibonacci/) | Huge Fibonacci | medium | py go rs |
-| [16](16-medium-string-search/) | String Search | medium | py go rs |
-| [17](17-medium-knapsack/) | 0/1 Knapsack | medium | py go rs |
-| [18](18-medium-task-ordering/) | Task Ordering | medium | py go rs |
-| [19](19-medium-mst/) | Cheapest Road Network | medium | py go rs |
-| [20](20-medium-lcs/) | Longest Common Subsequence | medium | py go rs |
-| [21](21-medium-constraint-puzzles/) | Constraint Puzzles | medium | py |
-| [22](22-medium-unbounded-sequences/) | Unbounded Sequences | medium | py |
-| [23](23-medium-search-suggestions/) | Search Suggestions | medium | py go rs |
-| [24](24-medium-lru-cache/) | Cache Eviction | medium | py go rs |
-| [25](25-medium-running-median/) | Running Median | medium | py go rs |
-| [26](26-medium-dynamic-prefix-sums/) | Dynamic Prefix Sums | medium | py go rs |
-| [27](27-medium-weighted-job-scheduling/) | Weighted Job Scheduling | medium | py go rs |
-| [28](28-medium-news-feed-merge/) | News Feed Merge | medium | py go rs |
-| [29](29-hard-mpsc-queue/) | Multi-Producer Queue | hard | go rs |
-| [30](30-hard-consistent-tick-snapshot/) | Consistent Tick Snapshot | hard | go rs |
-| [31](31-hard-work-stealing-deque/) | Concurrent Owner/Thief Deque | hard | rs |
-| [32](32-hard-two-thread-buffer/) | Two-Thread Buffer | hard | go rs |
-| [33](33-hard-lock-free-stack-reclamation/) | Lock-Free Stack Reclamation | hard | rs |
-| [34](34-hard-reusable-spin-barrier/) | Reusable Spin Barrier | hard | go rs |
-| [35](35-hard-dynamic-range-sums/) | Dynamic Range Sums | hard | py go rs |
-| [36](36-hard-matrix-chain/) | Matrix Chain Multiplication | hard | py go rs |
-| [37](37-hard-prime-pair-sets/) | Prime Pair Sets | hard | py go rs |
-| [38](38-hard-distinct-substrings/) | Distinct Substrings | hard | py go rs |
-| [39](39-hard-max-flow/) | Max Flow | hard | py go rs |
+| [01](01-easy-max-subarray/) | Maximum Subarray | easy | py go rs c |
+| [02](02-easy-mod-exp/) | Modular Power | easy | py go rs c |
+| [03](03-easy-max-drawdown/) | Max Drawdown | easy | py go rs c |
+| [04](04-medium-edge-costs/) | Vertex Load Assignment | medium | py go rs c |
+| [05](05-medium-price-streak/) | Price Streak | medium | py go rs c |
+| [06](06-medium-edit-distance/) | Edit Distance | medium | py go rs c |
+| [07](07-medium-coin-change/) | Coin Change | medium | py go rs c |
+| [08](08-medium-interval-scheduling/) | Interval Scheduling | medium | py go rs c |
+| [09](09-medium-count-inversions/) | Count Inversions | medium | py go rs c |
+| [10](10-medium-route-costs/) | Route Costs | medium | py go rs c |
+| [11](11-medium-friend-groups/) | Friend Groups | medium | py go rs c |
+| [12](12-medium-textbook-split/) | Textbook Split | medium | py go rs c |
+| [13](13-medium-sliding-window-max/) | Sliding Window Maximum | medium | py go rs c |
+| [14](14-medium-count-primes/) | Count Primes | medium | py go rs c |
+| [15](15-medium-huge-fibonacci/) | Huge Fibonacci | medium | py go rs c |
+| [16](16-medium-string-search/) | String Search | medium | py go rs c |
+| [17](17-medium-knapsack/) | 0/1 Knapsack | medium | py go rs c |
+| [18](18-medium-task-ordering/) | Task Ordering | medium | py go rs c |
+| [19](19-medium-mst/) | Cheapest Road Network | medium | py go rs c |
+| [20](20-medium-lcs/) | Longest Common Subsequence | medium | py go rs c |
+| [21](21-medium-constraint-puzzles/) | Constraint Puzzles | medium | py go |
+| [22](22-medium-unbounded-sequences/) | Unbounded Sequences | medium | py go |
+| [23](23-medium-search-suggestions/) | Search Suggestions | medium | py go rs c |
+| [24](24-medium-lru-cache/) | Cache Eviction | medium | py go rs c |
+| [25](25-medium-running-median/) | Running Median | medium | py go rs c |
+| [26](26-medium-dynamic-prefix-sums/) | Dynamic Prefix Sums | medium | py go rs c |
+| [27](27-medium-weighted-job-scheduling/) | Weighted Job Scheduling | medium | py go rs c |
+| [28](28-medium-news-feed-merge/) | News Feed Merge | medium | py go rs c |
+| [29](29-hard-mpsc-queue/) | Multi-Producer Queue | hard | go rs c |
+| [30](30-hard-consistent-tick-snapshot/) | Consistent Tick Snapshot | hard | go rs c |
+| [31](31-hard-work-stealing-deque/) | Concurrent Owner/Thief Deque | hard | rs c |
+| [32](32-hard-two-thread-buffer/) | Two-Thread Buffer | hard | go rs c |
+| [33](33-hard-lock-free-stack-reclamation/) | Lock-Free Stack Reclamation | hard | rs c |
+| [34](34-hard-reusable-spin-barrier/) | Reusable Spin Barrier | hard | go rs c |
+| [35](35-hard-dynamic-range-sums/) | Dynamic Range Sums | hard | py go rs c |
+| [36](36-hard-matrix-chain/) | Matrix Chain Multiplication | hard | py go rs c |
+| [37](37-hard-prime-pair-sets/) | Prime Pair Sets | hard | py go rs c |
+| [38](38-hard-distinct-substrings/) | Distinct Substrings | hard | py go rs c |
+| [39](39-hard-max-flow/) | Max Flow | hard | py go rs c |
 | [40](40-hard-go-memory-model/) | Go Concurrency Quizzes | hard | go |
-| [41](41-hard-ordered-set-queries/) | Ordered Set Queries | hard | py go rs |
-| [42](42-hard-fragmented-string-queries/) | Fragmented String Queries | hard | py go rs |
-| [43](43-hard-order-book/) | Order Book | hard | py go rs |
-| [44](44-hard-affine-align/) | Affine Alignment Score | hard | py go rs |
-| [45](45-hard-kmer-assembly/) | K-mer Assembly | hard | py go rs |
-| [46](46-hard-crispr-offtarget/) | CRISPR Off-Targets | hard | py go rs |
-| [47](47-hard-rna-max-pairs/) | RNA Max Pairs | hard | py go rs |
-| [48](48-hard-shortest-superstring/) | Shortest Superstring | hard | py go rs |
-| [49](49-hard-gene-region-decoder/) | Gene Region Decoder | hard | py go rs |
-| [50](50-hard-tree-sequence-likelihood/) | Tree Sequence Likelihood | hard | py go rs |
-| [51](51-hard-deadline-scheduler/) | Deadline Scheduler | hard | py go rs |
-| [52](52-hard-service-pairing/) | Service Pairing | hard | py go rs |
-| [53](53-hard-circular-genome-distance/) | Circular Genome Distance | hard | py go rs |
-| [54](54-hard-spectrum-peptide-recovery/) | Spectrum Peptide Recovery | hard | py go rs |
-| [55](55-hard-changing-network-queries/) | Changing Network Queries | hard | py go rs |
-| [56](56-hard-orthogonal-segment-crossings/) | Orthogonal Segment Crossings | hard | py go rs |
-| [57](57-hard-causal-event-replay/) | Causal Event Replay | hard | py go rs |
+| [41](41-hard-ordered-set-queries/) | Ordered Set Queries | hard | py go rs c |
+| [42](42-hard-fragmented-string-queries/) | Fragmented String Queries | hard | py go rs c |
+| [43](43-hard-order-book/) | Order Book | hard | py go rs c |
+| [44](44-hard-affine-align/) | Affine Alignment Score | hard | py go rs c |
+| [45](45-hard-kmer-assembly/) | K-mer Assembly | hard | py go rs c |
+| [46](46-hard-crispr-offtarget/) | CRISPR Off-Targets | hard | py go rs c |
+| [47](47-hard-rna-max-pairs/) | RNA Max Pairs | hard | py go rs c |
+| [48](48-hard-shortest-superstring/) | Shortest Superstring | hard | py go rs c |
+| [49](49-hard-gene-region-decoder/) | Gene Region Decoder | hard | py go rs c |
+| [50](50-hard-tree-sequence-likelihood/) | Tree Sequence Likelihood | hard | py go rs c |
+| [51](51-hard-deadline-scheduler/) | Deadline Scheduler | hard | py go rs c |
+| [52](52-hard-service-pairing/) | Service Pairing | hard | py go rs c |
+| [53](53-hard-circular-genome-distance/) | Circular Genome Distance | hard | py go rs c |
+| [54](54-hard-spectrum-peptide-recovery/) | Spectrum Peptide Recovery | hard | py go rs c |
+| [55](55-hard-changing-network-queries/) | Changing Network Queries | hard | py go rs c |
+| [56](56-hard-orthogonal-segment-crossings/) | Orthogonal Segment Crossings | hard | py go rs c |
+| [57](57-hard-causal-event-replay/) | Causal Event Replay | hard | py go rs c |
 
 ---
 

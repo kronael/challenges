@@ -43,6 +43,7 @@ Print the minimum number of rearrangements as one integer.
 ```bash
 make -C python
 make -C go
+make -C c
 make -C rust
 ```
 

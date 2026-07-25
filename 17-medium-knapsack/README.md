@@ -43,6 +43,7 @@ capacity 10, items above → 90   (weight 4+3, value 40+50)
 ```
 make -C rust
 make -C go
+make -C c
 make -C python
 ```
 

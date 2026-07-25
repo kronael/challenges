@@ -20,7 +20,7 @@ Harness is **editor + `make test`**. Each challenge has its own dir
 
 ## Golden rule — solutions ONLY in golden/
 
-**io challenges** have four language dirs: `golden/`, `python/`, `go/`, `rust/`.
+**io challenges** have five language dirs: `golden/`, `python/`, `go/`, `rust/`, `c/`.
 
 - **`golden/main.py`** — the optimised reference. Always passes `make test`.
   Never shown to the solver. Used to generate `.out` files and as the bench target.
@@ -53,23 +53,35 @@ Harness is **editor + `make test`**. Each challenge has its own dir
   pinned, warmed-up, repeated measurements and an asserted regression.
   The root `make sys-rotten` target enforces the sanity-pass/adversarial-fail
   contract and rejects hangs.
-- **`python/main.py`, `go/main.go`, `rust/src/main.rs`** — stubs ONLY.
-  Only the algorithm body is a stub (`pass` / `return nil` / `todo!()`); the
-  scaffold around it must be COMPLETE — `solve(...)` signature matches the Input,
-  `main` parses JSON → calls `solve` → prints, and the test harness actually runs
-  the cases through `solve`. A finished stub builds and its tests run (and fail
-  only on the unimplemented body), never on harness/parse errors.
+- **`python/main.py`, `go/main.go`, `rust/src/main.rs`, `c/solution.c`** — stubs
+  ONLY. Only the algorithm body is a stub (`pass` / `return nil` / `todo!()` /
+  a zero `Answer`); the scaffold around it must be COMPLETE — `solve(...)`
+  signature matches the Input, `main` parses JSON → calls `solve` → prints, and
+  the test harness actually runs the cases through `solve`. A finished stub
+  builds and its tests run (and fail only on the unimplemented body), never on
+  harness/parse errors.
+  `c/` splits that scaffold across seven files. `Makefile`, `json.h`,
+  `harness.h`, `main.c` and `test.c` are shared byte-for-byte by every challenge
+  — copy them from `template/c/` and never hand-edit one copy. Per challenge you
+  write only `solution.h` (the `Input` and `Answer` types plus the five
+  prototypes) and `solution.c` (`input_parse`, `input_free`, `answer_print`,
+  `answer_free` complete; `solve` stubbed). `input_parse` transcribes the JSON
+  literally — a precomputed adjacency list, sort, or prefix sum in there is a
+  solution hint and belongs in `golden/`.
 
 **sys challenges** (29–34): Python is inappropriate (GIL prevents real concurrency).
 Use **`golden/main.c`** as the reference implementation instead of `main.py`.
 `golden/main.c` contains the complete algorithm + a pthreads stress test in one file.
 `golden/Makefile` builds with `gcc -std=c11 -O2 -pthread` and `make test` runs `./main`.
+Their `c/` solver dir keeps `solution.h` + `solution.c` (types and lifecycle
+complete, every concurrent operation stubbed to `abort()`), plus a finished
+`stress.c` and `bench.c`.
 
-**Never put a working solution in `python/`, `go/`, or `rust/`.** If you find one,
-move it to `golden/` and replace the original with a stub.
+**Never put a working solution in `python/`, `go/`, `rust/`, or `c/`.** If you find
+one, move it to `golden/` and replace the original with a stub.
 
 When scaffolding a new I/O challenge: write the reference first in
-`golden/main.py`, verify it passes, then write stubs in the three solver dirs.
+`golden/main.py`, verify it passes, then write stubs in the four solver dirs.
 
 ## README vs HINTS — never spoil the problem
 
@@ -112,9 +124,11 @@ NN-level-slug/
   python/  main.py · test_solution.py · Makefile
   go/      main.go · solution_test.go · go.mod · Makefile
   rust/    src/lib.rs · src/main.rs · tests/ · Cargo.toml · Makefile
+  c/       solution.h · solution.c · main.c · test.c · json.h · harness.h · Makefile
 ```
 
-sys challenges have no `python/`; rust-only sys challenges 31 and 33 have no `go/`.
+sys challenges have no `python/`; sys challenges 31 and 33 have no `go/`.
+API challenges 21 and 22 have only `python/` and `go/`.
 
 ## Input / output format
 
@@ -179,6 +193,9 @@ Name each pair `??_large_NAME.in` and `??_large_NAME.out`, such as
 - **py** — `uv run` (pytest, ruff); no venv to manage.
 - **go** — stdlib `go test`.
 - **rs** — `cargo test`. io: `src/main.rs` is the timed binary; sys: `src/bin/bench.rs`.
+- **c** — `cc -std=c11`, no dependencies. io: `./run_tests` drives `../cases`,
+  `./main` is the timed binary; sys: `./stress` and `./benchmark`. `lint`
+  recompiles everything with `-Wpedantic -Wshadow -Werror`.
 
 Per-challenge language set is in the README catalog (most are `py go rs`; some
 hard io and the sys ones drop a language).
@@ -190,7 +207,9 @@ hard io and the sys ones drop a language).
    guidance and solution-bearing sources in `HINTS.md`.
 3. Add at least eight small fixture pairs and at least two large pairs.
 4. Implement only `golden/` and `rotten/`. Tailor each solver scaffold to the
-   input contract, but keep its `solve()` body stubbed.
+   input contract, but keep its `solve()` body stubbed. For `c/`, copy the five
+   shared files from `template/c/` unchanged and write only `solution.h` and
+   `solution.c`.
 5. Verify the golden test and bench pass, the rotten small test passes, and every
    large case exceeds the rotten timeout.
 6. Add a row to the catalog table in the repo `README.md`.

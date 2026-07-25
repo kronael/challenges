@@ -48,6 +48,7 @@ n=3, unions [], queries [0,1] → 0
 ```
 make -C rust
 make -C go
+make -C c
 make -C python
 ```
 

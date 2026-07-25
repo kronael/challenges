@@ -28,6 +28,7 @@ is a fixed 64 bytes; no `Mutex` or OS blocking primitive.
 ```
 make -C rust test
 make -C go test
+make -C c test
 ```
 
 Stuck? See `HINTS.md`.

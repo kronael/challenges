@@ -45,6 +45,7 @@ One optimal split is [5,5] | [100].
 ```
 make -C rust
 make -C go
+make -C c
 make -C python
 ```
 

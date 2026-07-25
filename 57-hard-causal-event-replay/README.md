@@ -43,6 +43,7 @@ Print event IDs in replay order, separated by spaces.
 ```bash
 make -C python
 make -C go
+make -C c
 make -C rust
 ```
 

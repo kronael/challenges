@@ -52,6 +52,7 @@ dims [5,10,20] → 1000
 ```
 make -C rust
 make -C go
+make -C c
 make -C python
 ```
 

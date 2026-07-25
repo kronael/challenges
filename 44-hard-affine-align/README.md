@@ -88,6 +88,7 @@ A single integer: the maximum global alignment score.
 ```
 make -C rust
 make -C go
+make -C c
 make -C python
 ```
 

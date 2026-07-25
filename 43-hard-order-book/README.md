@@ -91,6 +91,7 @@ The market buy takes 3 at 101, then 3 of the 4 at 103 (two trades), filling its
 ```
 make -C rust
 make -C go
+make -C c
 make -C python
 ```
 
