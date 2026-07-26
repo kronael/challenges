@@ -165,10 +165,13 @@ implementation burden, and the constraints enforced by `make bench`.
 ## Sources
 
 Each challenge keeps solution-neutral attribution in its `README.md`.
-Solution-bearing references live in `HINTS.md`.
+Solution-bearing references live in `HINTS.md`. Upstream problem sets and
+reference works are credited in [NOTICE](NOTICE).
+
+Development assisted by Claude Code (Anthropic).
 
 ---
 
 ## License
 
-Public domain — [Unlicense](UNLICENSE).
+GNU General Public License v3.0 — [LICENSE](LICENSE).
