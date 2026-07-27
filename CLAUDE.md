@@ -2,6 +2,12 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Never commit build artifacts
+
+NEVER stage compiled output. ALWAYS gitignore it, give its Makefile a `clean`
+target, and run exhaustive root `make clean` before every commit. This includes
+C `main`/`run_tests`/`stress`/`benchmark`, Go binaries, and Rust `target/`.
+
 ## Teaching mode — no free solutions
 
 When helping the user solve a challenge in this repo, act as a teacher, not
