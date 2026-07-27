@@ -17,11 +17,17 @@ GOLDEN := $(sort $(dir $(wildcard [0-9][0-9]-*/golden/test_solution.py)))
 ROTTEN := $(sort $(dir $(wildcard [0-9][0-9]-*/rotten/test_solution.py)))
 SYS    := $(sort $(dir $(wildcard [0-9][0-9]-*/golden/main.c)))
 SYS_ROTTEN := $(sort $(dir $(wildcard [0-9][0-9]-*/rotten/main.c)))
+CLEAN := $(sort \
+	$(dir $(wildcard [0-9][0-9]-*/c/Makefile)) \
+	$(dir $(wildcard [0-9][0-9]-*/go/Makefile)) \
+	$(dir $(wildcard [0-9][0-9]-*/rust/Makefile)) \
+	$(SYS) $(SYS_ROTTEN) \
+	template/c/ template/go/ template/rust/)
 
 GOLDEN_TIMEOUT ?= 15   # generous: golden must finish well within this
 ROTTEN_TIMEOUT ?= 5    # short: the naive trap must blow past this
 
-.PHONY: all test golden rotten sys sys-rotten help
+.PHONY: all test golden rotten sys sys-rotten clean help
 
 all: test
 
@@ -97,10 +103,16 @@ sys-rotten:
 	done; \
 	[ $$fail -eq 0 ] && echo "all sys rotten controls expose their defect" || { echo "FAILURES above"; exit 1; }
 
+clean:
+	@for d in $(CLEAN); do \
+	  $(MAKE) --no-print-directory -C "$$d" clean || exit $$?; \
+	done
+
 help:
 	@echo "test    — every io golden + rotten passes its case suite"
 	@echo "golden  — every io golden passes test AND bench (must not time out)"
 	@echo "rotten  — every io rotten passes small tests and every large case times out"
 	@echo "sys     — every sys (29-34) golden C stress test passes"
 	@echo "sys-rotten — every sys rotten passes sanity and fails controlled stress"
+	@echo "clean   — remove compiled artifacts from every challenge"
 	@echo "Override GOLDEN_TIMEOUT (def 15s) / ROTTEN_TIMEOUT (def 5s)."

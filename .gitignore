@@ -44,6 +44,15 @@ uv.lock
 *.test
 /tmp/
 
+# Go solver directories contain source and harness files only. This also catches
+# extensionless executables written by a plain `go build`.
+/*/go/*
+!/*/go/*.go
+!/*/go/go.mod
+!/*/go/go.sum
+!/*/go/Makefile
+!/*/go/.gitignore
+
 # Rust
 target/
 Cargo.lock

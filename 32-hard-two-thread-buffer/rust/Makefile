@@ -1,4 +1,4 @@
-.PHONY: all build fmt lint check test bench help
+.PHONY: all build fmt lint check test bench clean help
 TIMEOUT ?= 5
 
 all: fmt build lint test
@@ -20,7 +20,11 @@ test: build check
 bench:
 	timeout -k 2 $(TIMEOUT) cargo run --release --bin bench
 
+clean:
+	cargo clean
+
 help:
+	@echo "clean  — remove build artifacts"
 	@echo "all    — fmt build lint test (default)"
 	@echo "build  — cargo build (debug)"
 	@echo "fmt    — cargo fmt"

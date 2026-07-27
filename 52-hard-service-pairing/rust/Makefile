@@ -1,4 +1,4 @@
-.PHONY: all build fmt lint check test bench help
+.PHONY: all build fmt lint check test bench clean help
 TIMEOUT  ?= 5
 LARGE    := $(wildcard ../cases/??_large_*.in)
 BIN_NAME := $(shell grep '^name' Cargo.toml | head -1 | sed 's/.*= *"\(.*\)"/\1/')
@@ -56,7 +56,11 @@ bench: build
 	  printf "%dms\n" $$elapsed; \
 	done
 
+clean:
+	cargo clean
+
 help:
+	@echo "clean  — remove build artifacts"
 	@echo "all    — fmt build lint test (default)"
 	@echo "build  — cargo build (debug)"
 	@echo "fmt    — cargo fmt"

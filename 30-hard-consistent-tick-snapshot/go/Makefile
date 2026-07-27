@@ -1,4 +1,4 @@
-.PHONY: all build fmt lint check test bench help
+.PHONY: all build fmt lint check test bench clean help
 TIMEOUT ?= 5
 MOD_NAME := $(shell awk '/^module/{print $$2}' go.mod)
 
@@ -21,7 +21,11 @@ test: build check
 bench: build
 	timeout -k 2 $(TIMEOUT) go test -run '^$$' -bench .
 
+clean:
+	rm -f $(MOD_NAME) $(MOD_NAME).exe /tmp/$(MOD_NAME)-build /tmp/$(MOD_NAME)-bench
+
 help:
+	@echo "clean  — remove built binaries"
 	@echo "all    — fmt build lint test (default)"
 	@echo "build  — go build"
 	@echo "fmt    — gofmt"
