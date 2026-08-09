@@ -59,9 +59,11 @@ NN-level-slug/
   c/             ← stub: implement solve() in solution.c
 ```
 
-The C directory ships a finished scaffold — `json.h`, `harness.h`, `main.c`, and
-`test.c` are shared and identical everywhere. Only `solution.c` holds the stub:
-`input_parse` and `answer_print` are written for you, `solve()` is not.
+The reusable C scaffold lives once in `shared/c/`: JSON parsing, allocation
+helpers, the executable entry point, the fixture runner, and their Make rules.
+Each challenge's `c/` directory contains only `solution.c`, `solution.h`, and a
+one-line Makefile include. `input_parse` and `answer_print` are written for you;
+`solve()` is not.
 
 The `README.md`, challenge title, directory slug, and catalog never narrow the
 solution search. All guidance, including rejected approaches and complexity

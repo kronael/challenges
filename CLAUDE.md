@@ -66,14 +66,13 @@ Harness is **editor + `make test`**. Each challenge has its own dir
   the test harness actually runs the cases through `solve`. A finished stub
   builds and its tests run (and fail only on the unimplemented body), never on
   harness/parse errors.
-  `c/` splits that scaffold across seven files. `Makefile`, `json.h`,
-  `harness.h`, `main.c` and `test.c` are shared byte-for-byte by every challenge
-  — copy them from `template/c/` and never hand-edit one copy. Per challenge you
-  write only `solution.h` (the `Input` and `Answer` types plus the five
-  prototypes) and `solution.c` (`input_parse`, `input_free`, `answer_print`,
-  `answer_free` complete; `solve` stubbed). `input_parse` transcribes the JSON
-  literally — a precomputed adjacency list, sort, or prefix sum in there is a
-  solution hint and belongs in `golden/`.
+  The I/O C runner, fixture driver, JSON reader, allocation helpers, and build
+  rules live once in `shared/c/`. Every I/O challenge's `c/Makefile` includes
+  `../../shared/c/io.mk`. Per challenge, write only `solution.h` (the `Input`
+  and `Answer` types plus the five prototypes) and `solution.c` (`input_parse`,
+  `input_free`, `answer_print`, `answer_free` complete; `solve` stubbed).
+  `input_parse` transcribes the JSON literally — a precomputed adjacency list,
+  sort, or prefix sum in there is a solution hint and belongs in `golden/`.
 
 **sys challenges** (29–34): Python is inappropriate (GIL prevents real concurrency).
 Use **`golden/main.c`** as the reference implementation instead of `main.py`.
@@ -121,6 +120,7 @@ When scaffolding a new I/O challenge: write the reference first in
 ## Layout
 
 ```
+shared/c/               shared I/O C runner, JSON reader, tests, and Make rules
 NN-level-slug/
   README.md              problem statement, constraints, I/O, examples
   HINTS.md               all solution guidance and solution-bearing sources
@@ -130,7 +130,7 @@ NN-level-slug/
   python/  main.py · test_solution.py · Makefile
   go/      main.go · solution_test.go · go.mod · Makefile
   rust/    src/lib.rs · src/main.rs · tests/ · Cargo.toml · Makefile
-  c/       solution.h · solution.c · main.c · test.c · json.h · harness.h · Makefile
+  c/       solution.h · solution.c · Makefile (includes shared/c/io.mk)
 ```
 
 sys challenges have no `python/`; sys challenges 31 and 33 have no `go/`.
@@ -213,9 +213,9 @@ hard io and the sys ones drop a language).
    guidance and solution-bearing sources in `HINTS.md`.
 3. Add at least eight small fixture pairs and at least two large pairs.
 4. Implement only `golden/` and `rotten/`. Tailor each solver scaffold to the
-   input contract, but keep its `solve()` body stubbed. For `c/`, copy the five
-   shared files from `template/c/` unchanged and write only `solution.h` and
-   `solution.c`.
+   input contract, but keep its `solve()` body stubbed. For `c/`, keep the
+   one-line Makefile include from `template/c/` and write only `solution.h` and
+   `solution.c`; do not copy files from `shared/c/`.
 5. Verify the golden test and bench pass, the rotten small test passes, and every
    large case exceeds the rotten timeout.
 6. Add a row to the catalog table in the repo `README.md`.
