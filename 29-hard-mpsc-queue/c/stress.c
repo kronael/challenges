@@ -1,6 +1,8 @@
-// Every producer pushes 1..MSGS, so each value must come back out exactly
-// PRODUCERS times. Checking the whole multiset — not just the total — catches a
-// lost item paired with a duplicated one, which leaves the sum unchanged.
+// Each producer pushes a disjoint block of values, so the whole run pushes
+// 1..PRODUCERS*MSGS, each exactly once. Asserting every value comes back exactly
+// once — not merely that each of 1..MSGS returns PRODUCERS times — catches a lost
+// item masked by a duplicate of the same message, which leaves both the total and
+// a per-value-multiplicity count unchanged.
 
 #include "solution.h"
 
@@ -15,10 +17,10 @@ static MpscQueue queue;
 static pthread_barrier_t start;
 
 static void *producer_fn(void *arg) {
-	(void)arg;
+	uint64_t base = (uint64_t)(intptr_t)arg * MSGS;  // this producer's disjoint block
 	pthread_barrier_wait(&start);
-	for (uint64_t value = 1; value <= MSGS; value++) {
-		mpsc_push(&queue, value);
+	for (uint64_t i = 1; i <= MSGS; i++) {
+		mpsc_push(&queue, base + i);
 	}
 	return NULL;
 }
@@ -29,25 +31,26 @@ int main(void) {
 
 	pthread_t producers[PRODUCERS];
 	for (int i = 0; i < PRODUCERS; i++) {
-		if (pthread_create(&producers[i], NULL, producer_fn, NULL) != 0) {
+		if (pthread_create(&producers[i], NULL, producer_fn, (void *)(intptr_t)i) != 0) {
 			perror("pthread_create");
 			return 1;
 		}
 	}
 
-	uint32_t *counts = (uint32_t *)calloc(MSGS + 1, sizeof *counts);
+	uint64_t total_vals = (uint64_t)PRODUCERS * MSGS;
+	uint32_t *counts = (uint32_t *)calloc(total_vals + 1, sizeof *counts);
 	if (counts == NULL) {
 		perror("calloc");
 		return 1;
 	}
 
-	unsigned long long remaining = (unsigned long long)PRODUCERS * MSGS;
+	unsigned long long remaining = total_vals;
 	while (remaining > 0) {
 		uint64_t value;
 		if (mpsc_try_pop(&queue, &value) != POP_ITEM) {
 			continue;
 		}
-		if (value == 0 || value > MSGS) {
+		if (value == 0 || value > total_vals) {
 			fprintf(stderr, "FAIL: popped out-of-range value %llu\n",
 				(unsigned long long)value);
 			return 1;
@@ -73,10 +76,10 @@ int main(void) {
 		return 1;
 	}
 
-	for (uint64_t value = 1; value <= MSGS; value++) {
-		if (counts[value] != PRODUCERS) {
-			fprintf(stderr, "FAIL: value %llu popped %u times, expected %d\n",
-				(unsigned long long)value, counts[value], PRODUCERS);
+	for (uint64_t value = 1; value <= total_vals; value++) {
+		if (counts[value] != 1) {
+			fprintf(stderr, "FAIL: value %llu popped %u times, expected exactly once\n",
+				(unsigned long long)value, counts[value]);
 			return 1;
 		}
 	}

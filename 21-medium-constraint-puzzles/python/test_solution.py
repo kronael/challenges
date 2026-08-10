@@ -57,12 +57,16 @@ def test_triangle_three_coloring_has_six():
         assert all(0 <= color <= 2 for color in c.values())
         for u, v in edges:
             assert c[u] != c[v]
+    # the six must be distinct — N copies of one valid coloring must not pass
+    assert len({tuple(sorted(c.items())) for c in sols}) == 6
 
 
 def test_isolated_nodes_are_still_colored():
     sols = solve_graph_coloring(3, [], 2)
     assert len(sols) == 8
     assert all(set(c) == {0, 1, 2} for c in sols)
+    assert all(0 <= color <= 1 for c in sols for color in c.values())
+    assert len({tuple(sorted(c.items())) for c in sols}) == 8
 
 
 def test_k4_three_coloring_impossible():

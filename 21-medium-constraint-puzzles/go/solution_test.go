@@ -75,6 +75,18 @@ func TestNQueensEightHas92Solutions(t *testing.T) {
 	}
 }
 
+func distinctColorings(sols []map[int]int, n int) int {
+	seen := make(map[string]bool, len(sols))
+	for _, c := range sols {
+		key := ""
+		for node := 0; node < n; node++ {
+			key += fmt.Sprintf("%d,", c[node])
+		}
+		seen[key] = true
+	}
+	return len(seen)
+}
+
 func checkColorings(t *testing.T, sols []map[int]int, n, k int, edges [][2]int) {
 	t.Helper()
 	for _, coloring := range sols {
@@ -105,6 +117,9 @@ func TestTriangleThreeColoringHasSix(t *testing.T) {
 		t.Fatalf("got %d colorings, want 6", len(sols))
 	}
 	checkColorings(t, sols, 3, 3, edges)
+	if distinctColorings(sols, 3) != 6 {
+		t.Errorf("colorings are not distinct: %v", sols)
+	}
 }
 
 func TestIsolatedNodesAreStillColored(t *testing.T) {
@@ -113,6 +128,9 @@ func TestIsolatedNodesAreStillColored(t *testing.T) {
 		t.Fatalf("got %d colorings, want 8", len(sols))
 	}
 	checkColorings(t, sols, 3, 2, nil)
+	if distinctColorings(sols, 3) != 8 {
+		t.Errorf("colorings are not distinct: %v", sols)
+	}
 }
 
 func TestK4ThreeColoringImpossible(t *testing.T) {

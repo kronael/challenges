@@ -8,8 +8,9 @@ produce values without a fixed end.
 
 ## Problem
 
-Fill in eight functions in `python/main.py`. Each returns or transforms an
-iterator. The caller decides how many values to request.
+Fill in the same eight functions in either language track (`python/main.py` or
+`go/solution.go`). Each returns or transforms an iterator. The caller decides how
+many values to request.
 
 The functions and the values they produce:
 
@@ -29,8 +30,9 @@ The functions and the values they produce:
 
 This is a Python thinking exercise, not a JSON stdin/stdout challenge. There are
 no case files, no large-case benchmark, and no hidden reference answer in the
-solver scaffold. The tests in `python/` describe the contract; the implementation
-belongs in `python/main.py`.
+solver scaffold. The tests in `python/` and `go/` describe the contract; the
+implementation belongs in the track you pick (`python/main.py` or
+`go/solution.go`).
 
 ## Run
 

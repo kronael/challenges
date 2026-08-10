@@ -7,8 +7,8 @@
 
 ## Problem
 
-`main.py` exposes four functions to fill in. Each one returns *all* solutions to a
-puzzle:
+The solver in each language track (`python/main.py`, `go/solution.go`) exposes
+four functions to fill in. Each one returns *all* solutions to a puzzle:
 
 - `solve_nqueens(n)` — place `n` queens on an `n×n` board so no two attack each
   other (no shared row, column, or diagonal). Return every placement as a tuple

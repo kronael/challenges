@@ -24,6 +24,9 @@ def test_primes():
 
 def test_sieve_directly():
     assert list(islice(sieve(naturals(2)), 6)) == [2, 3, 5, 7, 11, 13]
+    # sieve must consume its argument, not hardcode an endless 2.. stream: fed a
+    # finite stream it yields only the primes within it, then stops.
+    assert list(islice(sieve(iter(range(2, 13))), 20)) == [2, 3, 5, 7, 11]
 
 
 def test_fibonacci():

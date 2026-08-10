@@ -1,7 +1,10 @@
 // Half the threads pop before they push and half do the reverse, so a node is
 // very likely to be released while a peer still holds a pointer into it. Node
 // accounting closes the loop: fewer frees than allocations is a leak, a second
-// free of the same node trips the poison check inside node_free.
+// free of the same node trips the poison check inside node_free. Every pushed
+// value is unique, so a final per-value tally that each is popped exactly once
+// catches a lost item masked by a duplicated one — the totals stay equal, the
+// identity does not.
 
 #include "solution.h"
 
@@ -16,6 +19,7 @@ static Stack stack;
 static pthread_barrier_t start;
 static _Atomic unsigned long long popped = 0;
 static _Atomic int corrupt = 0;
+static _Atomic unsigned int *seen;  // per-value pop tally; every value must end at 1
 
 typedef struct {
 	int id;
@@ -24,7 +28,9 @@ typedef struct {
 static void take(uint64_t value) {
 	if (value >= (uint64_t)THREADS * OPS) {
 		atomic_store_explicit(&corrupt, 1, memory_order_relaxed);
+		return;
 	}
+	atomic_fetch_add_explicit(&seen[value], 1, memory_order_relaxed);
 }
 
 static void *worker(void *p) {
@@ -55,6 +61,11 @@ static void *worker(void *p) {
 
 int main(void) {
 	stack_init(&stack);
+	seen = calloc((size_t)THREADS * OPS, sizeof *seen);
+	if (seen == NULL) {
+		perror("calloc");
+		return 1;
+	}
 	pthread_barrier_init(&start, NULL, THREADS);
 
 	pthread_t threads[THREADS];
@@ -90,6 +101,16 @@ int main(void) {
 			pushed);
 		return 1;
 	}
+
+	for (uint64_t v = 0; v < (uint64_t)THREADS * OPS; v++) {
+		unsigned int c = atomic_load_explicit(&seen[v], memory_order_relaxed);
+		if (c != 1) {
+			fprintf(stderr, "FAIL: value %llu popped %u times, expected exactly once\n",
+				(unsigned long long)v, c);
+			return 1;
+		}
+	}
+	free(seen);
 
 	stack_destroy(&stack);
 
