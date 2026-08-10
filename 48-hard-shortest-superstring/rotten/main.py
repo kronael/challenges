@@ -1,5 +1,20 @@
 import json
 import sys
+from bisect import bisect_right
+
+
+def _reduce(reads):
+    # Same correctness prep as the reference: distinct reads, drop any contained
+    # in a longer one. Not the trap — the greedy merge below is.
+    uniq = list(dict.fromkeys(reads))
+    uniq.sort(key=len)
+    lens = [len(r) for r in uniq]
+    kept = []
+    for i, r in enumerate(uniq):
+        start = bisect_right(lens, len(r))
+        if not any(r in uniq[j] for j in range(start, len(uniq))):
+            kept.append(r)
+    return kept
 
 
 def _overlap(a, b):
@@ -15,7 +30,7 @@ def solve(reads):
     # Naive greedy merge: every round, recompute the max overlap over ALL remaining
     # pairs by sliding-window string compare, merge the best pair, repeat. Correct on
     # the small cases, but O(n^3 * L) — it TIMEOUTs on the many-reads large case.
-    frags = [r for r in reads if r]
+    frags = _reduce(reads)
     if not frags:
         return ""
     while len(frags) > 1:

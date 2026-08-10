@@ -1,8 +1,26 @@
 import json
 import sys
+from bisect import bisect_right
+
+
+def _reduce(reads):
+    # README reduction: keep one copy of each distinct read, then drop any read
+    # contained in a strictly longer one. Sorting by length and probing only the
+    # longer suffix of the list keeps this O(n log n + hits) instead of all-pairs;
+    # equal-length distinct reads can never contain each other.
+    uniq = list(dict.fromkeys(reads))
+    uniq.sort(key=len)
+    lens = [len(r) for r in uniq]
+    kept = []
+    for i, r in enumerate(uniq):
+        start = bisect_right(lens, len(r))
+        if not any(r in uniq[j] for j in range(start, len(uniq))):
+            kept.append(r)
+    return kept
 
 
 def solve(reads):
+    reads = _reduce(reads)
     n = len(reads)
     if n == 0:
         return ""
