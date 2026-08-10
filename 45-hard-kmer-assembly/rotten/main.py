@@ -1,52 +1,49 @@
 import json
 import sys
+from collections import defaultdict
 
 
 def solve(k, kmers):
-    # Naive O(n^2 * k): find the start read, then for each read scan all others
-    # for the one whose (k-1) prefix matches this read's (k-1) suffix. Correct,
-    # but it TIMEOUTs on the large cases — the trap.
     if not kmers:
         return ""
     p = k - 1
-    n = len(kmers)
-    used = [False] * n
+    edges = [(km[:p], km[1:]) for km in kmers]
+    used = [False] * len(edges)
 
-    prefixes = [km[:p] for km in kmers]
-    suffixes = [km[1:] for km in kmers]
-
-    # Start read: the one whose (k-1) prefix is not any other read's suffix —
-    # it has no predecessor. Found by scanning all pairs (O(n^2), the trap).
-    start = 0
-    for i in range(n):
-        has_pred = False
-        for j in range(n):
-            if j != i and suffixes[j] == prefixes[i]:
-                has_pred = True
-                break
-        if not has_pred:
-            start = i
+    outdeg, indeg = defaultdict(int), defaultdict(int)
+    for u, v in edges:
+        outdeg[u] += 1
+        indeg[v] += 1
+    start = edges[0][0]
+    for u in outdeg:
+        if outdeg[u] - indeg[u] == 1:
+            start = u
             break
 
-    order = [start]
-    used[start] = True
-    cur = start
-    for _ in range(n - 1):
-        want = suffixes[cur]
+    # Correct Hierholzer over the de Bruijn edges, but to leave a node it LINEAR-
+    # SCANS the whole edge list for an unused out-edge: O(E) per edge, O(E^2) total
+    # and independent of graph shape. Correct on the small cases, TIMEOUTs on the
+    # large ones — the trap.
+    stack = [start]
+    path = []
+    while stack:
+        u = stack[-1]
         nxt = -1
-        for j in range(n):
-            if not used[j] and prefixes[j] == want:
-                nxt = j
+        for i in range(len(edges)):
+            if not used[i] and edges[i][0] == u:
+                nxt = i
                 break
         if nxt == -1:
-            break
-        used[nxt] = True
-        order.append(nxt)
-        cur = nxt
+            path.append(u)
+            stack.pop()
+        else:
+            used[nxt] = True
+            stack.append(edges[nxt][1])
+    path.reverse()
 
-    out = [kmers[order[0]]]
-    for idx in order[1:]:
-        out.append(kmers[idx][-1])
+    out = [path[0]]
+    for node in path[1:]:
+        out.append(node[-1])
     return "".join(out)
 
 
