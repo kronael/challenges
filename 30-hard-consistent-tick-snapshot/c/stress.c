@@ -27,18 +27,21 @@ static void pack(unsigned char *buf, uint64_t counter) {
 	}
 }
 
-// The shared slot value, or 0 when the eight slots disagree.
-static uint64_t consistent_value(const unsigned char *buf) {
+// Returns true and stores the shared slot value when all eight slots agree;
+// returns false when they disagree (a torn snapshot). Value 0 is a legitimate
+// snapshot — the initial pre-publication state — and must not read as torn.
+static bool consistent_value(const unsigned char *buf, uint64_t *out) {
 	uint64_t first;
 	memcpy(&first, buf, sizeof first);
 	for (int slot = 1; slot < SLOTS; slot++) {
 		uint64_t value;
 		memcpy(&value, buf + slot * sizeof value, sizeof value);
 		if (value != first) {
-			return 0;
+			return false;
 		}
 	}
-	return first;
+	*out = first;
+	return true;
 }
 
 static void *writer_fn(void *arg) {
@@ -63,8 +66,8 @@ static void *reader_fn(void *arg) {
 	for (unsigned i = 0; i < READER_ITERS; i++) {
 		while (!seqlock_read(&lock, buf)) {
 		}
-		uint64_t value = consistent_value(buf);
-		if (value == 0) {
+		uint64_t value;
+		if (!consistent_value(buf, &value)) {
 			atomic_fetch_add_explicit(&torn, 1, memory_order_relaxed);
 		} else if (value > local_max) {
 			local_max = value;

@@ -22,6 +22,15 @@
   weak-memory machines reorder freely and expose the bug — which is why the
   ordering must be explicit, not relied on from observed x86 behaviour.
 
+- **A note on strict conformance**: the classic seqlock `memcpy`s a *non-atomic*
+  payload while a reader may `memcpy` it concurrently. Under the C11 abstract
+  machine that is still a data race — the sequence counter turns it into a retry
+  in practice but does not legalize it formally. This is the textbook seqlock and
+  is what real hardware runs; a strictly-conforming variant would make the payload
+  slots `_Atomic` and load/store them `memory_order_relaxed` inside the guarded
+  window. The reference keeps the textbook form deliberately; the fences, not the
+  payload type, are the point of the exercise.
+
 The wrong-but-tempting version (`rotten/main.c`) just `memcpy`s the payload with
 no sequence counter and no fence. It passes a single-threaded check but tears
 under a concurrent writer.
