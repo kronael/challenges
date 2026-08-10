@@ -9,7 +9,7 @@
 
 You have an unlimited pile of coins in each given denomination. What's the minimum number of coins that sum to exactly `amount`? Return `-1` if no combination works.
 
-Constraints: `0 <= amount <= 2,000,000`; denominations are positive integers. The list of denominations may be empty.
+Constraints: `0 <= amount <= 2,000,000`; denominations are distinct positive integers, at most `100` of them; the list of denominations may be empty.
 
 ## Input
 

@@ -3,6 +3,7 @@ import sys
 
 
 def solve(amount, coins):
+    coins = set(coins)
     INF = amount + 1
     dp = [0] + [INF] * amount
     for a in range(1, amount + 1):
