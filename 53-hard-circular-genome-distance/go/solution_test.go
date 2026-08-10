@@ -11,20 +11,39 @@ import (
 )
 
 func TestCases(t *testing.T) {
-	all, _ := filepath.Glob("../cases/*.in")
+	all, err := filepath.Glob("../cases/*.in")
+	if err != nil {
+		t.Fatal(err)
+	}
 	sort.Strings(all)
+	inputs := make([]string, 0, len(all))
 	for _, path := range all {
-		if strings.Contains(filepath.Base(path), "_large_") {
-			continue
+		if !strings.Contains(filepath.Base(path), "_large_") {
+			inputs = append(inputs, path)
 		}
+	}
+	if len(inputs) == 0 {
+		t.Fatal("no small cases found in ../cases")
+	}
+	for _, path := range inputs {
+		path := path
 		t.Run(filepath.Base(path), func(t *testing.T) {
-			raw, _ := os.ReadFile(path)
+			raw, err := os.ReadFile(path)
+			if err != nil {
+				t.Fatal(err)
+			}
 			var in input
 			if err := json.Unmarshal(raw, &in); err != nil {
 				t.Fatal(err)
 			}
-			out, _ := os.ReadFile(strings.TrimSuffix(path, ".in") + ".out")
-			want, _ := strconv.Atoi(strings.TrimSpace(string(out)))
+			out, err := os.ReadFile(strings.TrimSuffix(path, ".in") + ".out")
+			if err != nil {
+				t.Fatal(err)
+			}
+			want, err := strconv.Atoi(strings.TrimSpace(string(out)))
+			if err != nil {
+				t.Fatal(err)
+			}
 			if got := solve(in.A, in.B); got != want {
 				t.Fatalf("got %d want %d", got, want)
 			}

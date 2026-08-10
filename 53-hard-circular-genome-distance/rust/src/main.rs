@@ -41,6 +41,7 @@ mod tests {
             })
             .collect();
         inputs.sort();
+        assert!(!inputs.is_empty(), "no small cases found in ../cases");
         for path in inputs {
             let input: Input = serde_json::from_str(&fs::read_to_string(&path).unwrap()).unwrap();
             let want: i64 = fs::read_to_string(path.with_extension("out"))
