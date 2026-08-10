@@ -6,7 +6,7 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#define DEQUE_CAPACITY (1u << 21)
+#define DEQUE_CAPACITY (1u << 22)
 
 typedef enum { STEAL_SUCCESS, STEAL_EMPTY, STEAL_RETRY } StealStatus;
 

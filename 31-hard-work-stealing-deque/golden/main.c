@@ -12,7 +12,7 @@
 
 #define NTASKS 1000000u
 #define NTHIEVES 4
-#define CAP (1u << 21)  // 2M slots: > NTASKS, so push never overruns the buffer
+#define CAP (1u << 22)  // 4M slots (the documented capacity): > NTASKS, so push never overruns the buffer
 
 #define EMPTY UINT64_MAX  // sentinel: deque had nothing for us
 #define ABORT (UINT64_MAX - 1)  // thief lost the CAS race, may retry
