@@ -81,15 +81,16 @@ int main(void) {
 		fclose(mem);
 
 		char *want = read_path(out_path);
-		got_len = trim(got);
-		size_t want_len = trim(want);
+		size_t want_len = strlen(want);
 
+		// Byte-exact, matching `make bench`'s `cmp -s`; trailing whitespace is a
+		// real difference. `trim` is only for readable diagnostics on a mismatch.
 		if (got_len == want_len && memcmp(got, want, got_len) == 0) {
 			printf("PASS  %s\n", ents[k]->d_name);
 		} else {
 			printf("FAIL  %s\n", ents[k]->d_name);
-			show("want", want, want_len);
-			show("got ", got, got_len);
+			show("want", want, trim(want));
+			show("got ", got, trim(got));
 			failed++;
 		}
 
