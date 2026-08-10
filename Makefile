@@ -96,10 +96,11 @@ sys-rotten:
 	  if ! (cd $$d && make test) >/tmp/psys-rotten-test.log 2>&1; then \
 	    echo "SANITY FAIL"; sed 's/^/    /' /tmp/psys-rotten-test.log | tail -3; fail=1; continue; \
 	  fi; \
-	  timeout -k 2 5 make -C $$d stress >/tmp/psys-rotten-stress.log 2>&1; code=$$?; \
-	  if [ $$code -eq 0 ]; then echo "STRESS PASSED — defect not exposed"; fail=1; \
+	  (cd $$d && timeout -k 2 5 ./main stress) >/tmp/psys-rotten-stress.log 2>&1; code=$$?; \
+	  if [ $$code -eq 1 ]; then echo "ok (sanity passes; stress detects the defect)"; \
+	  elif [ $$code -eq 0 ]; then echo "STRESS PASSED — defect not exposed"; fail=1; \
 	  elif [ $$code -eq 124 ]; then echo "STRESS HUNG"; fail=1; \
-	  else echo "ok (sanity passes; controlled stress fails)"; fi; \
+	  else echo "STRESS CRASHED (exit $$code) — not a controlled detection"; sed 's/^/    /' /tmp/psys-rotten-stress.log | tail -3; fail=1; fi; \
 	done; \
 	[ $$fail -eq 0 ] && echo "all sys rotten controls expose their defect" || { echo "FAILURES above"; exit 1; }
 
