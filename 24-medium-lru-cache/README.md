@@ -20,7 +20,7 @@ untouched the longest (the least recently used) is evicted to make room.
 
 Every `get` and every `put` must run in constant time on average.
 
-Constraints: `1 <= capacity <= 3000`, up to 2·10⁵ operations, keys and values
+Constraints: `1 <= capacity <= 100000`, up to 4·10⁵ operations, keys and values
 fit in i32.
 
 ## Input / Output

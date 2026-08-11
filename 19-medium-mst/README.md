@@ -12,7 +12,7 @@ has a construction cost. Choose a subset of the roads so that every city is
 reachable from every other city, and the total construction cost is as small as
 possible. Output that minimum total cost.
 
-Constraints: `n` up to 10⁴, `m` up to 2·10⁵, costs fit in signed 32-bit
+Constraints: `n` up to 10⁴, `m` up to 3·10⁵, costs fit in signed 32-bit
 integers, and the graph is connected. The total cost and all accumulated values
 must fit in a signed 64-bit integer.
 

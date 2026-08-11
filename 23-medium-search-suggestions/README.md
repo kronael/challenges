@@ -12,7 +12,7 @@ lexicographically smallest words that have the query as a prefix — exactly wha
 search box shows as you type. An empty query matches every word, so it returns the
 three smallest words overall; a query with no matching word returns nothing.
 
-Constraints: up to 5·10⁴ distinct words and 5·10³ queries; words are lowercase
+Constraints: up to 5·10⁴ distinct words and 10⁵ queries; words are lowercase
 `a`–`z`, each up to 20 characters; the word list arrives already sorted.
 
 ## Input / Output

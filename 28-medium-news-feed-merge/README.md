@@ -14,7 +14,7 @@ Produce one combined stream of all events in global timestamp order.
 When two events share a timestamp, order them by which feed they came from (lower
 feed index first); if they are still tied, by ascending `id`.
 
-Constraints: total events up to 2·10⁵ across up to ~10⁴ feeds; `ts` and `id` fit
+Constraints: total events up to 5·10⁵ across up to 2·10⁴ feeds; `ts` and `id` fit
 in i64; a feed may be empty.
 
 ## Input

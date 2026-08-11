@@ -10,7 +10,7 @@
 Report every 1-indexed start position where `pattern` occurs in `text`,
 including overlapping matches.
 
-Constraints: `|T|` is at most `3 * 10^5` and `|P|` is at most `10^3`. Both
+Constraints: `|T|` is at most `3 * 10^6` and `|P|` is at most `1.5 * 10^4`. Both
 strings contain printable ASCII characters, including spaces. `pattern` may be
 empty; report no positions.
 

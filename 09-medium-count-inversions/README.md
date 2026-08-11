@@ -9,7 +9,7 @@
 
 An array is "almost sorted" if it has few *inversions*: index pairs `i < j` where `arr[i] > arr[j]`. A sorted array has 0; a fully reversed array of `n` elements has the maximum, n(n−1)/2. Count the exact number for a given array.
 
-Constraints: n up to 10⁵, values fit in i32; the count can exceed i32 — use i64.
+Constraints: n up to 2·10⁵, values fit in i32; the count can exceed i32 — use i64.
 
 ## Input
 

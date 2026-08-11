@@ -13,7 +13,7 @@
   a fresh `(d, u)` entry and skip any pop where `d > dist[u]` (a stale duplicate).
   This keeps the heap simple and runs in O((n + m) log n).
 - **Why the obvious thing is too slow**: scanning all nodes each round to find the
-  current minimum is O(n²) — fine on the examples, hopeless at n = 10⁵. The heap
+  current minimum is O(n²) — fine on the examples, hopeless at n = 2·10⁵. The heap
   is what turns the round-by-round minimum search into a log-factor operation.
 
 Source: CLRS §24.3

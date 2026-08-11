@@ -18,7 +18,7 @@ unique.
 
 If the prerequisites contain a cycle, no valid ordering exists — output `CYCLE`.
 
-Constraints: `n` up to `10⁵`, up to `2·10⁵` edges.
+Constraints: `n` up to `2·10⁵`, up to `4·10⁵` edges.
 
 ## Input
 

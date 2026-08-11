@@ -14,7 +14,7 @@ operations, in order:
 - `update i d` — add `d` to element `i`.
 - `sum i` — report the prefix sum `a[1] + a[2] + … + a[i]`.
 
-Constraints: `n` is at most 2·10⁵, there are at most 2·10⁵ queries, and indices
+Constraints: `n` is at most 3·10⁵, there are at most 3·10⁵ queries, and indices
 are 1-based. Every initial value, update delta, array value after an update, and
 reported prefix sum fits in a signed 64-bit integer.
 

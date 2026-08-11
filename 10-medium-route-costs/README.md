@@ -12,7 +12,7 @@ distance from node `0` to each node, or `-1` for any node you can't reach. The
 distance to a node is the minimum total weight over every directed path from
 node `0` to it. Multiple directed edges between the same two nodes may appear.
 
-Constraints: `1 <= n <= 10^5`, `0 <= len(edges) <= 5*10^5`, edge endpoints are
+Constraints: `1 <= n <= 2*10^5`, `0 <= len(edges) <= 5*10^5`, edge endpoints are
 valid node ids, weights are non-negative integers, and distances fit in i64.
 
 ## Input
