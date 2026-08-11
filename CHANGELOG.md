@@ -2,6 +2,29 @@
 
 All notable changes to this challenge bench are recorded here.
 
+## [v0.1.1] — 2026-08-11
+
+Native benchmark-integrity release. All 48 I/O challenges were audited against
+optimized C versions of their intended naive approach, using the five-second
+solver budget rather than relying only on Python timing.
+
+### Fixed
+
+- Strengthened both large fixtures wherever an optimized native naive control
+  could escape the intended complexity wall: challenges 09, 10, 13, 16, 18, 19,
+  23, 24, 26, 28, 35, 39, 41, 42, 46, 51, 53, 54, 55, 56, and 57.
+- Regenerated every affected golden output and aligned the documented input
+  limits with the enlarged cases.
+- Terminated challenge 55's empty expected output with the required newline.
+
+### Changed
+
+- Challenge 23 now documents prefix-answer precomputation with a hash map as a
+  valid alternative to its trie-based hint.
+- Challenge creation now requires an optimized temporary native control to
+  validate each performance wall at the fastest supported solver timeout.
+- Added a resolved defect log with the complete native-control audit result.
+
 ## [v0.1.0] — 2026-08-10
 
 > challenges v0.1.0 — first tagged snapshot
