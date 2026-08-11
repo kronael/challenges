@@ -17,6 +17,17 @@
 - **Empty query**: it walks zero steps and lands on the root, so its subtree is the
   whole dictionary; the same DFS returns the three smallest words overall.
 
+### Alternative: precompute the prefix answers
+
+Because the dictionary already arrives in lexicographic order, you can build a
+hash map from each prefix to its first three words. Visit the words in input
+order, enumerate every prefix of each word (including the empty prefix), and add
+the word only while that prefix has fewer than three stored suggestions. Each
+query then becomes a direct lookup. At most 20 prefixes are visited per word;
+with ordinary substring hashing this can inspect O(|word|²) characters per word,
+but the stated 20-character cap keeps that bounded. Store at most three word
+references per distinct prefix.
+
 The naive O(queries · |words|) approach (for each query, scan all words, keep the
 prefix matches, sort them, take three) is what `rotten/main.py` does — correct, but
 it TIMEOUTs on the large cases.
