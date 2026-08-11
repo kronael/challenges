@@ -47,6 +47,10 @@ Harness is **editor + `make test`**. Each challenge has its own dir
   For io challenges this is an executable contract: `make test` must finish
   promptly and match every non-`_large_` fixture, and every `??_large_*.in` must
   independently exercise the documented naive bottleneck at the default timeout.
+  Validate that wall with an equivalent temporary native control compiled with
+  optimization and the fastest supported solver timeout; a Python-only timeout
+  is insufficient evidence. Keep the temporary control outside the repository so
+  it cannot expose a solution or be mistaken for a solver scaffold.
   A small fixture must never duplicate a large fixture byte-for-byte. Rotten code
   must remain correct for every input allowed by `README.md`, not only the checked
   fixtures. Keep it as the shortest direct formulation; do not retain memoization,
@@ -217,7 +221,8 @@ hard io and the sys ones drop a language).
    one-line Makefile include from `template/c/` and write only `solution.h` and
    `solution.c`; do not copy files from `shared/c/`.
 5. Verify the golden test and bench pass, the rotten small test passes, and every
-   large case exceeds the rotten timeout.
+   large case exceeds both the rotten timeout and the fastest solver timeout when
+   exercised by an equivalent optimized temporary native control.
 6. Add a row to the catalog table in the repo `README.md`.
 
 For an API, sys, or quiz challenge, copy the closest matching challenge instead
@@ -249,5 +254,6 @@ attribution in `HINTS.md`.
 
 - Rotten references should be the shortest obviously correct naive formulation,
   with an adjacent complexity/timeout comment. Every large fixture must exercise
-  that bottleneck independently; systems controls pair a passing weak sanity test
-  with a deterministic adversarial failure.
+  that bottleneck independently in optimized native code as well as Python;
+  systems controls pair a passing weak sanity test with a deterministic
+  adversarial failure.
