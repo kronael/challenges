@@ -16,7 +16,7 @@ interleaved in any order:
 Indices are 1-based and ranges are inclusive. Emit one answer per `sum`, in the
 order the `sum` operations appear.
 
-Constraints: `n` and the number of operations each up to 2·10⁵; values and the
+Constraints: `n` and the number of operations each up to 3·10⁵; values and the
 running sums fit in a 64-bit signed integer.
 
 ## Input

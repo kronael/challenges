@@ -25,7 +25,7 @@ windows. Windows overlap: every starting offset from `0` through
 `|genome| - L` is separate, and one window may count for several guides. If the
 genome is shorter than `L`, it has no windows and every guide's count is zero.
 
-Constraints: genome length up to `2·10⁵`; `L` in `8 … 20`; up to `10³` guides;
+Constraints: genome length up to `10⁶`; `L` in `8 … 20`; up to `2·10³` guides;
 `d` in `0 … 4`; alphabet `{A, C, G, T}`.
 
 ## Input

@@ -10,7 +10,7 @@
 Think of the edges as water pipes, each with a capacity; you want to push as much
 as possible from the source (node 1) to the sink (node n).
 
-Constraints: `2 ≤ n ≤ 500` and at most `100,000` directed edges. Every
+Constraints: `2 ≤ n ≤ 500` and at most `200,000` directed edges. Every
 endpoint is between `1` and `n`. Capacities are integers from `0` through
 `2⁶³−1`, and the maximum flow fits in a signed 64-bit integer. Zero-capacity
 edges and self-loops are valid. Parallel edges are allowed, including edges in

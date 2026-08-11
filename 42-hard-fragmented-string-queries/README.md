@@ -16,6 +16,9 @@ bytes. Each `lo` and `hi` is clamped to `[0, total]`, where `total` is the
 combined byte length. If the clamped range is empty, the answer for that query
 is the empty string.
 
+Constraints: up to 30,000 fragments, at most 3,000,000 combined fragment bytes,
+up to 10,000 queries, and at most 10,000,000 combined output bytes.
+
 ## Input / Output
 
 ```json
