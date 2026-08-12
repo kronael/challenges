@@ -1,6 +1,6 @@
 # Project-wide checks across every NN-level-slug challenge.
 #
-#   make test     every golden AND rotten passes its test suite (make test in each)
+#   make test     script tests pass; every golden AND rotten passes its test suite
 #   make golden   every golden passes test; I/O goldens also run generated bench cases
 #   make rotten   every I/O rotten passes test BUT times out on generated cases
 #   make all      test
@@ -35,6 +35,7 @@ cases:
 	python3 scripts/large_cases.py --check
 
 test:
+	cd scripts && python3 -X dev -W error -m unittest discover -p 'test_*.py'
 	@fail=0; \
 	for d in $(GOLDEN) $(ROTTEN); do \
 	  printf "test  %-34s " "$$d"; \
