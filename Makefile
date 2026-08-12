@@ -1,8 +1,8 @@
 # Project-wide checks across every NN-level-slug challenge.
 #
 #   make test     every golden AND rotten passes its case suite (make test in each)
-#   make golden   every golden passes test AND bench (fast — must NOT time out)
-#   make rotten   every rotten passes test BUT times out on bench (the trap)
+#   make golden   every golden passes test AND generated bench cases
+#   make rotten   every rotten passes test BUT times out on generated cases
 #   make all      test
 #
 # golden/ is the optimised reference; rotten/ is the naive trap that is correct on
@@ -27,9 +27,12 @@ CLEAN := $(sort \
 GOLDEN_TIMEOUT ?= 15   # generous: golden must finish well within this
 ROTTEN_TIMEOUT ?= 5    # short: the naive trap must blow past this
 
-.PHONY: all test golden rotten sys sys-rotten clean help
+.PHONY: all test cases golden rotten sys sys-rotten clean help
 
 all: test
+
+cases:
+	python3 scripts/large_cases.py --check
 
 test:
 	@fail=0; \
@@ -40,18 +43,18 @@ test:
 	done; \
 	[ $$fail -eq 0 ] && echo "all golden+rotten case suites pass" || { echo "FAILURES above"; exit 1; }
 
-golden:
+golden: cases
 	@fail=0; \
 	for d in $(GOLDEN); do \
 	  printf "golden %-33s " "$$d"; \
 	  if ! (cd $$d && make test) >/tmp/pgold.log 2>&1; then echo "TEST FAIL"; fail=1; continue; fi; \
 	  if grep -q '^bench:' $$d/Makefile; then \
 	    if (cd $$d && make bench TIMEOUT=$(GOLDEN_TIMEOUT)) >/tmp/pgold-bench.log 2>&1; then \
-	      if grep -q TIMEOUT /tmp/pgold-bench.log; then \
+	      if grep -q 'TIMEOUT (' /tmp/pgold-bench.log; then \
 	        echo "BENCH TIMEOUT — golden too slow!"; fail=1; \
 	      else echo "ok (test + bench)"; fi; \
 	    else \
-	      if grep -q TIMEOUT /tmp/pgold-bench.log; then echo "BENCH TIMEOUT — golden too slow!"; \
+	      if grep -q 'TIMEOUT (' /tmp/pgold-bench.log; then echo "BENCH TIMEOUT — golden too slow!"; \
 	      else echo "BENCH FAIL"; sed 's/^/    /' /tmp/pgold-bench.log | tail -3; fi; \
 	      fail=1; \
 	    fi; \
@@ -59,7 +62,7 @@ golden:
 	done; \
 	[ $$fail -eq 0 ] && echo "all golden pass test and bench" || { echo "FAILURES above"; exit 1; }
 
-rotten:
+rotten: cases
 	@fail=0; \
 	for d in $(ROTTEN); do \
 	  printf "rotten %-33s " "$$d"; \
@@ -67,16 +70,12 @@ rotten:
 	    echo "TEST FAIL — rotten must pass small cases"; sed 's/^/    /' /tmp/prot.log | tail -3; fail=1; continue; \
 	  fi; \
 	  echo "small ok"; \
-	  case_dir="$${d%rotten/}cases"; found=0; \
-	  for f in $$case_dir/??_large_*.in; do \
-	    [ -e "$$f" ] || continue; found=1; \
-	    printf "       %-33s " "$$(basename $$f .in)"; \
-	    (cd $$d && timeout -k 2 $(ROTTEN_TIMEOUT) uv run python main.py) < "$$f" >/dev/null 2>&1; code=$$?; \
-	    if [ $$code -eq 124 ]; then echo "TIMEOUT ok"; \
-	    elif [ $$code -eq 0 ]; then echo "NO TIMEOUT"; fail=1; \
-	    else echo "ERROR (exit $$code)"; fail=1; fi; \
-	  done; \
-	  if [ $$found -eq 0 ]; then echo "       NO LARGE CASES"; fail=1; fi; \
+	  if python3 scripts/bench.py --workdir "$$d" --timeout "$(ROTTEN_TIMEOUT)" \
+	      --expect-timeout -- uv run python main.py >/tmp/prot-bench.log 2>&1; then \
+	    sed 's/^/       /' /tmp/prot-bench.log; \
+	  else \
+	    sed 's/^/       /' /tmp/prot-bench.log; fail=1; \
+	  fi; \
 	done; \
 	[ $$fail -eq 0 ] && echo "all rotten pass small tests and every large case times out" || { echo "FAILURES above"; exit 1; }
 
@@ -111,8 +110,9 @@ clean:
 
 help:
 	@echo "test    — every io golden + rotten passes its case suite"
-	@echo "golden  — every io golden passes test AND bench (must not time out)"
-	@echo "rotten  — every io rotten passes small tests and every large case times out"
+	@echo "cases   — verify every seeded large-case recipe is reproducible"
+	@echo "golden  — every io golden passes test AND generated bench cases"
+	@echo "rotten  — every io rotten passes small tests and generated cases time out"
 	@echo "sys     — every sys (29-34) golden C stress test passes"
 	@echo "sys-rotten — every sys rotten passes sanity and fails controlled stress"
 	@echo "clean   — remove compiled artifacts from every challenge"

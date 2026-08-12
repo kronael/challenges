@@ -20,7 +20,7 @@
 - **64-bit accumulator**: the running sums exceed 32 bits at this scale, so keep
   the totals in a 64-bit signed integer.
 
-The naive approaches — re-scanning the range on every `sum`, or rebuilding a
-prefix-sum array on every `update` — are O(n) per operation. That is what
-`rotten/main.py` does (correct on the small cases) and it TIMEOUTs on the large
-ones, which is the wall this challenge sets.
+The naive approaches — re-scanning the range on every `sum`, or repairing a
+prefix-sum array after every `update` — are O(n) per operation. The executable
+`rotten/main.py` demonstrates rescanning; temporary optimized native controls
+validate both strategies against the generated benchmark budget.
