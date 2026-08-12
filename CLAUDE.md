@@ -29,13 +29,14 @@ Harness is **editor + `make test`**. Each challenge has its own dir
 **io challenges** have five language dirs: `golden/`, `python/`, `go/`, `rust/`, `c/`.
 
 - **`golden/main.py`** — the optimised reference. Always passes `make test`.
-  Never shown to the solver. Used to generate `.out` files and as the bench target.
+  Never shown to the solver. Used to generate tracked small `.out` files and
+  ephemeral expected benchmark output.
 - **`rotten/`** — its OWN dir, a sibling of `golden/` (same shape: `main.py` +
   `Makefile` + `pyproject.toml`, never a file nested inside `golden/`). It holds
   the *naive* reference: correct, so `make test` PASSES the small cases, but too
   slow, so `make bench` TIMEOUTs. It is the trap the solver must beat — the
   obvious O(n²)/exponential approach the problem punishes. `rotten/`'s test
-  excludes the `_large_` cases (those are exactly where it would hang). (sys
+  runs only tracked small cases. (sys
   challenges: `rotten/main.c` is the obvious-but-wrong version — torn reads, false
   sharing, ABA — that passes a weak check but fails the stress test / race
   detector.)
@@ -45,13 +46,13 @@ Harness is **editor + `make test`**. Each challenge has its own dir
   the large cases time out. Never add sleeps, busy-work, input-name checks, wrong
   answers, or other artificial benchmark sabotage.
   For io challenges this is an executable contract: `make test` must finish
-  promptly and match every non-`_large_` fixture, and every `??_large_*.in` must
+  promptly and match every tracked fixture, and every generated large case must
   independently exercise the documented naive bottleneck at the default timeout.
   Validate that wall with an equivalent temporary native control compiled with
   optimization and the fastest supported solver timeout; a Python-only timeout
   is insufficient evidence. Keep the temporary control outside the repository so
   it cannot expose a solution or be mistaken for a solver scaffold.
-  A small fixture must never duplicate a large fixture byte-for-byte. Rotten code
+  A small fixture must never duplicate a generated large case byte-for-byte. Rotten code
   must remain correct for every input allowed by `README.md`, not only the checked
   fixtures. Keep it as the shortest direct formulation; do not retain memoization,
   compatibility caches, branch-and-bound pruning, fast precomputation, or other
@@ -125,10 +126,12 @@ When scaffolding a new I/O challenge: write the reference first in
 
 ```
 shared/c/               shared I/O C runner, JSON reader, tests, and Make rules
+scripts/large_cases.py  deterministic seeded benchmark recipes
+scripts/bench.py        ephemeral generation, oracle comparison, and timeout runner
 NN-level-slug/
   README.md              problem statement, constraints, I/O, examples
   HINTS.md               all solution guidance and solution-bearing sources
-  cases/                 NN.in / NN.out          (io only)
+  cases/                 tracked small NN.in / NN.out fixtures (io only)
   golden/  main.py · test_solution.py · Makefile · pyproject.toml   (fast reference)
   rotten/  main.py · test_solution.py · Makefile · pyproject.toml   (naive trap: passes test, fails bench)
   python/  main.py · test_solution.py · Makefile
@@ -159,21 +162,23 @@ I/O solver directories share these targets:
 | `fmt`   | format in place (ruff / gofmt / cargo fmt) |
 | `lint`  | static analysis (ruff check / go vet / cargo clippy) |
 | `check` | fmt then lint |
-| `test`  | build + check + test suite — **small cases only** (no `_large_`) |
-| `bench` | build, check output for every `??_large_*.in`, then report elapsed time |
+| `test`  | build + check + tracked small-case suite |
+| `bench` | generate seeded large cases, check output, then report elapsed time |
 | `help`  | print all targets |
 
 Running `make` (no target) = fmt + build + lint + test.
 
-For I/O solvers, `make bench` captures stdout and compares it byte-for-byte with
-the matching `.out`. A timeout, missing expected output, runtime error, or
-mismatch fails the target.
-It uses `timeout -k 2 $(TIMEOUT)` — SIGTERM then SIGKILL 2s later, so the loop
-can **never hang** regardless of what the binary does.
+For I/O solvers, `make bench` generates one input at a time under `tmp/`, runs
+the golden implementation to obtain the expected output, and compares solver
+stdout byte-for-byte. The input, expected output, and actual output are deleted
+before the next seed. Configured repeat runs share one aggregate time budget. A
+timeout, runtime error, or mismatch fails the target.
+The runner terminates the whole process group, then kills it 2s later, so the
+benchmark can **never hang** regardless of what the binary does.
 Defaults: **5s** Rust/Go, **10s** Python. Override: `make bench TIMEOUT=30`.
 
-I/O `golden/` has `all: test` and adds a `regen` target to regenerate `.out`
-files. API, sys, and quiz challenges use targets specific to their test style;
+I/O `golden/` has `all: test` and adds a `regen` target to regenerate tracked
+small `.out` files. API, sys, and quiz challenges use targets specific to their test style;
 check their README and `make help` instead of assuming this table applies.
 
 ## Test case coverage
@@ -185,18 +190,20 @@ mistakes, and the largest useful input that still belongs in the small suite.
 For graph inputs, include at least two relevant shapes such as a path, star,
 cycle, or dense graph.
 
-Every I/O challenge must also have at least two structurally distinct large
-cases. Each one must independently exercise the documented rotten bottleneck at
-the default timeout.
+Every I/O challenge must also have at least two structurally distinct seeded
+large-case recipes. Each one must independently exercise the documented rotten
+bottleneck at the default timeout.
 
 When writing cases, include valid inputs that expose likely implementation
 mistakes. Edge cases are the point — don't just use the README examples.
 
 ## Large cases
 
-Name each pair `??_large_NAME.in` and `??_large_NAME.out`, such as
-`09_large_path.in` and `09_large_path.out`. Only files selected by the
-`??_large_*.in` glob are checked and timed by `bench`.
+Define each recipe in `scripts/large_cases.py` with a `??_large_NAME` name, such
+as `09_large_path`. Seeds are derived from the challenge number and recipe
+ordinal. `make cases` regenerates every case hash and rejects any drift from the
+frozen aggregate digest, including seed and repeat metadata. `make bench`
+materializes these cases ephemerally.
 
 ## Languages
 
@@ -215,13 +222,14 @@ hard io and the sys ones drop a language).
 1. Copy `template/` to `NN-level-slug/` (next number).
 2. Fill `README.md`: statement, constraints, I/O, and examples. Put all solution
    guidance and solution-bearing sources in `HINTS.md`.
-3. Add at least eight small fixture pairs and at least two large pairs.
+3. Add at least eight tracked small fixture pairs and at least two seeded recipes
+   in `scripts/large_cases.py`, update the frozen digest, then run `make cases`.
 4. Implement only `golden/` and `rotten/`. Tailor each solver scaffold to the
    input contract, but keep its `solve()` body stubbed. For `c/`, keep the
    one-line Makefile include from `template/c/` and write only `solution.h` and
    `solution.c`; do not copy files from `shared/c/`.
 5. Verify the golden test and bench pass, the rotten small test passes, and every
-   large case exceeds both the rotten timeout and the fastest solver timeout when
+   generated case exceeds both the rotten timeout and the fastest solver timeout when
    exercised by an equivalent optimized temporary native control.
 6. Add a row to the catalog table in the repo `README.md`.
 
@@ -253,7 +261,7 @@ attribution in `HINTS.md`.
 # Project Memory
 
 - Rotten references should be the shortest obviously correct naive formulation,
-  with an adjacent complexity/timeout comment. Every large fixture must exercise
+  with an adjacent complexity/timeout comment. Every generated large case must exercise
   that bottleneck independently in optimized native code as well as Python;
   systems controls pair a passing weak sanity test with a deterministic
   adversarial failure.

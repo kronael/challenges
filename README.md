@@ -20,6 +20,7 @@ From the repo root, verify the whole bench at once:
 
 ```bash
 make test        # I/O and API golden suites; I/O rotten small suites pass
+make cases       # all seeded large-case recipes reproduce their frozen hashes
 make golden      # I/O and API golden tests pass; I/O benchmarks stay fast
 make rotten      # I/O rotten controls pass small cases; every large case times out
 make sys         # systems golden C stress tests pass
@@ -36,7 +37,7 @@ I/O solver directories share these targets:
 | `make lint`  | run static analysis |
 | `make check` | format, then lint |
 | `make test`  | correctness — small cases only, fast |
-| `make bench` | correctness + speed — compare every large result, then report time |
+| `make bench` | correctness + speed — generate and check every seeded large case |
 | `make help`  | list all targets |
 
 API, systems, and quiz challenges use targets suited to their test style. Their
@@ -50,7 +51,7 @@ challenge README and `make help` list the available commands.
 NN-level-slug/
   README.md      ← the problem only: task, constraints, I/O, examples
   HINTS.md       ← the approach/technique — spoilers, open only when stuck
-  cases/         ← NN.in / NN.out  (I/O challenges)
+  cases/         ← tracked small NN.in / NN.out fixtures (I/O challenges)
   golden/        ← optimized reference; always passes make test
   rotten/        ← deliberately naive benchmark control
   python/        ← stub: implement solve() in main.py
@@ -64,6 +65,13 @@ helpers, the executable entry point, the fixture runner, and their Make rules.
 Each challenge's `c/` directory contains only `solution.c`, `solution.h`, and a
 one-line Makefile include. `input_parse` and `answer_print` are written for you;
 `solve()` is not.
+
+Large benchmark inputs are deterministic recipes in `scripts/large_cases.py`,
+not checked-in payloads. `make bench` materializes one seeded case at a time in
+`tmp/`, asks the golden implementation for its expected output, checks the
+solver under one aggregate budget (including configured repeat runs), and
+deletes all three temporary files. Frozen hashes and recipe metadata make drift
+fail `make cases`.
 
 The `README.md`, challenge title, directory slug, and catalog never narrow the
 solution search. All guidance, including rejected approaches and complexity
@@ -156,8 +164,10 @@ implementation burden, and the constraints enforced by `make bench`.
    solution-bearing sources in `HINTS.md`.
 3. Add the optimized implementation in `golden/` and the short, correct, naive
    control in `rotten/`. Keep every solver `solve` body stubbed.
-4. Add at least eight small fixture pairs and at least two large pairs. Each
-   large input must independently make the rotten implementation exceed its
+4. Add at least eight tracked small fixture pairs and at least two structurally
+   distinct seeded recipes to `scripts/large_cases.py`. Update the frozen digest
+   after an intentional recipe change, then verify it with `make cases`; each
+   generated input must independently make the rotten implementation exceed its
    timeout.
 5. Run the root `make golden` and `make rotten` contract checks.
 6. Add the challenge to the catalog above.

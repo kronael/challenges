@@ -61,6 +61,8 @@ Cargo.lock
 *.prof
 *.trace
 perf.data
+/*/cases/??_large_*.in
+/*/cases/??_large_*.out
 
 # Compiled C binaries (golden/rotten build to ./main; c/ builds these)
 */golden/main
