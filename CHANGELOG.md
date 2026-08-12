@@ -2,6 +2,35 @@
 
 All notable changes to this challenge bench are recorded here.
 
+## [v0.1.2] — 2026-08-12
+
+> challenges v0.1.2 — seeded benchmarks, smaller checkout
+>
+> Large benchmarks now regenerate from frozen seeds, cutting 322 MiB from the checkout without weakening correctness or timeout checks.
+>
+> • `make bench` generates one case at a time and checks it against the golden reference.
+> • `make cases` freezes 98 input hashes, seeds, and repeat counts.
+> • Challenges 18 and 35 enforce native naive walls with aggregate repeat budgets.
+> • Timeout cleanup cannot hang on escaped stderr holders; runtime failures stay failures.
+> • Tracked challenge data drops to 9.6 MiB.
+>
+> Full notes below.
+
+### Changed
+
+- Replaced 196 checked-in large input/output fixtures with 98 deterministic
+  recipes whose hashes, seeds, and repeat counts are frozen by `make cases`.
+- Generate one benchmark at a time, obtain its expected output from the golden
+  reference, compare byte-for-byte, then delete all temporary files.
+- Added the existing `check` target to every I/O solver's `make help` output.
+
+### Fixed
+
+- Enforced the challenge 18 and 35 native performance walls with aggregate
+  repeat budgets while keeping optimized references well below the limit.
+- Bounded every timeout cleanup wait, preserved early runtime failures, rejected
+  missing or multiline output, and covered partial temporary-file allocation.
+
 ## [v0.1.1] — 2026-08-11
 
 Native benchmark-integrity release. All 48 I/O challenges were audited against
