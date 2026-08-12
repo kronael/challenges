@@ -21,4 +21,5 @@ bench:
 
 help:
 	@echo "all    — fmt build lint test (default)"
+	@echo "check  — fmt + lint"
 	@echo "bench  — check output and time main.py on large cases"

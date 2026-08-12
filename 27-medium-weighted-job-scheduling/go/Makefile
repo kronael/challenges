@@ -29,4 +29,5 @@ clean:
 help:
 	@echo "clean  — remove built binaries"
 	@echo "all    — fmt build lint test"
+	@echo "check  — fmt + lint"
 	@echo "bench  — check output and time binary on large cases"

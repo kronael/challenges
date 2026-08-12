@@ -24,5 +24,6 @@ help:
 	@echo "build  — syntax-check main.py"
 	@echo "fmt    — ruff format + import sort"
 	@echo "lint   — ruff check"
+	@echo "check  — fmt + lint"
 	@echo "test   — build + fmt + lint + pytest (small cases only)"
 	@echo "bench  — check output and time main.py on large cases (TIMEOUT=10)"

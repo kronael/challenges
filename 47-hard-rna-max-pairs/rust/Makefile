@@ -30,5 +30,6 @@ help:
 	@echo "build  — cargo build (debug)"
 	@echo "fmt    — cargo fmt"
 	@echo "lint   — cargo clippy"
+	@echo "check  — fmt + lint"
 	@echo "test   — build + fmt + lint + cargo test (small cases only)"
 	@echo "bench  — check output and time debug binary on large cases (TIMEOUT=5)"

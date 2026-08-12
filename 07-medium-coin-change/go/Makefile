@@ -32,5 +32,6 @@ help:
 	@echo "build  — go build"
 	@echo "fmt    — gofmt"
 	@echo "lint   — go vet"
+	@echo "check  — fmt + lint"
 	@echo "test   — build + fmt + lint + go test (small cases only)"
 	@echo "bench  — check output and time binary on large cases (TIMEOUT=5)"

@@ -43,6 +43,7 @@ help:
 	@echo "build  — compile ./main"
 	@echo "fmt    — clang-format in place (skipped when not installed)"
 	@echo "lint   — compile every source with -Wpedantic -Wshadow -Werror"
+	@echo "check  — fmt + lint"
 	@echo "test   — build + fmt + lint + run ../cases (small cases only)"
 	@echo "bench  — check output and time ./main on large cases (TIMEOUT=5)"
 	@echo "clean  — remove built binaries"

@@ -22,5 +22,5 @@
 
 The naive approaches — re-scanning the range on every `sum`, or repairing a
 prefix-sum array after every `update` — are O(n) per operation. The executable
-`rotten/main.py` demonstrates rescanning; temporary optimized native controls
-validate both strategies against the generated benchmark budget.
+`rotten/main.py` demonstrates rescanning. Generated seeded benchmark cases run
+it with the configured timeout.

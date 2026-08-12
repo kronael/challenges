@@ -1,8 +1,8 @@
 # Project-wide checks across every NN-level-slug challenge.
 #
-#   make test     every golden AND rotten passes its case suite (make test in each)
-#   make golden   every golden passes test AND generated bench cases
-#   make rotten   every rotten passes test BUT times out on generated cases
+#   make test     every golden AND rotten passes its test suite (make test in each)
+#   make golden   every golden passes test; I/O goldens also run generated bench cases
+#   make rotten   every I/O rotten passes test BUT times out on generated cases
 #   make all      test
 #
 # golden/ is the optimised reference; rotten/ is the naive trap that is correct on

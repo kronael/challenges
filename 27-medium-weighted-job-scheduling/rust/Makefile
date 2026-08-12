@@ -27,4 +27,5 @@ clean:
 help:
 	@echo "clean  — remove build artifacts"
 	@echo "all    — fmt build lint test"
+	@echo "check  — fmt + lint"
 	@echo "bench  — check output and time debug binary on large cases"
