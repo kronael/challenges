@@ -33,31 +33,48 @@ def run(
     timeout: float,
 ) -> Result:
     started = time.monotonic_ns()
-    with input_path.open("rb") as stdin, output_path.open("wb") as stdout:
+    with (
+        input_path.open("rb") as stdin,
+        output_path.open("wb") as stdout,
+        tempfile.TemporaryFile(dir=TMP) as stderr,
+    ):
         process = subprocess.Popen(
             command,
             cwd=workdir,
             stdin=stdin,
             stdout=stdout,
-            stderr=subprocess.PIPE,
+            stderr=stderr,
             start_new_session=True,
         )
         try:
-            _, stderr = process.communicate(timeout=timeout)
+            process.wait(timeout=timeout)
             timed_out = False
         except subprocess.TimeoutExpired:
-            os.killpg(process.pid, signal.SIGTERM)
             try:
-                _, stderr = process.communicate(timeout=2)
+                os.killpg(process.pid, signal.SIGTERM)
+            except ProcessLookupError:
+                pass
+            try:
+                process.wait(timeout=2)
             except subprocess.TimeoutExpired:
-                os.killpg(process.pid, signal.SIGKILL)
-                _, stderr = process.communicate()
+                try:
+                    os.killpg(process.pid, signal.SIGKILL)
+                except ProcessLookupError:
+                    pass
+                try:
+                    process.wait(timeout=2)
+                except subprocess.TimeoutExpired as exc:
+                    raise RuntimeError(
+                        f"Failed to stop timed-out process {process.pid}"
+                    ) from exc
             timed_out = True
+        stderr.seek(0)
+        stderr_text = stderr.read().decode(errors="replace")
     elapsed_ms = (time.monotonic_ns() - started) // 1_000_000
     return Result(
         code=process.returncode,
         elapsed_ms=elapsed_ms,
-        stderr=stderr.decode(errors="replace"),
+        stderr=stderr_text,
         timed_out=timed_out,
     )
 
@@ -70,6 +87,12 @@ def files_equal(left: Path, right: Path) -> bool:
             if chunk != right_file.read(len(chunk)):
                 return False
     return True
+
+
+def has_one_output_line(path: Path) -> bool:
+    with path.open("rb") as output:
+        line = output.readline()
+        return line.endswith(b"\n") and not output.read(1)
 
 
 def temp_path(label: str) -> Path:
@@ -92,10 +115,14 @@ def benchmark_case(
     oracle_timeout: float,
     expect_timeout: bool,
 ) -> str | None:
-    input_path = temp_path("input")
-    expected_path = temp_path("expected")
-    actual_path = temp_path("actual")
+    paths = []
     try:
+        input_path = temp_path("input")
+        paths.append(input_path)
+        expected_path = temp_path("expected")
+        paths.append(expected_path)
+        actual_path = temp_path("actual")
+        paths.append(actual_path)
         with input_path.open("w", encoding="utf-8") as output:
             write_case(case, output)
         label = f"{case.name} (seed {case.seed}):"
@@ -113,6 +140,9 @@ def benchmark_case(
                 return "error"
             if oracle.code != 0:
                 report_error(f"{label} oracle", oracle)
+                return "error"
+            if not has_one_output_line(expected_path):
+                print(f"{label:<48} ORACLE OUTPUT (expected exactly one line)")
                 return "error"
 
         deadline = time.monotonic() + timeout
@@ -134,9 +164,16 @@ def benchmark_case(
             if result.code != 0:
                 report_error(label, result)
                 return "error"
-            if not expect_timeout and not files_equal(expected_path, actual_path):
-                print(f"{label:<48} WRONG ANSWER (repeat {repeat}/{case.repeats})")
-                return "wrong-answer"
+            if not expect_timeout:
+                if not has_one_output_line(actual_path):
+                    print(
+                        f"{label:<48} INVALID OUTPUT "
+                        f"(repeat {repeat}/{case.repeats}; expected exactly one line)"
+                    )
+                    return "wrong-answer"
+                if not files_equal(expected_path, actual_path):
+                    print(f"{label:<48} WRONG ANSWER (repeat {repeat}/{case.repeats})")
+                    return "wrong-answer"
 
         run_count = f", {case.repeats} runs" if case.repeats > 1 else ""
         if expect_timeout:
@@ -145,9 +182,8 @@ def benchmark_case(
         print(f"{label:<48} {elapsed_ms}ms{run_count}")
         return None
     finally:
-        input_path.unlink(missing_ok=True)
-        expected_path.unlink(missing_ok=True)
-        actual_path.unlink(missing_ok=True)
+        for path in paths:
+            path.unlink(missing_ok=True)
 
 
 def parse_args() -> argparse.Namespace:
