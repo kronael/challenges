@@ -71,6 +71,9 @@ Harness is **editor + `make test`**. Each challenge has its own dir
   the test harness actually runs the cases through `solve`. A finished stub
   builds and its tests run (and fail only on the unimplemented body), never on
   harness/parse errors.
+  Rust keeps a plain derived `Input` beside `solve`. Heterogeneous JSON decoding
+  lives in `src/input.rs`, with its solver-facing types re-exported by `lib.rs`;
+  never pass `serde_json::Value` into `solve`.
   The I/O C runner, fixture driver, JSON reader, allocation helpers, and build
   rules live once in `shared/c/`. Every I/O challenge's `c/Makefile` includes
   `../../shared/c/io.mk`. Per challenge, write only `solution.h` (the `Input`
