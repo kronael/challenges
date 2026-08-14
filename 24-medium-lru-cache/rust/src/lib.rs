@@ -1,12 +1,9 @@
-use serde::Deserialize;
+mod input;
 
-#[derive(Deserialize)]
-pub struct Input {
-    pub capacity: usize,
-    pub ops: Vec<Vec<serde_json::Value>>,
-}
+pub use input::Input;
+pub use input::Operation;
 
-pub fn solve(capacity: usize, ops: &[Vec<serde_json::Value>]) -> Vec<i64> {
+pub fn solve(capacity: usize, ops: &[Operation]) -> Vec<i64> {
     let _ = (capacity, ops);
     todo!()
 }
