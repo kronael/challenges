@@ -7,7 +7,7 @@ use std::path::PathBuf;
 fn cases() {
     let mut ins: Vec<PathBuf> = fs::read_dir("../cases")
         .unwrap()
-        .filter_map(|e| e.ok())
+        .map(|e| e.expect("failed to read ../cases entry"))
         .map(|e| e.path())
         .filter(|p| {
             p.extension().map_or(false, |x| x == "in")

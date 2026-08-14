@@ -18,7 +18,7 @@ fn format(result: Option<Vec<i64>>) -> String {
 fn cases() {
     let mut inputs: Vec<PathBuf> = fs::read_dir("../cases")
         .unwrap()
-        .filter_map(|entry| entry.ok())
+        .map(|entry| entry.expect("failed to read ../cases entry"))
         .map(|entry| entry.path())
         .filter(|path| {
             path.extension().is_some_and(|extension| extension == "in")
