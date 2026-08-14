@@ -56,7 +56,7 @@ NN-level-slug/
   rotten/        ← deliberately naive benchmark control
   python/        ← stub: implement solve() in main.py
   go/            ← stub: implement solve() in main.go
-  rust/          ← stub: implement solve() in src/main.rs
+  rust/          ← stub: implement solve() in src/lib.rs
   c/             ← stub: implement solve() in solution.c
 ```
 

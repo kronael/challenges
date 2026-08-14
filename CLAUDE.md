@@ -64,7 +64,7 @@ Harness is **editor + `make test`**. Each challenge has its own dir
   pinned, warmed-up, repeated measurements and an asserted regression.
   The root `make sys-rotten` target enforces the sanity-pass/adversarial-fail
   contract and rejects hangs.
-- **`python/main.py`, `go/main.go`, `rust/src/main.rs`, `c/solution.c`** — stubs
+- **`python/main.py`, `go/main.go`, `rust/src/lib.rs`, `c/solution.c`** — stubs
   ONLY. Only the algorithm body is a stub (`pass` / `return nil` / `todo!()` /
   a zero `Answer`); the scaffold around it must be COMPLETE — `solve(...)`
   signature matches the Input, `main` parses JSON → calls `solve` → prints, and
