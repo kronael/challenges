@@ -2,6 +2,37 @@
 
 All notable changes to this challenge bench are recorded here.
 
+## [v0.1.3] — 2026-08-14
+
+> challenges v0.1.3 — consistent Rust harnesses
+>
+> Rust I/O challenges now share one library-first scaffold, typed parsing
+> boundaries, and fixture tests that fail loudly.
+>
+> • All 48 crates expose `solve` from `src/lib.rs`.
+> • Binaries only parse input, call `solve`, and print one result.
+> • Heterogeneous JSON decoding is isolated in four `src/input.rs` modules.
+> • Challenge 24 passes typed operations instead of raw JSON values.
+> • Fixture discovery rejects unreadable entries and empty case sets.
+>
+> Full notes below.
+
+### Changed
+
+- Normalized all 48 Rust I/O crates around `src/lib.rs`, a thin `src/main.rs`,
+  and external fixture tests.
+- Kept plain input types beside `solve` while isolating heterogeneous JSON
+  decoding in `src/input.rs` for challenges 24, 26, 41, and 51.
+- Replaced challenge 24's raw JSON solver boundary with typed cache operations.
+- Brought the Rust template under the same layout and required a nonempty case
+  set before its fixture loop can pass.
+
+### Fixed
+
+- Made Rust fixture enumeration report unreadable directory entries instead of
+  silently skipping them.
+- Corrected the documented Rust solver path to `src/lib.rs`.
+
 ## [v0.1.2] — 2026-08-12
 
 > challenges v0.1.2 — seeded benchmarks, smaller checkout
