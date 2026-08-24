@@ -71,3 +71,9 @@ perf.data
 */c/run_tests
 */c/stress
 */c/benchmark
+
+# Local-only working diary — never published
+.diary/
+
+# Stray screenshots — never track
+capture.png
