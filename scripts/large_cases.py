@@ -15,7 +15,7 @@ DNA = "ACGT"
 LOWER = "abcdefghijklmnopqrstuvwxyz"
 PROTEIN = "ARNDCQEGHILKMFPSTWYV"
 RNA = "ACGU"
-EXPECTED_DIGEST = "80619c5ab115f8f07edb3fab62745150f1b6933fde725f8e088c7c7c3c88f934"
+EXPECTED_DIGEST = "d6592d33ee68c34f8c107c9f7d26aa5f36d7b11033d050ef6e42226a0857b75e"
 
 
 class Rng:
@@ -291,7 +291,16 @@ def build_24(name: str, rng: Rng) -> dict[str, Any]:
             else:
                 ops.append(["put", key, rng.integer(0, 1_000_000_000)])
     else:
-        ops = [["put", i, rng.integer(0, 10_000_000)] for i in range(400_000)]
+        # A monotone key frontier keeps the cache full, so nearly every put evicts.
+        # Gets probe a random distance behind the frontier, straddling the resident
+        # window: a hit also refreshes recency and changes who is evicted next, so
+        # the answer pins the eviction order rather than only the running time.
+        ops = []
+        for i in range(400_000):
+            if i % 4 == 3:
+                ops.append(["get", i - 1 - rng.integer(0, 149_999) % i])
+            else:
+                ops.append(["put", i, rng.integer(0, 1_000_000_000)])
     return {"capacity": capacity, "ops": ops}
 
 
@@ -695,6 +704,290 @@ def build_57(name: str, rng: Rng) -> dict[str, Any]:
     return {"processes": processes, "events": events}
 
 
+def build_58(name: str, rng: Rng) -> dict[str, Any]:
+    n = 400_000
+    if name == "09_large_percentile_ranks":
+        # Wide value range, so almost every fill is distinct and the requested
+        # ranks reach from both tails into the middle of the session.
+        slippage = [rng.integer(-1_000_000_000, 1_000_000_000) for _ in range(n)]
+        ks = [1, 2, 500, 40_000, 200_000, n - 1, n]
+    else:
+        # Eight tick values, 50_000 fills each, laid out non-decreasing: every
+        # requested rank falls inside a 50_000-fill run of equal slippage, and
+        # consecutive ranks straddle a run boundary.
+        run = n // 8
+        slippage = [value - 4 for value in range(8) for _ in range(run)]
+        ks = [1, 50_000, 50_001, 200_000, 200_001, n]
+    return {"n": n, "slippage": slippage, "ks": ks}
+
+
+def build_59(name: str, rng: Rng) -> dict[str, Any]:
+    n = 250_000
+    prices: list[int] = []
+    if name == "09_large_rising_ramp":
+        # Every session settles above the one before it, all values distinct, so
+        # no day of the series is undercut until the closing session prints
+        # below the whole ramp.
+        price = 0
+        for _ in range(n - 1):
+            price += rng.integer(1, 4_000)
+            prices.append(price)
+    else:
+        # 250 plateaus of 1_000 equal settlements that never step down: an
+        # undercut needs a strictly lower price, and only the closing session
+        # has one, so equal neighbours must not be mistaken for undercuts.
+        price = 0
+        while len(prices) < n - 1:
+            prices.extend([price] * min(1_000, n - 1 - len(prices)))
+            price += rng.integer(0, 40)
+    prices.append(-1)
+    return {"n": n, "prices": prices}
+
+
+def build_60(name: str, rng: Rng) -> dict[str, Any]:
+    if name == "09_large_forked_chains":
+        # Root with two 99_999-venue lines. Every pair takes one venue from the
+        # deep quarter of each line, so the only venue on both routes is the
+        # root and both routes run their full length.
+        arm = 99_999
+        n = 2 * arm + 1
+        parent = [-1] * n
+        for venue in range(1, n):
+            parent[venue] = venue - 1
+        parent[arm + 1] = 0
+        deep = arm * 3 // 4
+        queries = [
+            [rng.integer(deep, arm), rng.integer(arm + deep, n - 1)] for _ in range(150)
+        ]
+        return {"n": n, "parent": parent, "queries": queries}
+
+    # A 1_000-venue spine, then 25 branches of 7_960 hanging off its tail, with
+    # every venue number shuffled so a parent's number says nothing about its
+    # child's. Pairs come from the deep fifth of two different branches, so both
+    # routes run far past the shared venue at the end of the spine.
+    spine = 1_000
+    branches = 25
+    length = 7_960
+    n = spine + branches * length
+    parent = [-1] * n
+    for venue in range(1, spine):
+        parent[venue] = venue - 1
+    for branch in range(branches):
+        base = spine + branch * length
+        parent[base] = spine - 1
+        for step in range(1, length):
+            parent[base + step] = base + step - 1
+    label = list(range(n))
+    rng.shuffle(label)
+    shuffled = [-1] * n
+    for venue in range(n):
+        shuffled[label[venue]] = -1 if parent[venue] < 0 else label[parent[venue]]
+    deep = length * 4 // 5
+    queries = []
+    for _ in range(1_800):
+        first = rng.integer(0, branches - 1)
+        second = (first + rng.integer(1, branches - 1)) % branches
+        queries.append(
+            [
+                label[spine + first * length + rng.integer(deep, length - 1)],
+                label[spine + second * length + rng.integer(deep, length - 1)],
+            ]
+        )
+    return {"n": n, "parent": shuffled, "queries": queries}
+
+
+def build_61(name: str, rng: Rng) -> dict[str, Any]:
+    if name == "09_large_cycle_chain":
+        # 66_666 three-venue loops strung out in one line, neighbouring loops
+        # joined by a single link. Half the network sits behind every joining
+        # link, and the line is 199_998 venues from end to end.
+        blocks = 66_666
+        links = []
+        for block in range(blocks):
+            base = 3 * block
+            links.append([base, base + 1])
+            links.append([base + 1, base + 2])
+            links.append([base + 2, base])
+            if block:
+                links.append([base - 1, base])
+        return {"n": 3 * blocks, "links": links}
+
+    # A 120_000-venue ring with 40_000 extra links thrown across it, 50_000 more
+    # venues hung off the result in trees, 5_000 of those hanging links doubled,
+    # and a detached 30_000-venue line. Venue numbers and link order are both
+    # shuffled, so neither says anything about the shape.
+    ring = 120_000
+    hanging = 50_000
+    line = 30_000
+    n = ring + hanging + line
+    links = [[venue, venue + 1] for venue in range(ring - 1)]
+    links.append([ring - 1, 0])
+    for _ in range(40_000):
+        venue = rng.integer(0, ring - 1)
+        links.append([venue, (venue + rng.integer(1, ring - 1)) % ring])
+    hung = []
+    for step in range(hanging):
+        child = ring + step
+        hung.append([rng.integer(0, child - 1), child])
+    links.extend(hung)
+    order = list(range(hanging))
+    rng.shuffle(order)
+    links.extend(hung[pick] for pick in order[:5_000])
+    base = ring + hanging
+    links.extend([base + step, base + step + 1] for step in range(line - 1))
+    label = list(range(n))
+    rng.shuffle(label)
+    links = [[label[u], label[v]] for u, v in links]
+    rng.shuffle(links)
+    return {"n": n, "links": links}
+
+
+def build_62(name: str, rng: Rng) -> dict[str, Any]:
+    n = 38
+    if name == "09_large_signed_spread":
+        # 38 positions drawn across the whole signed range and a target drawn
+        # independently of them. No two positions share a magnitude, so the
+        # baskets have essentially 2**38 distinct totals and nothing about the
+        # book narrows where the closest one sits.
+        exposures = [rng.integer(-(10**12), 10**12) for _ in range(n)]
+        target = rng.integer(-(10**12), 10**12)
+    else:
+        # 38 positions of one sign, all even, and an odd target at half the
+        # book's total: totals crowd the target from both sides, every position
+        # is in play, and no basket can land on it exactly. The magnitudes stay
+        # under 4 * 10**11, which keeps the target inside its own limit whatever
+        # the draw.
+        exposures = [2 * rng.integer(5 * 10**10, 2 * 10**11) for _ in range(n)]
+        target = sum(exposures) // 2 | 1
+    return {"n": n, "target": target, "exposures": exposures}
+
+
+def build_63(name: str, rng: Rng) -> dict[str, Any]:
+    n = 1_000_000
+    quantities: list[int] = []
+    if name == "09_large_rising_wall":
+        # Every level rests strictly more than the one before it and all million
+        # quantities are distinct. A sweep sized to any level's own quantity is
+        # available at every later level, so the run outward from a level reaches
+        # the far end of the book, and the shape says nothing about where the
+        # largest block sits.
+        quantity = 0
+        for _ in range(n):
+            quantity += rng.integer(1, 1_000)
+            quantities.append(quantity)
+    else:
+        # 1000 plateaus of 1000 equal quantities, laid out non-increasing, with
+        # every tenth step down set to 0 so that a hundred pairs of plateaus join
+        # into one 2000-level run of exactly equal quantities. No level rests
+        # more than the one before it, so the run from a level reaches back to
+        # the top of the book, and equal neighbours must not cut a run short.
+        steps = [
+            0 if i % 10 == 4 else rng.integer(1, 5_000) for i in range(n // 1_000)
+        ]
+        quantity = sum(steps)
+        for step in steps:
+            quantities.extend([quantity] * 1_000)
+            quantity -= step
+    return {"n": n, "quantities": quantities}
+
+
+def build_64(name: str, rng: Rng) -> dict[str, Any]:
+    n = 500_000
+    left = [-1] * n
+    right = [-1] * n
+    if name == "09_large_skewed_chain":
+        # One 500000-desk line, each desk reporting to the one above it and the
+        # side alternating so neither child slot is the only one used. Nothing is
+        # ever a meeting point of two arms, so the whole answer comes out of the
+        # value handed upward, and both the depth and the walk from any desk run
+        # the length of the hierarchy. Contributions are drawn across the whole
+        # allowed range, so the winning run is a window somewhere in the middle
+        # and its total is far past a signed 32-bit integer.
+        pnl = [rng.integer(-(10**9), 10**9) for _ in range(n)]
+        chain = list(range(n))
+        rng.shuffle(chain)
+        for step in range(n - 1):
+            if step % 2 == 0:
+                left[chain[step]] = chain[step + 1]
+            else:
+                right[chain[step]] = chain[step + 1]
+        return {"n": n, "root": chain[0], "pnl": pnl, "left": left, "right": right}
+
+    # A 250000-desk spine with one leaf desk hanging off every spine desk, so
+    # every spine desk is a meeting point of two arms and half the hierarchy is
+    # leaves. Spine contributions are drawn across the whole allowed range and
+    # leaf contributions too, so about half the leaves are worth taking at the
+    # turn and the other half must be dropped. Desk numbers are shuffled, so a
+    # parent's number says nothing about its children's.
+    spine = n // 2
+    pnl = [rng.integer(-(10**9), 10**9) for _ in range(n)]
+    label = list(range(n))
+    rng.shuffle(label)
+    for step in range(spine):
+        left[label[step]] = label[spine + step]
+        if step + 1 < spine:
+            right[label[step]] = label[step + 1]
+    return {"n": n, "root": label[0], "pnl": pnl, "left": left, "right": right}
+
+
+def build_65(name: str, rng: Rng) -> dict[str, Any]:
+    if name == "09_large_layered_feeds":
+        # Four layers of 7500 strategies. The bottom layer is pure cost, drawn
+        # small enough that a shared prerequisite is worth paying for once but
+        # not twice; every strategy above it names three prerequisites in the
+        # layer below, picked independently, so prerequisites are shared by about
+        # three dependants each and no strategy stands alone. Contributions above
+        # the bottom layer span the whole allowed range, so roughly half of them
+        # are losses that only a dependant can justify. No prerequisite ever
+        # points upward or sideways: the whole recipe is one shallow acyclic
+        # graph, and its answer keeps a little under half of what the profitable
+        # strategies would be worth if prerequisites were free.
+        layers = 4
+        per_layer = 7_500
+        n = layers * per_layer
+        pnl = [0] * n
+        requires = []
+        for layer in range(layers):
+            for slot in range(per_layer):
+                strategy = layer * per_layer + slot
+                if layer == 0:
+                    pnl[strategy] = -rng.integer(10**6, 10**8)
+                    continue
+                pnl[strategy] = rng.integer(-(10**9), 10**9)
+                below = (layer - 1) * per_layer
+                for _ in range(3):
+                    requires.append([strategy, below + rng.integer(0, per_layer - 1)])
+        return {"n": n, "pnl": pnl, "requires": requires}
+
+    # 4000 clusters of five strategies, each cluster wired as a directed cycle so
+    # its five members are all-or-nothing however their contributions fall. The
+    # clusters sit in four ranks of 1000; every cluster outside the first rank
+    # names two prerequisites in the rank below, so a cluster drags whole other
+    # clusters in with it and the closure of one strategy can be far larger than
+    # its own cluster. Contributions span the whole allowed range, so a cluster's
+    # own five may total either way and the decision is never local.
+    size = 5
+    clusters = 4_000
+    ranks = 4
+    per_rank = clusters // ranks
+    n = clusters * size
+    pnl = [rng.integer(-(10**9), 10**9) for _ in range(n)]
+    requires = []
+    for cluster in range(clusters):
+        base = cluster * size
+        for member in range(size):
+            requires.append([base + member, base + (member + 1) % size])
+        rank = cluster // per_rank
+        if rank == 0:
+            continue
+        for _ in range(2):
+            other = ((rank - 1) * per_rank + rng.integer(0, per_rank - 1)) * size
+            requires.append(
+                [base + rng.integer(0, size - 1), other + rng.integer(0, size - 1)]
+            )
+    return {"n": n, "pnl": pnl, "requires": requires}
+
+
 BUILDERS: dict[str, Callable[[str, Rng], dict[str, Any]]] = {
     "01-easy-max-subarray": build_01,
     "02-easy-mod-exp": build_02,
@@ -744,6 +1037,14 @@ BUILDERS: dict[str, Callable[[str, Rng], dict[str, Any]]] = {
     "55-hard-changing-network-queries": build_55,
     "56-hard-orthogonal-segment-crossings": build_56,
     "57-hard-causal-event-replay": build_57,
+    "58-medium-kth-worst-fill": build_58,
+    "59-medium-price-undercut": build_59,
+    "60-medium-venue-ancestor": build_60,
+    "61-hard-critical-venue-links": build_61,
+    "62-hard-neutral-basket": build_62,
+    "63-hard-liquidity-wall": build_63,
+    "64-medium-signal-path": build_64,
+    "65-hard-strategy-portfolio": build_65,
 }
 
 NAMES = {
@@ -799,6 +1100,32 @@ NAMES = {
     "55-hard-changing-network-queries": ("09_large_path", "10_large_star"),
     "56-hard-orthogonal-segment-crossings": ("09_large_dense", "10_large_sparse"),
     "57-hard-causal-event-replay": ("09_large_independent", "10_large_chain"),
+    "58-medium-kth-worst-fill": (
+        "09_large_percentile_ranks",
+        "10_large_duplicate_plateaus",
+    ),
+    "59-medium-price-undercut": ("09_large_rising_ramp", "10_large_equal_plateaus"),
+    "60-medium-venue-ancestor": ("09_large_forked_chains", "10_large_shuffled_fan"),
+    "61-hard-critical-venue-links": (
+        "09_large_cycle_chain",
+        "10_large_ring_and_hangers",
+    ),
+    "62-hard-neutral-basket": (
+        "09_large_signed_spread",
+        "10_large_same_sign_split",
+    ),
+    "63-hard-liquidity-wall": (
+        "09_large_rising_wall",
+        "10_large_draining_plateaus",
+    ),
+    "64-medium-signal-path": (
+        "09_large_skewed_chain",
+        "10_large_caterpillar_desks",
+    ),
+    "65-hard-strategy-portfolio": (
+        "09_large_layered_feeds",
+        "10_large_cyclic_clusters",
+    ),
 }
 
 REPEATS = {
