@@ -2,6 +2,43 @@
 
 All notable changes to this challenge bench are recorded here.
 
+## [v0.1.4] — 2026-08-24
+
+> challenges v0.1.4 — new challenges + cleaner Go solvers
+>
+> Eight new trading-themed challenges, Go solvers now read as a plain `solve()`
+> function, and every hint set moved to the numbered `hints/` layout.
+>
+> • Adds challenges 58–65 (kth-worst-fill, price-undercut, venue-ancestor, …)
+> • Go: `solve` lives in `solution.go`; `main.go` is only the JSON IO scaffold
+> • `HINTS.md` → `hints/01.md…`, one spoiler per file, sources last
+> • README novice-clarity pass across every challenge
+> • Retires challenge 40 (go-memory-model quiz)
+>
+> Full notes below.
+
+### Added
+
+- Challenges 58–65 (kth-worst-fill, price-undercut, venue-ancestor,
+  critical-venue-links, neutral-basket, liquidity-wall, signal-path,
+  strategy-portfolio) — golden/rotten references, five language scaffolds,
+  `hints/`, and seeded cases; all pass test/golden/rotten/cases.
+- Challenge 24 gains empty-ops, i32-bounds, and zero/negative-key cases.
+- `specs/go-solver-layout.md` documenting the Go split.
+
+### Changed
+
+- Go I/O solvers split: `solve` is isolated in `solution.go`; `main.go` holds
+  imports, the JSON `input` type, and `main` (decode → solve → print), mirroring
+  the Rust lib/main layout. Tests and package-mode build are unchanged.
+- Every challenge's `HINTS.md` migrated to numbered `hints/` files.
+- README novice-clarity pass across all challenges and the root catalog.
+- Challenge 24's rotten reference hardened.
+
+### Removed
+
+- Challenge 40 (go-memory-model quiz).
+
 ## [v0.1.3] — 2026-08-14
 
 > challenges v0.1.3 — consistent Rust harnesses
