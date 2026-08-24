@@ -23,7 +23,7 @@ fn cases() {
             .unwrap();
         let parsed: Input = serde_json::from_str(&src).unwrap();
         assert_eq!(
-            solve(parsed.size(), parsed.limit()),
+            solve(parsed.size, parsed.limit),
             want,
             "{:?}",
             inp.file_name().unwrap()
