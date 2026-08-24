@@ -9,7 +9,7 @@ void input_parse(const JsonValue *root, Input *in) {
 	in->events = (Event *)xmalloc(in->events_len * sizeof *in->events);
 	for (size_t i = 0; i < in->events_len; i++) {
 		const JsonValue *e = json_at(events, i);
-		in->events[i].id = (int)json_int(json_get(e, "id"));
+		in->events[i].id = (long long)json_int(json_get(e, "id"));
 		in->events[i].process = (int)json_int(json_get(e, "process"));
 		const JsonValue *clock = json_get(e, "clock");
 		in->events[i].clock_len = json_len(clock);

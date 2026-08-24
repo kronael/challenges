@@ -1,6 +1,6 @@
 package main
 
-func solve(rna string, minLoop int, allowWobble bool) int {
+func solve(rna string, minLoop int64, allowWobble bool) int {
 	_ = rna
 	_ = minLoop
 	_ = allowWobble

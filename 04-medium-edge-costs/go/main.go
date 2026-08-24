@@ -10,7 +10,7 @@ import (
 type input struct {
 	N     int      `json:"n"`
 	Edges [][2]int `json:"edges"`
-	Loads []*int   `json:"loads"` // nil = missing
+	Loads []*int64 `json:"loads"` // nil = missing
 }
 
 func main() {

@@ -7,8 +7,8 @@ import (
 )
 
 type input struct {
-	Parts   []string `json:"parts"`
-	Queries [][]int  `json:"queries"`
+	Parts   []string  `json:"parts"`
+	Queries [][]int64 `json:"queries"`
 }
 
 func main() {

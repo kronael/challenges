@@ -9,17 +9,17 @@ import (
 )
 
 type input struct {
-	Masses   []int `json:"masses"`
-	Spectrum []int `json:"spectrum"`
+	Masses   []int64 `json:"masses"`
+	Spectrum []int64 `json:"spectrum"`
 }
 
-func format(result []int, ok bool) string {
+func format(result []int64, ok bool) string {
 	if !ok {
 		return "NONE"
 	}
 	parts := make([]string, len(result))
 	for i, value := range result {
-		parts[i] = strconv.Itoa(value)
+		parts[i] = strconv.FormatInt(value, 10)
 	}
 	return strings.Join(parts, " ")
 }

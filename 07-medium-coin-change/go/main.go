@@ -7,8 +7,8 @@ import (
 )
 
 type input struct {
-	Amount int   `json:"amount"`
-	Coins  []int `json:"coins"`
+	Amount int     `json:"amount"`
+	Coins  []int64 `json:"coins"`
 }
 
 func main() {

@@ -10,7 +10,7 @@ import (
 type op struct {
 	Kind string
 	A    int
-	B    int
+	B    int64
 }
 
 func (o *op) UnmarshalJSON(data []byte) error {

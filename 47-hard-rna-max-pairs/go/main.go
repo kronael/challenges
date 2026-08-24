@@ -8,7 +8,7 @@ import (
 
 type input struct {
 	Rna         string `json:"rna"`
-	MinLoop     int    `json:"min_loop"`
+	MinLoop     int64  `json:"min_loop"`
 	AllowWobble bool   `json:"allow_wobble"`
 }
 

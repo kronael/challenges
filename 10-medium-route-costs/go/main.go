@@ -7,8 +7,8 @@ import (
 )
 
 type input struct {
-	N     int     `json:"n"`
-	Edges [][]int `json:"edges"`
+	N     int       `json:"n"`
+	Edges [][]int64 `json:"edges"`
 }
 
 func main() {

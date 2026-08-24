@@ -7,7 +7,7 @@
 #include <stdio.h>
 
 typedef struct {
-	int id;
+	long long id;
 	int process;
 	long long *clock;
 	size_t clock_len;
