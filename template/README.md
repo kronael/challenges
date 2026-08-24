@@ -1,11 +1,17 @@
 # NN — TODO level — TODO title
 
-TODO: state the task in one paragraph. Keep this file solution-neutral; put all
-guidance in `hints/01.md` (and onward).
+**Task**: TODO — state the task in one sentence.
 
-## Constraints
+**Difficulty**: TODO level
+**Time estimate**: ~TODO min
 
-TODO: list valid ranges and required behavior.
+## Problem
+
+TODO: state the task in one or two paragraphs. Keep this file solution-neutral;
+put all guidance in `hints/01.md` (and onward).
+
+Constraints: TODO — state valid ranges and required behavior inline (a bare
+target complexity is allowed; nothing that names or rules out an approach).
 
 ## Input
 
@@ -39,6 +45,3 @@ make -C go bench
 make -C python test
 make -C python bench
 ```
-
-> No debug prints. Extra stdout breaks the test harness and signals you don't
-> have a mental model yet. Build the model, then write the code.

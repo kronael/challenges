@@ -23,7 +23,7 @@ The two genomes contain the same blocks. Chromosome order and circular rotation
 do not matter. A chromosome may also be read in the opposite direction if every
 block sign is reversed.
 
-Constraints: `1 <= n <= 200000` and at most `n` chromosomes per genome.
+Constraints: `1 ≤ n ≤ 200000` and at most `n` chromosomes per genome.
 
 ## Input
 

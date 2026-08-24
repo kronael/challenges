@@ -1,5 +1,12 @@
 # 52 — Hard — Service Pairing
 
+**Task**: Assign every service to a distinct host at minimum total cost.
+
+**Difficulty**: hard
+**Time estimate**: ~90 min
+
+## Problem
+
 Assign every service to a different host while minimizing total cost.
 
 `costs[i][j]` is the cost of placing service `i` on host `j`. There are equally

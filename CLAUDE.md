@@ -165,7 +165,8 @@ NN-level-slug/
 ```
 
 sys challenges have no `python/`; sys challenges 31 and 33 have no `go/`.
-API challenges 21 and 22 have only `python/` and `go/`.
+API challenges 21 and 22 have `golden/`, `python/`, and `go/` (no `rotten/`,
+`rust/`, or `c/`).
 
 ## Input / output format
 

@@ -1,5 +1,13 @@
 # 49 — Hard — Gene Region Decoder
 
+**Task**: Recover the highest-scoring state path for a DNA sequence under a
+scored state model.
+
+**Difficulty**: hard
+**Time estimate**: ~75 min
+
+## Problem
+
 Given a DNA sequence and a scored state model, return the most likely state at
 every base. A state can represent a biological region such as coding DNA,
 non-coding DNA, or a frame-specific segment.

@@ -1,5 +1,13 @@
 # 51 — Hard — Deadline Scheduler
 
+**Task**: Process timer commands against a monotonic clock and report the timers
+that fire.
+
+**Difficulty**: hard
+**Time estimate**: ~60 min
+
+## Problem
+
 Process timer commands against a monotonic integer clock. The clock starts at
 zero.
 

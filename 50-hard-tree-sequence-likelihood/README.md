@@ -1,5 +1,13 @@
 # 50 — Hard — Tree Sequence Likelihood
 
+**Task**: Compute the log-likelihood of leaf DNA sequences under a rooted
+evolutionary tree.
+
+**Difficulty**: hard
+**Time estimate**: ~90 min
+
+## Problem
+
 Compute the natural logarithm of the probability of DNA sequences observed at
 the leaves of a rooted evolutionary tree.
 
