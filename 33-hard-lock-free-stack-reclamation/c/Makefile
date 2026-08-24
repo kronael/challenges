@@ -38,6 +38,8 @@ help:
 	@echo "build  — compile ./stress and ./benchmark"
 	@echo "fmt    — clang-format in place (skipped when not installed)"
 	@echo "lint   — compile every source with -Wpedantic -Wshadow -Werror"
+	@echo "check  — fmt + lint"
 	@echo "test   — build + fmt + lint + run the stress test (TIMEOUT=60)"
 	@echo "bench  — run the throughput benchmark (TIMEOUT=60)"
+	@echo "help   — show this message"
 	@echo "clean  — remove built binaries"

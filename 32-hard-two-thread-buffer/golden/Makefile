@@ -1,5 +1,5 @@
 .PHONY: all test clean
-CC ?= gcc
+CC ?= cc
 all: test
 test: main
 	./main

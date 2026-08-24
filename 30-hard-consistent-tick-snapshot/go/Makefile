@@ -30,5 +30,7 @@ help:
 	@echo "build  — go build"
 	@echo "fmt    — gofmt"
 	@echo "lint   — go vet"
-	@echo "test   — build + fmt + lint + go test (small cases only)"
+	@echo "check  — fmt + lint"
+	@echo "test   — build + fmt + lint + run the stress test"
 	@echo "bench  — run Go benchmark (TIMEOUT=5)"
+	@echo "help   — show this message"
