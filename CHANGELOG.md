@@ -2,6 +2,62 @@
 
 All notable changes to this challenge bench are recorded here.
 
+## [v0.1.5] — 2026-08-24
+
+> challenges v0.1.5 — defect-queue cleanup
+>
+> Resolves the `BUGS.md` review queue: real correctness fixes to the Go and C
+> solver scaffolds, int64-boundary test coverage, sys Makefile standardization,
+> value-checking tests for challenge 22, and solution-neutrality / accuracy
+> touch-ups across several READMEs and hints.
+>
+> • Go/C scaffolds: 64-bit fields no longer narrow to `int` (would overflow on
+>   32-bit GOARCH) across challenges 03, 04, 07, 10, 17, 35, 42, 43, 47, 54, 57
+> • Adds int64-boundary small fixtures to 01, 02, 28, 49, 52
+> • sys (29–34) Makefiles standardized; challenge 22 golden gains value tests
+> • Solution-neutral README/hint fixes and ≤/superscript glyph consistency
+>
+> Full notes below.
+
+### Fixed
+
+- **Go solver scaffolds widened to `int64`** where a documented 64-bit field or
+  result was parsed or returned as `int` (overflows on 32-bit `GOARCH`): 03
+  (drawdown result), 04 (loads), 07 (coin denominations), 10 (edge weights), 17
+  (item value/total), 35 (assignment payload), 42 (query endpoints), 43
+  (aggregate quantities/result), 47 (min-loop), 54 (masses), 57 (event IDs).
+  Each fix widens `main.go`, `solution.go`, and the expected-output parsing in
+  `solution_test.go` together; stubs still build and their harness parses.
+- **57 C scaffold**: `Event.id` widened from `int` to `long long`, matching the
+  Rust and C answer tracks and the 64-bit output.
+
+### Added
+
+- int64-boundary small fixtures: 01 (an element and sum beyond signed 32-bit),
+  02 (a result beyond signed 32-bit), 28 (i64 `ts`/`id`), 49 (a path total
+  beyond signed 32-bit), 52 (a minimum assignment total beyond signed 32-bit).
+- Challenge 22 golden: value-checking tests for all eight sequence functions
+  (previously scaffold/signature-only).
+
+### Changed
+
+- sys challenges 29–34: Makefiles standardized — `CC ?= cc` everywhere (no
+  `gcc`/hardcoded `cc`), bare-integer `TIMEOUT`, Rust `bench` builds the release
+  binary before the timed run, `help` lists `check`/`help`, and Rust `clean`
+  removes the untracked `Cargo.lock`.
+- 49/50/51/52 READMEs: added the standard `**Task**`/`**Difficulty**`/`**Time
+  estimate**` header and `## Problem` heading used by every other challenge.
+- 55 README: reworded the operation-availability line so it no longer telegraphs
+  an offline approach. 56 README: removed the "Collinear pairs are not part of
+  the count" line (horizontal/vertical segments are never collinear).
+- 53/55/56 READMEs: ASCII `<=`/`10^9` replaced with `≤`/`10⁹`.
+- 07/10/45 hints: name `rotten/main.py` in the complexity note (10 gains a
+  Complexity file) and cite CLRS Problem 16-1 for coin change.
+- 59/60/63 hints: benchmark-margin wording made accurate and hardware-robust.
+- template/README.md aligned to the canonical challenge layout.
+- 37 Rust stub: dropped redundant `Input::size()/limit()` accessors.
+- CLAUDE.md: corrected the note about API challenges 21/22 (they have `golden/`).
+
 ## [v0.1.4] — 2026-08-24
 
 > challenges v0.1.4 — new challenges + cleaner Go solvers
