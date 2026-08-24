@@ -13,10 +13,6 @@ type input struct {
 	Spectrum []int `json:"spectrum"`
 }
 
-func solve(masses, spectrum []int) ([]int, bool) {
-	return nil, false
-}
-
 func format(result []int, ok bool) string {
 	if !ok {
 		return "NONE"

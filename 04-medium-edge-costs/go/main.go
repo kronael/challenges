@@ -13,11 +13,6 @@ type input struct {
 	Loads []*int   `json:"loads"` // nil = missing
 }
 
-func solve(n int, edges [][2]int, loads []*int) []int {
-	_ = n
-	return nil
-}
-
 func main() {
 	var in input
 	if err := json.NewDecoder(os.Stdin).Decode(&in); err != nil {

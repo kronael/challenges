@@ -12,11 +12,6 @@ type input struct {
 	Data []int `json:"data"`
 }
 
-func solve(n int, data []int) []int {
-	// TODO
-	return nil
-}
-
 func main() {
 	var in input
 	json.NewDecoder(os.Stdin).Decode(&in)

@@ -11,11 +11,6 @@ type input struct {
 	Prices []int `json:"prices"`
 }
 
-func solve(prices []int) int {
-	_ = prices
-	panic("TODO")
-}
-
 func main() {
 	var in input
 	if err := json.NewDecoder(os.Stdin).Decode(&in); err != nil {

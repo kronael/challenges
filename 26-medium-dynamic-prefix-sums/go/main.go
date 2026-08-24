@@ -48,13 +48,6 @@ func (in *input) UnmarshalJSON(b []byte) error {
 	return nil
 }
 
-func solve(n int, initial []int64, queries []query) []int64 {
-	_ = n
-	_ = initial
-	_ = queries
-	return nil
-}
-
 func main() {
 	var in input
 	if err := json.NewDecoder(os.Stdin).Decode(&in); err != nil {

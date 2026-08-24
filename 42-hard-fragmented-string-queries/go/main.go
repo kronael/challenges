@@ -11,12 +11,6 @@ type input struct {
 	Queries [][]int  `json:"queries"`
 }
 
-func solve(parts []string, queries [][]int) string {
-	_ = parts
-	_ = queries
-	return ""
-}
-
 func main() {
 	var in input
 	if err := json.NewDecoder(os.Stdin).Decode(&in); err != nil {

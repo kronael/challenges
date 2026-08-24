@@ -10,11 +10,6 @@ type input struct {
 	Dims []int `json:"dims"`
 }
 
-func solve(dims []int) int {
-	_ = dims
-	return 0
-}
-
 func main() {
 	var in input
 	if err := json.NewDecoder(os.Stdin).Decode(&in); err != nil {

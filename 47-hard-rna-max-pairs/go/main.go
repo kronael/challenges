@@ -12,13 +12,6 @@ type input struct {
 	AllowWobble bool   `json:"allow_wobble"`
 }
 
-func solve(rna string, minLoop int, allowWobble bool) int {
-	_ = rna
-	_ = minLoop
-	_ = allowWobble
-	panic("TODO")
-}
-
 func main() {
 	var in input
 	if err := json.NewDecoder(os.Stdin).Decode(&in); err != nil {

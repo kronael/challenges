@@ -10,10 +10,6 @@ type input struct {
 	Costs [][]int64 `json:"costs"`
 }
 
-func solve(costs [][]int64) int64 {
-	return 0
-}
-
 func main() {
 	var in input
 	if err := json.NewDecoder(os.Stdin).Decode(&in); err != nil {

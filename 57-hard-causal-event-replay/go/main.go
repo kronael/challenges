@@ -19,10 +19,6 @@ type input struct {
 	Events    []event `json:"events"`
 }
 
-func solve(processes int, events []event) []int {
-	return nil
-}
-
 func main() {
 	var in input
 	if err := json.NewDecoder(os.Stdin).Decode(&in); err != nil {

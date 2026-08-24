@@ -16,12 +16,6 @@ type input struct {
 	Items    []item `json:"items"`
 }
 
-func solve(capacity int, items []item) int {
-	_ = capacity
-	_ = items
-	return 0
-}
-
 func main() {
 	var in input
 	if err := json.NewDecoder(os.Stdin).Decode(&in); err != nil {

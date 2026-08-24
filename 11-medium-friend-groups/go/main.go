@@ -15,11 +15,6 @@ type input struct {
 	Queries [][]int `json:"queries"`
 }
 
-func solve(n int, unions, queries [][]int) []int {
-	_, _, _ = n, unions, queries
-	return nil
-}
-
 func main() {
 	var in input
 	if err := json.NewDecoder(os.Stdin).Decode(&in); err != nil {

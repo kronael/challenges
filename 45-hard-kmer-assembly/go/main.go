@@ -11,12 +11,6 @@ type input struct {
 	Kmers []string `json:"kmers"`
 }
 
-func solve(k int, kmers []string) string {
-	_ = k
-	_ = kmers
-	return ""
-}
-
 func main() {
 	var in input
 	if err := json.NewDecoder(os.Stdin).Decode(&in); err != nil {

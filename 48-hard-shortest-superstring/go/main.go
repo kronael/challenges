@@ -10,10 +10,6 @@ type input struct {
 	Reads []string `json:"reads"`
 }
 
-func solve(reads []string) string {
-	return ""
-}
-
 func main() {
 	var in input
 	if err := json.NewDecoder(os.Stdin).Decode(&in); err != nil {

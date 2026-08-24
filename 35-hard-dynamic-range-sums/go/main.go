@@ -36,11 +36,6 @@ type input struct {
 	Ops    []op    `json:"ops"`
 }
 
-func solve(n int, values []int64, ops []op) []int64 {
-	_, _, _ = n, values, ops
-	return nil
-}
-
 func main() {
 	var in input
 	if err := json.NewDecoder(os.Stdin).Decode(&in); err != nil {

@@ -37,10 +37,6 @@ type input struct {
 	Commands []command `json:"commands"`
 }
 
-func solve(commands []command) []int {
-	return nil
-}
-
 func main() {
 	var in input
 	if err := json.NewDecoder(os.Stdin).Decode(&in); err != nil {
