@@ -12,7 +12,7 @@ number arrives, output the median of all values seen so far: the middle value
 when the count is odd, the average of the two middle values when the count is
 even.
 
-Constraints: `n` up to 2·10⁵, values fit in i32.
+Constraints: `n` up to 2·10⁵, values fit in a signed 32-bit integer.
 
 ## Input
 
@@ -47,6 +47,6 @@ make -C c
 make -C python
 ```
 
-Stuck? See `HINTS.md`.
+Stuck? See `hints/01.md`.
 
 Source: [LeetCode 295 — Find Median from Data Stream](https://leetcode.com/problems/find-median-from-data-stream/)

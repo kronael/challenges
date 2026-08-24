@@ -12,7 +12,7 @@ gap penalties.
 An *alignment* of `s` and `t` writes the two strings one above the other, left to
 right in their original order, inserting gap symbols (`-`) into either string so
 that both end up the same length. Every column then holds either two residues
-(one from each string) or one residue and a gap. A *global* alignment must cover
+(amino acids, one from each string) or one residue and a gap. A *global* alignment must cover
 both strings end to end — every residue of `s` and of `t` appears in some column.
 
 Each column is scored, and the alignment's score is the sum over all columns:
@@ -92,4 +92,4 @@ make -C c
 make -C python
 ```
 
-Stuck? See `HINTS.md`.
+Stuck? See `hints/01.md`.

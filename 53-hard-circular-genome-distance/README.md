@@ -9,11 +9,14 @@ circular genome into another.
 ## Problem
 
 A genome is a collection of circular chromosomes. Each chromosome is a signed
-sequence of synteny blocks. The sign records the block's orientation. Across a
-genome, every block from `1` through `n` appears exactly once.
+sequence of synteny blocks — numbered segments of DNA treated as the basic
+units of comparison between the two genomes. The sign records the block's
+orientation. Across a genome, every block from `1` through `n` appears exactly
+once.
 
-One rearrangement cuts two adjacencies and reconnects the four exposed ends in
-one of the other pairings. Find the minimum number of rearrangements needed to
+One rearrangement cuts two adjacencies — the connections between consecutive
+block ends along a chromosome — and reconnects the four exposed ends in one of
+the other pairings. Find the minimum number of rearrangements needed to
 transform genome `a` into genome `b`.
 
 The two genomes contain the same blocks. Chromosome order and circular rotation
@@ -47,4 +50,4 @@ make -C c
 make -C rust
 ```
 
-Stuck? See `HINTS.md`.
+Stuck? See `hints/01.md`.

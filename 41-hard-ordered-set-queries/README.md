@@ -19,7 +19,8 @@ Maintain a sorted set of integers under a stream of operations:
 Correctness must hold across long mixed streams: duplicate inserts, missing
 deletes, negative values, and ranges touching only part of the current set.
 
-Constraints: up to `400000` operations; values fit in i32; `lo <= hi`.
+Constraints: up to `400000` operations; values fit in a signed 32-bit integer;
+`lo <= hi`.
 
 ## Input / Output
 
@@ -52,4 +53,4 @@ make -C c
 make -C python
 ```
 
-Stuck? See `HINTS.md`.
+Stuck? See `hints/01.md`.

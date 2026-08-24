@@ -1,6 +1,6 @@
 # Coding Challenges
 
-57 self-contained algorithm and systems challenges. Most use file-based cases,
+65 self-contained algorithm and systems challenges. Most use file-based cases,
 an optimized reference, a deliberately naive benchmark control, and stubs in
 Python, Go, Rust, and C. A few exercises use an API test suite or a systems
 stress test instead. Run `make` in a language directory to format, build, lint,
@@ -50,7 +50,7 @@ challenge README and `make help` list the available commands.
 ```
 NN-level-slug/
   README.md      ← the problem only: task, constraints, I/O, examples
-  HINTS.md       ← the approach/technique — spoilers, open only when stuck
+  hints/         ← the approach/technique, one spoiler per file (01.md, 02.md, …)
   cases/         ← tracked small NN.in / NN.out fixtures (I/O challenges)
   golden/        ← optimized reference; always passes make test
   rotten/        ← deliberately naive benchmark control
@@ -75,7 +75,7 @@ fail `make cases`.
 
 The `README.md`, challenge title, directory slug, and catalog never narrow the
 solution search. All guidance, including rejected approaches and complexity
-comparisons, lives in `HINTS.md`.
+comparisons, lives in `hints/`, one spoiler per numbered file.
 
 **Four challenge types:**
 
@@ -136,7 +136,6 @@ implementation burden, and the constraints enforced by `make bench`.
 | [37](37-hard-prime-pair-sets/) | Prime Pair Sets | hard | py go rs c |
 | [38](38-hard-distinct-substrings/) | Distinct Substrings | hard | py go rs c |
 | [39](39-hard-max-flow/) | Max Flow | hard | py go rs c |
-| [40](40-hard-go-memory-model/) | Go Concurrency Quizzes | hard | go |
 | [41](41-hard-ordered-set-queries/) | Ordered Set Queries | hard | py go rs c |
 | [42](42-hard-fragmented-string-queries/) | Fragmented String Queries | hard | py go rs c |
 | [43](43-hard-order-book/) | Order Book | hard | py go rs c |
@@ -154,6 +153,37 @@ implementation burden, and the constraints enforced by `make bench`.
 | [55](55-hard-changing-network-queries/) | Changing Network Queries | hard | py go rs c |
 | [56](56-hard-orthogonal-segment-crossings/) | Orthogonal Segment Crossings | hard | py go rs c |
 | [57](57-hard-causal-event-replay/) | Causal Event Replay | hard | py go rs c |
+| [58](58-medium-kth-worst-fill/) | Kth Worst Fill | medium | py go rs c |
+| [59](59-medium-price-undercut/) | Price Undercut | medium | py go rs c |
+| [60](60-medium-venue-ancestor/) | Venue Ancestor | medium | py go rs c |
+| [61](61-hard-critical-venue-links/) | Critical Venue Links | hard | py go rs c |
+| [62](62-hard-neutral-basket/) | Neutral Basket | hard | py go rs c |
+| [63](63-hard-liquidity-wall/) | Liquidity Wall | hard | py go rs c |
+| [64](64-medium-signal-path/) | Signal Path | medium | py go rs c |
+| [65](65-hard-strategy-portfolio/) | Strategy Portfolio | hard | py go rs c |
+
+---
+
+## Specialized tracks
+
+Two clusters sit outside the general LeetCode-style set, for anyone curious
+about a specific field rather than drilling generic interview patterns:
+
+- **Concurrency / systems** (29–34) — lock-free structures, memory
+  ordering, and synchronization primitives, the kind of thing a
+  low-latency/HFT-adjacent systems role touches. These are concept demos of
+  the classic primitives (MPSC queues, work-stealing, hazard pointers, spin
+  barriers), not a substitute for a real systems-engineering education.
+- **Computational biology** (44–50, 53, 54) — sequence alignment, genome
+  assembly, off-target search, phylogenetics, and genome rearrangement,
+  framed as algorithm problems. These borrow real bioinformatics vocabulary
+  and are a taste of the field's algorithmic flavor, not a bioinformatics
+  curriculum — an actual research or industry role needs far more domain
+  depth than one problem apiece can give.
+
+Both are here because the underlying techniques are worth knowing regardless
+of which field you end up in. Treat them as an introduction, not a
+credential.
 
 ---
 
@@ -161,7 +191,7 @@ implementation burden, and the constraints enforced by `make bench`.
 
 1. Copy `template/` to the next numbered directory.
 2. Write the pure specification in `README.md`. Put all solution guidance and
-   solution-bearing sources in `HINTS.md`.
+   solution-bearing sources in `hints/`, one spoiler per numbered file.
 3. Add the optimized implementation in `golden/` and the short, correct, naive
    control in `rotten/`. Keep every solver `solve` body stubbed.
 4. Add at least eight tracked small fixture pairs and at least two structurally
@@ -177,8 +207,8 @@ implementation burden, and the constraints enforced by `make bench`.
 ## Sources
 
 Each challenge keeps solution-neutral attribution in its `README.md`.
-Solution-bearing references live in `HINTS.md`. Upstream problem sets and
-reference works are credited in [NOTICE](NOTICE).
+Solution-bearing references live in the last file of `hints/`. Upstream
+problem sets and reference works are credited in [NOTICE](NOTICE).
 
 Development assisted by Claude Code (Anthropic).
 

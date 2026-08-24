@@ -1,7 +1,7 @@
 # NN — TODO level — TODO title
 
 TODO: state the task in one paragraph. Keep this file solution-neutral; put all
-guidance in `HINTS.md`.
+guidance in `hints/01.md` (and onward).
 
 ## Constraints
 

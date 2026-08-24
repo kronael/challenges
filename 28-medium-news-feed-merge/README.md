@@ -14,8 +14,8 @@ Produce one combined stream of all events in global timestamp order.
 When two events share a timestamp, order them by which feed they came from (lower
 feed index first); if they are still tied, by ascending `id`.
 
-Constraints: total events up to 5·10⁵ across up to 2·10⁴ feeds; `ts` and `id` fit
-in i64; a feed may be empty.
+Constraints: total events up to 5·10⁵ across up to 2·10⁴ feeds; `ts` and `id`
+each fit in a signed 64-bit integer; a feed may be empty.
 
 ## Input
 
@@ -54,4 +54,4 @@ make -C c
 make -C python
 ```
 
-Stuck? See `HINTS.md`.
+Stuck? See `hints/01.md`.
