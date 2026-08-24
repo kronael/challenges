@@ -12,7 +12,7 @@ C `main`/`run_tests`/`stress`/`benchmark`, Go binaries, and Rust `target/`.
 
 When helping the user solve a challenge in this repo, act as a teacher, not
 an answer key. NEVER reveal the solution approach, the named algorithm, or
-even a hint from `HINTS.md` unless the user has explicitly asked for a hint
+even a hint from `hints/` unless the user has explicitly asked for a hint
 or the solution **twice** (two separate, explicit requests — not implied by
 frustration or a vague "I'm stuck"). Before that threshold: ask guiding
 questions, point at relevant concepts to review, or explain why an approach
@@ -20,7 +20,7 @@ fails — never state the technique or write solving code for them.
 
 # challenges/
 
-Personal coding-practice bench. 57 self-contained challenges, one per sitting.
+Personal coding-practice bench. 65 self-contained challenges, one per sitting.
 Harness is **editor + `make test`**. Each challenge has its own dir
 `NN-level-slug/`.
 
@@ -64,7 +64,7 @@ Harness is **editor + `make test`**. Each challenge has its own dir
   pinned, warmed-up, repeated measurements and an asserted regression.
   The root `make sys-rotten` target enforces the sanity-pass/adversarial-fail
   contract and rejects hangs.
-- **`python/main.py`, `go/main.go`, `rust/src/lib.rs`, `c/solution.c`** — stubs
+- **`python/main.py`, `go/solution.go`, `rust/src/lib.rs`, `c/solution.c`** — stubs
   ONLY. Only the algorithm body is a stub (`pass` / `return nil` / `todo!()` /
   a zero `Answer`); the scaffold around it must be COMPLETE — `solve(...)`
   signature matches the Input, `main` parses JSON → calls `solve` → prints, and
@@ -74,6 +74,13 @@ Harness is **editor + `make test`**. Each challenge has its own dir
   Rust keeps a plain derived `Input` beside `solve`. Heterogeneous JSON decoding
   lives in `src/input.rs`, with its solver-facing types re-exported by `lib.rs`;
   never pass `serde_json::Value` into `solve`.
+  Go splits the same way: `go/solution.go` holds ONLY `func solve` (plus any
+  solution-only helpers) — it is the single file the solver edits — while
+  `go/main.go` is the IO scaffold: imports, the JSON `input` type (and its
+  `UnmarshalJSON` when the input is heterogeneous), and `main` (decode stdin →
+  `solve` → print). Both are `package main` in the same directory, so
+  `solution_test.go` calls `solve` directly and the Makefile's package-mode
+  `go build .` picks up both files with no change.
   The I/O C runner, fixture driver, JSON reader, allocation helpers, and build
   rules live once in `shared/c/`. Every I/O challenge's `c/Makefile` includes
   `../../shared/c/io.mk`. Per challenge, write only `solution.h` (the `Input`
@@ -96,7 +103,7 @@ one, move it to `golden/` and replace the original with a stub.
 When scaffolding a new I/O challenge: write the reference first in
 `golden/main.py`, verify it passes, then write stubs in the four solver dirs.
 
-## README vs HINTS — never spoil the problem
+## README vs hints/ — never spoil the problem
 
 - **`README.md`** is a pure specification: task, constraints, I/O format, worked
   examples, and a source only when the citation itself reveals nothing about the
@@ -108,10 +115,26 @@ When scaffolding a new I/O challenge: write the reference first in
   limits without explaining how an approach behaves at those limits.
 - **Names are part of the prompt.** Challenge titles, directory slugs, catalog
   rows, example captions, and source labels must also be solution-neutral.
-- **`HINTS.md`** holds every detail that could narrow the solution search: the
+- **Exception: a bare target complexity is allowed**, LeetCode-follow-up style
+  ("Solutions are expected to run in O(n) time and O(1) extra space beyond the
+  input."). This states a requirement, not a comparison — it must not name,
+  rule out, or describe why any particular approach does or doesn't meet it,
+  and it stays a bare time/space bound: no added clause or parenthetical that
+  restates the bound in terms of a mechanism (a data structure, an operation,
+  "materializing" or "building" something) rather than a number, even one that
+  adds no new information beyond the bound itself — that phrasing is exactly
+  how a comparison or a ruled-out approach smuggles back in. Only add this
+  when `make bench` genuinely cannot enforce the gap on its own, verified the
+  same way the rotten/naive wall is: with a temporary optimized native control
+  outside the repo confirming that wall-clock timing at the largest practical
+  input can't reliably separate the intended approach from the obvious
+  alternative (e.g. O(n) vs O(n log n) — see `58-medium-kth-worst-fill/README.md`).
+- **`hints/`** holds every detail that could narrow the solution search: the
   approach, named algorithm, data structure, ordering, old "Teaches" bullets,
-  rejected approaches, complexity comparisons, and solution-bearing sources.
-  The solver opens it only when stuck.
+  rejected approaches, complexity comparisons, and solution-bearing sources —
+  one spoiler per numbered file (`01.md`, `02.md`, …), ordered from gentlest
+  nudge to full approach, ending with a `Sources` file. The solver opens
+  `01.md` only when stuck, and only one file at a time.
 
 ## Challenge types
 
@@ -122,8 +145,6 @@ When scaffolding a new I/O challenge: write the reference first in
 - **sys** (29–34): concurrent / lock-free systems challenge. No `cases/`, no
   stdin/stdout. The test *is* a stress test written in the language (many
   threads, barrier-synced, assert the invariant).
-- **quiz** (40): standalone Go memory-model exercises. This does not use the
-  golden/rotten layout.
 
 ## Layout
 
@@ -133,12 +154,12 @@ scripts/large_cases.py  deterministic seeded benchmark recipes
 scripts/bench.py        ephemeral generation, oracle comparison, and timeout runner
 NN-level-slug/
   README.md              problem statement, constraints, I/O, examples
-  HINTS.md               all solution guidance and solution-bearing sources
+  hints/                 01.md, 02.md, … — one spoiler per file, sources last
   cases/                 tracked small NN.in / NN.out fixtures (io only)
   golden/  main.py · test_solution.py · Makefile · pyproject.toml   (fast reference)
   rotten/  main.py · test_solution.py · Makefile · pyproject.toml   (naive trap: passes test, fails bench)
   python/  main.py · test_solution.py · Makefile
-  go/      main.go · solution_test.go · go.mod · Makefile
+  go/      main.go · solution.go · solution_test.go · go.mod · Makefile
   rust/    src/lib.rs · src/main.rs · tests/ · Cargo.toml · Makefile
   c/       solution.h · solution.c · Makefile (includes shared/c/io.mk)
 ```
@@ -224,7 +245,8 @@ hard io and the sys ones drop a language).
 
 1. Copy `template/` to `NN-level-slug/` (next number).
 2. Fill `README.md`: statement, constraints, I/O, and examples. Put all solution
-   guidance and solution-bearing sources in `HINTS.md`.
+   guidance and solution-bearing sources in `hints/`, one spoiler per numbered
+   file.
 3. Add at least eight tracked small fixture pairs and at least two seeded recipes
    in `scripts/large_cases.py`, update the frozen digest, then run `make cases`.
 4. Implement only `golden/` and `rotten/`. Tailor each solver scaffold to the
@@ -249,17 +271,16 @@ The race detector and the stress test are your debugger for sys challenges.
 
 ## State of the repo
 
-- 01–20, 23–28, 35–39, 41–57: io challenges with cases and language harnesses.
+- 01–20, 23–28, 35–39, 41–65: io challenges with cases and language harnesses.
 - 21–22: Python API exercises with direct tests and no rotten reference.
 - 29–34: sys challenges with stress tests.
-- 40: standalone Go concurrency quizzes.
 
 ## Sources
 
 CSES, CP-Algorithms, USACO Guide, Project Euler, Codeforces EDU, CLRS,
 peer-reviewed papers, and official technical documentation. Keep
 solution-neutral attribution in the challenge README. Put solution-bearing
-attribution in `HINTS.md`.
+attribution in the last file of `hints/`.
 
 # Project Memory
 
