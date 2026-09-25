@@ -151,13 +151,16 @@ When scaffolding a new I/O challenge: write the reference first in
   `shared/c/io.mk` (correctness against `cases/`) and `shared/vec.mk`, which
   adds `make vec`. Golden and rotten run the SAME algorithm at the SAME
   complexity and differ only in memory layout, so a timing gate cannot tell
-  them apart. No Python, no Go, and no seeded large cases, so the `bench`
+  them apart. No Python and no seeded large cases, so the `bench`
   target io.mk supplies has nothing to generate. Solver
-  directories include `shared/vec.mk` too; root `make vec` checks only
-  `golden/` and `rotten/`.
+  directories (`c/`, `rust/`, `go/`) include `shared/vec.mk` too; root
+  `make vec` checks only `golden/` and `rotten/`.
   All four Makefiles pin `CFLAGS` to `-O3 -march=x86-64-v3`, matching what
   `scripts/vec_check.py` compiles, and export `C_INCLUDE_PATH` so that the
   standalone compile it runs can still find `shared/c`.
+  The `go/` Makefile exports `GOEXPERIMENT=simd`, without which
+  `simd/archsimd` does not exist, and `GOAMD64=v3`; `vec_check.py` builds Go
+  with the same two and grades `main.solve` from `go build -gcflags=-S`.
 
 ## Layout
 
@@ -179,7 +182,8 @@ NN-level-slug/
 
 sys challenges have no `python/`; sys challenges 31 and 33 have no `go/`.
 API challenges 21 and 22 have `golden/`, `python/`, and `go/` (no `rotten/`,
-`rust/`, or `c/`).
+`rust/`, or `c/`). vec challenges 66–68 have C `golden/` and `rotten/` and the
+solver dirs `c/`, `rust/`, and `go/` (no `python/`).
 
 ## Input / output format
 
@@ -288,7 +292,7 @@ The race detector and the stress test are your debugger for sys challenges.
 - 01–20, 23–28, 35–39, 41–65: io challenges with cases and language harnesses.
 - 21–22: Python API exercises with direct tests and no rotten reference.
 - 29–34: sys challenges with stress tests.
-- 66–68: vec challenges — C and Rust only, graded on emitted code by `make vec`.
+- 66–68: vec challenges — C, Rust, and Go only, graded on emitted code by `make vec`.
 
 ## Sources
 

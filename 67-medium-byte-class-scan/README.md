@@ -96,10 +96,15 @@ make -C c test
 make -C c vec
 make -C rust test
 make -C rust vec
+make -C go test
+make -C go vec
 ```
 
-Both solver directories build for `x86-64-v3`, the same target `make vec`
-grades, so running `make test` needs a machine with AVX2.
+The C and Go solver directories build for `x86-64-v3`, the same target
+`make vec` grades, so running `make test` needs a machine with AVX2.
+
+The Go solver directory builds with `GOEXPERIMENT=simd`, so a Go `solve` may
+import `simd/archsimd`. Its `go.mod` requires Go 1.27.1 or newer.
 
 > No debug prints. Extra stdout breaks the test harness and signals you don't
 > have a mental model yet. Build the model, then write the code.
