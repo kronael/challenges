@@ -18,7 +18,7 @@ hold one entry per sample, in cohort order:
 - `quality` — how confident the caller is in that call
 
 A sample **passes** when its `depth` is at least `min_depth` and its `quality`
-is at least `min_quality`. Both thresholds are inclusive.
+is at least `min_quality`.
 
 Report two numbers over the passing samples:
 
