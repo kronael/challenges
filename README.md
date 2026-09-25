@@ -1,6 +1,6 @@
 # Coding Challenges
 
-68 self-contained algorithm and systems challenges. Most use file-based cases,
+67 self-contained algorithm and systems challenges. Most use file-based cases,
 an optimized reference, a deliberately naive benchmark control, and stubs in
 Python, Go, Rust, and C. A few exercises use an API test suite or a systems
 stress test instead. Run `make` in a language directory to format, build, lint,
@@ -41,7 +41,7 @@ I/O solver directories share these targets:
 | `make bench` | correctness + speed — generate and check every seeded large case |
 | `make help`  | list all targets |
 
-API, systems, and quiz challenges use targets suited to their test style. Their
+API, systems, and vec challenges use targets suited to their test style. Their
 challenge README and `make help` list the available commands.
 
 ---
@@ -83,7 +83,6 @@ comparisons, lives in `hints/`, one spoiler per numbered file.
 - **io** — reads JSON from stdin and writes one line in the documented format
 - **api** — implements functions checked directly by a language test suite
 - **sys** — exposes a systems API; the test is a stress test rather than files
-- **quiz** — asks for predictions about standalone programs, then checks them
 - **vec** — reads JSON like an io challenge, and is graded on the machine code
   as well as the answer: `make vec` builds the solution for `x86-64-v3`, traces
   it on one fixture, and checks that it does its per-element work in packed

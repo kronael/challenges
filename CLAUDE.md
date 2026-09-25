@@ -20,7 +20,7 @@ fails — never state the technique or write solving code for them.
 
 # challenges/
 
-Personal coding-practice bench. 68 self-contained challenges, one per sitting.
+Personal coding-practice bench. 67 self-contained challenges, one per sitting.
 Harness is **editor + `make test`**. Each challenge has its own dir
 `NN-level-slug/`.
 
@@ -229,7 +229,7 @@ benchmark can **never hang** regardless of what the binary does.
 Defaults: **5s** Rust/Go, **10s** Python. Override: `make bench TIMEOUT=30`.
 
 I/O `golden/` has `all: test` and adds a `regen` target to regenerate tracked
-small `.out` files. API, sys, and quiz challenges use targets specific to their test style;
+small `.out` files. API, sys, and vec challenges use targets specific to their test style;
 check their README and `make help` instead of assuming this table applies.
 
 ## Test case coverage
@@ -285,7 +285,7 @@ hard io and the sys ones drop a language).
    exercised by an equivalent optimized temporary native control.
 6. Add a row to the catalog table in the repo `README.md`.
 
-For an API, sys, or quiz challenge, copy the closest matching challenge instead
+For an API, sys, or vec challenge, copy the closest matching challenge instead
 of the I/O template and preserve that challenge type's test contract.
 
 ## No debug prints

@@ -88,3 +88,22 @@ decision) or BY-DESIGN (accepted variance).
   problems. Do NOT fabricate citations. (Case-number bands like `58/13_i32_bounds.in`
   and `04/12–20.in` were also reviewed and are intentional/harmless — every
   `.in` is paired and each challenge has ≥8 small cases — so they are not logged.)
+
+## Status — 2026-09-25 — found while rebuilding the vec grader
+
+- **NOTICE-HINTS-PATH** (LOW, docs) — Record-only. `NOTICE` says solution
+  guidance "lives in each challenge's HINTS.md" and sends readers to "the
+  relevant HINTS.md" for citations, but every challenge now keeps that material
+  in `hints/`, one rung per file, with sources in the last file. **Fix:** name
+  `hints/` in both places.
+- **VEC-UNROLLED-STACK-LANES** (LOW, grading) — BY-DESIGN. `scripts/vec_check.py`
+  does not count general-purpose arithmetic or stack accesses inside an
+  iteration that loads a vector, because that is where Go spills and where every
+  language keeps its per-vector loop control, bounds checks, and mask
+  arithmetic. A `solve` that loads a vector, stores it to a local array, and
+  then handles each lane with scalar code unrolled inside that same iteration
+  therefore grades vectorized. It takes deliberate construction; no natural
+  shape of 66–68 does it, and every separate scalar pass, every scalar
+  floating-point add, and every heap load or store still counts. **Fix
+  (optional):** tell apart stack slots that hold spilled vectors, which needs
+  data flow the tracer does not track.
