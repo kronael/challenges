@@ -2,6 +2,62 @@
 
 All notable changes to this challenge bench are recorded here.
 
+## [Unreleased]
+
+### Added
+
+- **vec challenge type** and challenges 66–68 (Variant Allele Counts, Tick
+  Frame Audit, Sparse Activation Gate), graded on the emitted machine code as
+  well as the answer. Each has C `golden/` and `rotten/` controls, `cases/`,
+  `hints/`, a `vec.mk` naming the traced fixture, and `c/`, `rust/`, and `go/`
+  solver scaffolds. `shared/vec.mk` adds `make vec`; the root `make vec`
+  checks every golden and rotten under `cc`, and under `clang` too when it is
+  on PATH.
+- Go solver track for 66–68: `go/` builds with `GOEXPERIMENT=simd` and
+  `GOAMD64=v3`, so a solve may use `simd/archsimd`.
+
+### Changed
+
+- Merged v0.1.5 into the vec work. v0.1.4's 58–65 had taken the numbers the
+  vec challenges were built under, so they moved from 58–60 to 66–68, and
+  their slugs were renamed to solution-neutral titles.
+- Every Go module and the template now declare `go 1.27.1`.
+- `scripts/vec_check.py` rebuilt as a ptrace tracer. It runs the binary
+  `make test` checks on one fixture, single-steps `solve` and everything it
+  calls, and passes a solve that retires fewer than one scalar instruction per
+  input element. The loop-shape reader it replaces passed any solve with one
+  packed loop anywhere and missed SIMD done in helpers. Solver sources may not
+  use assembly, pragmas, target or optimize attributes, `#[target_feature]`,
+  `build.rs`, or cgo, and AVX-512 is refused at run time. Rust builds and tests
+  one release `x86-64-v3` build.
+- 66 now sums floating-point dosages; 67 holds frames to 32–1024 bytes wide;
+  68 is traced on a full-size 16389-score batch. Their hints moved to `hints/`.
+- README and CLAUDE.md count 67 challenges and no longer list the quiz type
+  retired in v0.1.4.
+
+### Fixed
+
+- `make vec` found no return from a Go `solve` whose frame made the runtime
+  move its stack, and failed a vectorized solve as exiting inside the graded
+  function.
+- `make vec` gives up after 60 seconds. It used to single-step a `solve` that
+  never returned for 400 instructions per input element before failing, and
+  wait for ever on a program that hung outside `solve`. The traced program no
+  longer outlives the grader.
+- `make vec` says when the system does not permit ptrace, instead of that the
+  program could not start.
+- `make vec` no longer counts the Go runtime growing a goroutine's stack or
+  preempting it: `runtime.morestack` runs untraced. A Go solve that makes a
+  call per vector graded 6.7 to 8.7 scalar instructions per element across
+  identical runs, and now grades 0.13 every time.
+- `make vec` counts a scalar int-to-float convert from memory and a scalar
+  compare with an `_oq`-style predicate as scalar, not packed.
+- `make vec` passes the traced program's stderr through and names its exit
+  status when it stops early.
+- NOTICE points to each challenge's `hints/` instead of `HINTS.md`, and no
+  longer lists the retired challenge 40.
+- README: the Go stub is `solution.go`, not `main.go`.
+
 ## [v0.1.5] — 2026-08-24
 
 > challenges v0.1.5 — defect-queue cleanup
