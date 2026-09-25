@@ -19,7 +19,7 @@ make -C 05-medium-price-streak/go bench   # check and time your solution on larg
 From the repo root, verify the whole bench at once:
 
 ```bash
-make test        # I/O and API golden suites; I/O rotten small suites pass
+make test        # script tests; I/O, API, and vec golden + rotten suites pass
 make cases       # all seeded large-case recipes reproduce their frozen hashes
 make golden      # I/O and API golden tests pass; I/O benchmarks stay fast
 make rotten      # I/O rotten controls pass small cases; every large case times out
@@ -56,7 +56,7 @@ NN-level-slug/
   golden/        ← optimized reference; always passes make test
   rotten/        ← deliberately naive benchmark control
   python/        ← stub: implement solve() in main.py
-  go/            ← stub: implement solve() in main.go
+  go/            ← stub: implement solve() in solution.go
   rust/          ← stub: implement solve() in src/lib.rs
   c/             ← stub: implement solve() in solution.c
 ```
