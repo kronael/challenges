@@ -38,10 +38,12 @@ and attributes that change the target or the optimizer, Rust's
 graded build. While tracing, an AVX-512 instruction in the program's own code
 is refused for the same reason.
 
-The program runs with Go's asynchronous preemption and collector switched off,
-since both interrupt the traced thread with work that is not the solver's. A
-grade that takes longer than TIMEOUT seconds fails, and the traced program dies
-with the grader.
+Go's asynchronous preemption and collector are switched off, and Go's
+runtime.morestack, where a goroutine's stack grows and where the scheduler
+preempts it, runs untraced until it resumes the function that called it: all
+three interrupt the traced thread with work that is not the solver's. A grade
+that takes longer than TIMEOUT seconds fails, and the traced program dies with
+the grader.
 """
 
 from __future__ import annotations
@@ -64,6 +66,7 @@ PACKED_FLOOR = 0.02
 WINDOW = 256
 LONGEST = 15
 TIMEOUT = 60
+MORESTACK = "runtime.morestack.abi0"
 WORD = 2**64 - 1
 REFUSED = 126
 
@@ -234,16 +237,18 @@ def read_memory(pid: int, address: int, size: int) -> bytes:
                     for offset in range(0, size, 8))
 
 
-def find_symbol(binary: Path, name: str) -> tuple[int, bool]:
+def find_functions(binary: Path, base: int) -> dict[str, int]:
     listed = subprocess.run(["nm", "--defined-only", str(binary)], capture_output=True, text=True)
     if listed.returncode != 0:
         sys.exit(f"vec_check: cannot read symbols from {binary}\n{listed.stderr}")
+    relocated = int.from_bytes(binary.read_bytes()[16:18], "little") == 3
+    offset = base if relocated else 0
+    functions = {}
     for line in listed.stdout.splitlines():
         fields = line.split()
-        if len(fields) == 3 and fields[2] == name and fields[1] in "tTwW":
-            header = binary.read_bytes()[:18]
-            return int(fields[0], 16), int.from_bytes(header[16:18], "little") == 3
-    sys.exit(f"vec_check: {binary} defines no function {name}")
+        if len(fields) == 3 and fields[1] in "tTwW":
+            functions[fields[2]] = int(fields[0], 16) + offset
+    return functions
 
 
 def find_image(pid: int, binary: Path) -> tuple[int, int, int]:
@@ -306,7 +311,7 @@ def enter(pid: int, entry: int) -> int:
     return ptrace(PEEKTEXT, pid, regs.rsp) & WORD
 
 
-def trace(pid: int, entry: int, image: range, scalar_limit: float) -> Count:
+def trace(pid: int, entry: int, morestack: int | None, image: range, scalar_limit: float) -> Count:
     returns = enter(pid, entry)
     regs = Regs()
     table: dict[int, Insn] = {}
@@ -316,6 +321,9 @@ def trace(pid: int, entry: int, image: range, scalar_limit: float) -> Count:
     rip = entry
     pending = 0
     while True:
+        if rip == morestack:
+            rip = ptrace(PEEKTEXT, pid, regs.rsp) & WORD
+            enter(pid, rip)
         insn = table.get(rip)
         if insn is None:
             table.update(disassemble(read_memory(pid, rip, WINDOW), rip))
@@ -380,12 +388,14 @@ def count_units(input_path: Path, key: str) -> int:
 
 
 def run(binary: Path, function: str, input_path: Path, scalar_limit: float) -> Count:
-    address, relocated = find_symbol(binary, function)
     with tempfile.TemporaryFile() as out, tempfile.TemporaryFile() as err:
         pid = launch(binary, input_path, out.fileno(), err.fileno())
         base, low, high = find_image(pid, binary)
-        entry = address + (base if relocated else 0)
-        count = trace(pid, entry, range(low, high), scalar_limit)
+        functions = find_functions(binary, base)
+        if function not in functions:
+            sys.exit(f"vec_check: {binary} defines no function {function}")
+        count = trace(pid, functions[function], functions.get(MORESTACK), range(low, high),
+                      scalar_limit)
         if not count.returned:
             os.kill(pid, signal.SIGKILL)
             os.waitpid(pid, 0)

@@ -198,6 +198,34 @@ func solve(a, b, c []int32) {
 }
 """
 
+# The same loop, a vector per call two calls deep. Single-stepping outlasts the
+# scheduler's time slice, so the goroutine is preempted at one of the calls.
+GO_CALLS = """package main
+
+import "simd/archsimd"
+
+//go:noinline
+func multiply(a, b, c []int32, i int) {
+\tarchsimd.LoadInt32x8(a[i:]).Mul(archsimd.LoadInt32x8(b[i:])).Store(c[i:])
+}
+
+//go:noinline
+func step(a, b, c []int32, i int) {
+\tmultiply(a, b, c, i)
+}
+
+//go:noinline
+func solve(a, b, c []int32) {
+\ti := 0
+\tfor ; i+8 <= len(a); i += 8 {
+\t\tstep(a, b, c, i)
+\t}
+\tfor ; i < len(a); i++ {
+\t\tc[i] = a[i] * b[i]
+\t}
+}
+"""
+
 # The same loop behind a frame too large for the goroutine's stack, so solve's
 # prologue moves the stack and solve returns on a different stack than the one
 # it was entered on.
@@ -343,6 +371,9 @@ class GoTests(unittest.TestCase):
 
     def test_lane_multiply_in_a_helper_counts_for_solve(self) -> None:
         self.assert_grade(GO_HELPER, "vectorized")
+
+    def test_scheduler_preempting_solve_does_not_count(self) -> None:
+        self.assert_grade(GO_CALLS, "vectorized")
 
     def test_return_is_found_after_solve_moves_its_stack(self) -> None:
         with tempfile.TemporaryDirectory() as raw_dir:
