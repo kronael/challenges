@@ -106,4 +106,4 @@ import `simd/archsimd`. Its `go.mod` requires Go 1.27.1 or newer.
 > No debug prints. Extra stdout breaks the test harness and signals you don't
 > have a mental model yet. Build the model, then write the code.
 
-Stuck? See `HINTS.md`.
+Stuck? See `hints/01.md`.
