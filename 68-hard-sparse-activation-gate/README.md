@@ -22,15 +22,28 @@ another, and nothing else.
 
 `make test` checks the answer against `cases/`.
 
-`make vec` checks the shape of the code that produced it. It compiles `solve`
-for `x86-64-v3` at `-O3` and reads back the loops the compiler emitted: one of
-them must carry the selection in packed SIMD lanes. A `solve` whose loops the
-compiler leaves in scalar registers fails `make vec` even when every case
-passes.
+`make vec` checks how the program got it. It runs the same build on the
+fixture that `vec.mk` names and single-steps the call to `solve`: every
+instruction `solve` retires, in its own code, in the functions it calls, and in
+the library routines those call. It passes when `solve` retires fewer than one
+scalar instruction per score, averaged over the fixture, and some packed SIMD
+arithmetic. Scalar instructions are
 
-Both gates must pass. There are no large cases and no timing gate — this
-challenge is graded on the code the compiler emits, not on elapsed time.
-`make bench` has no recipes to generate here and says so.
+- scalar floating-point arithmetic, and loads and stores of one element or
+  less, wherever they run;
+- arithmetic, compares, and bit operations on general-purpose registers, except
+  in loop iterations that load several elements into a vector register at once.
+
+A `solve` that gets every case right but does its work on the scores one at
+a time in scalar registers fails `make vec`.
+
+`make vec` grades the code the compiler chose for `x86-64-v3`, so it refuses
+inline or standalone assembly, a `#pragma`, a `target` or `optimize`
+attribute, Rust's `#[target_feature]` and `build.rs`, and cgo. It needs Linux,
+`ptrace`, and `objdump`.
+
+Both gates must pass. There are no large cases and no timing gate: `make bench`
+has nothing to run here.
 
 ## Constraints
 
@@ -83,8 +96,9 @@ make -C go test
 make -C go vec
 ```
 
-The C and Go solver directories build for `x86-64-v3`, the same target
-`make vec` grades, so running `make test` needs a machine with AVX2.
+All three solver directories build for `x86-64-v3`, the target `make vec`
+grades, and `make test` runs that same build, so both need a machine with
+AVX2, BMI2, and FMA.
 
 The Go solver directory builds with `GOEXPERIMENT=simd`, so a Go `solve` may
 import `simd/archsimd`. Its `go.mod` requires Go 1.27.1 or newer.

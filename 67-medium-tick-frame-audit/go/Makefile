@@ -2,12 +2,11 @@
 MOD_NAME := $(shell awk '/^module/{print $$2}' go.mod)
 
 # simd/archsimd exists only under GOEXPERIMENT=simd, and GOAMD64=v3 is the
-# x86-64-v3 target scripts/vec_check.py builds, so `make test` runs the same
-# code that `make vec` reads.
+# x86-64-v3 target `make vec` grades. `go test` and `go build` both see the two,
+# and `make vec` traces the binary `build` writes.
 export GOEXPERIMENT := simd
 export GOAMD64 := v3
 
-VEC_FUNCS  := solve
 VEC_EXPECT := vectorized
 
 all: fmt build lint test
@@ -37,6 +36,6 @@ help:
 	@echo "lint   — go vet"
 	@echo "check  — fmt + lint"
 	@echo "test   — build + fmt + lint + go test against ../cases"
-	@echo "vec    — compile solve for x86-64-v3 and check its loops are packed"
+	@echo "vec    — trace solve on one fixture and check its work runs in packed lanes"
 
 include ../../shared/vec.mk

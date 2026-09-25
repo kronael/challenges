@@ -85,8 +85,9 @@ comparisons, lives in `hints/`, one spoiler per numbered file.
 - **sys** — exposes a systems API; the test is a stress test rather than files
 - **quiz** — asks for predictions about standalone programs, then checks them
 - **vec** — reads JSON like an io challenge, and is graded on the machine code
-  as well as the answer: `make vec` compiles the solution for `x86-64-v3` and
-  checks whether its hot loop kept the arithmetic in vector lanes
+  as well as the answer: `make vec` builds the solution for `x86-64-v3`, traces
+  it on one fixture, and checks that it does its per-element work in packed
+  SIMD lanes
 
 I/O challenge input is always JSON
 (`{"n":4,"edges":[[0,1]],"loads":[10,null]}`), so parsing is real work rather

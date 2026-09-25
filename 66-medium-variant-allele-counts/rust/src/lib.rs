@@ -12,8 +12,8 @@ pub struct Input {
 /// Returns the summed dosage and the called-allele count over the samples
 /// whose depth and quality clear both thresholds.
 ///
-/// `#[no_mangle]` keeps this symbol named `solve` in the object file, so that
-/// `make vec` can find its loops in the emitted assembly.
+/// `#[no_mangle]` keeps this symbol named `solve` in the binary, so that
+/// `make vec` can find where each call to it starts and returns.
 #[no_mangle]
 pub fn solve(
     dosage: &[f64],

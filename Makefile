@@ -17,12 +17,14 @@ GOLDEN := $(sort $(dir $(wildcard [0-9][0-9]-*/golden/test_solution.py)))
 ROTTEN := $(sort $(dir $(wildcard [0-9][0-9]-*/rotten/test_solution.py)))
 SYS    := $(sort $(dir $(wildcard [0-9][0-9]-*/golden/main.c)))
 SYS_ROTTEN := $(sort $(dir $(wildcard [0-9][0-9]-*/rotten/main.c)))
-# vec challenges: the golden and rotten controls whose Makefile includes the shape
-# assertion. golden/ expects vectorized and rotten/ expects scalar, so one target
-# checks both ends of the contract. Solver directories include it too, but theirs
-# is their own gate and fails until solved, exactly like their `make test`.
+# vec challenges: the golden and rotten controls whose Makefile includes the vec
+# grade. golden/ expects vectorized and rotten/ expects scalar, so one target
+# checks both ends of the contract, once per C compiler: cc, and clang too when
+# it is on PATH. Solver directories include it too, but theirs is their own gate
+# and fails until solved, exactly like their `make test`.
 VEC    := $(sort $(dir $(shell grep -l 'shared/vec.mk' \
 	[0-9][0-9]-*/golden/Makefile [0-9][0-9]-*/rotten/Makefile 2>/dev/null)))
+VEC_CCS := cc $(if $(shell command -v clang 2>/dev/null),clang)
 CLEAN := $(sort \
 	$(dir $(wildcard [0-9][0-9]-*/c/Makefile)) \
 	$(dir $(wildcard [0-9][0-9]-*/go/Makefile)) \
@@ -112,12 +114,16 @@ sys-rotten:
 
 vec:
 	@fail=0; \
-	for d in $(VEC); do \
-	  printf "vec    %-33s " "$$d"; \
-	  if out=$$(cd $$d && $(MAKE) --no-print-directory vec 2>&1); then echo "ok"; \
-	  else echo "FAIL"; fail=1; fi; \
-	  echo "$$out" | sed 's/^/    /'; \
+	for cc in $(VEC_CCS); do \
+	  for d in $(VEC); do \
+	    printf "vec    %-6s %-40s " "$$cc" "$$d"; \
+	    if out=$$(cd $$d && $(MAKE) -s --no-print-directory clean && \
+	        $(MAKE) -s --no-print-directory vec CC=$$cc 2>&1); then echo "ok"; \
+	    else echo "FAIL"; fail=1; fi; \
+	    echo "$$out" | sed 's/^/    /'; \
+	  done; \
 	done; \
+	for d in $(VEC); do $(MAKE) -s --no-print-directory -C $$d clean; done; \
 	[ $$fail -eq 0 ] && echo "every vec golden vectorizes and every vec rotten stays scalar" || { echo "FAILURES above"; exit 1; }
 
 clean:
@@ -132,6 +138,6 @@ help:
 	@echo "rotten  — every io rotten passes small tests and generated cases time out"
 	@echo "sys     — every sys (29-34) golden C stress test passes"
 	@echo "sys-rotten — every sys rotten passes sanity and fails controlled stress"
-	@echo "vec     — every vec golden vectorizes and every vec rotten stays scalar"
+	@echo "vec     — every vec golden vectorizes and every vec rotten stays scalar (cc, and clang if on PATH)"
 	@echo "clean   — remove compiled artifacts from every challenge"
 	@echo "Override GOLDEN_TIMEOUT (def 15s) / ROTTEN_TIMEOUT (def 5s)."

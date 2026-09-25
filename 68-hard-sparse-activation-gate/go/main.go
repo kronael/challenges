@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"runtime"
 	"strconv"
 	"strings"
 )
@@ -11,6 +12,12 @@ import (
 type input struct {
 	Scores    []int32 `json:"scores"`
 	Threshold int32   `json:"threshold"`
+}
+
+// init keeps the main goroutine, and so solve, on the thread the program
+// started on: `make vec` single-steps that one thread.
+func init() {
+	runtime.LockOSThread()
 }
 
 func main() {

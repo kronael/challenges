@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+import json
+import os
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -8,107 +11,387 @@ from pathlib import Path
 
 import vec_check
 
-# Vectorizes: every lane is independent, so the whole loop body is packed.
+ROOT = Path(__file__).resolve().parents[1]
+N = 4096
+
+# Every C probe links one of these drivers beside a solution.c, so that solve is
+# a call the compiler cannot inline or clone from main.
+SCALE_MAIN = """
+#include <stdlib.h>
+void solve(const float *restrict a, const float *restrict b, float *restrict c, long n);
+int main(void) {
+    float *a = malloc(%(n)d * sizeof *a), *b = malloc(%(n)d * sizeof *b), *c = malloc(%(n)d * sizeof *c);
+    for (long i = 0; i < %(n)d; i++) { a[i] = (float)(i %% 7); b[i] = 2.0f; }
+    solve(a, b, c, %(n)d);
+    return c[%(n)d - 1] == c[%(n)d - 1] ? 0 : 1;
+}
+""" % {"n": N}
+
+SELECT_MAIN = """
+#include <stdlib.h>
+long solve(const int *restrict x, int *restrict out, long n, int t);
+int main(void) {
+    int *x = malloc(%(n)d * sizeof *x), *out = malloc((%(n)d + 8) * sizeof *out);
+    unsigned s = 1;
+    for (long i = 0; i < %(n)d; i++) { s = s * 1103515245u + 12345u; x[i] = (int)((s >> 8) %% 1000); }
+    return solve(x, out, %(n)d, 500) > 0 ? 0 : 1;
+}
+""" % {"n": N}
+
+# Vectorizes: every lane is independent, so the loop runs in packed lanes.
 ELEMENTWISE = """
-void scale(const float *restrict a, const float *restrict b, float *restrict c, long n) {
+void solve(const float *restrict a, const float *restrict b, float *restrict c, long n) {
     for (long i = 0; i < n; i++) c[i] = a[i] * b[i];
 }
 """
 
-# Stays scalar: float addition is not associative, so the sum keeps its serial
-# dependency even though the compiler packs the multiply beside it.
+# Stays scalar: float addition is not associative, so every add waits on the
+# last. gcc packs the loads and the multiply beside it and still adds each
+# product in order, one scalar add per element.
 DOT = """
-float dot(const float *restrict a, const float *restrict b, long n) {
+void solve(const float *restrict a, const float *restrict b, float *restrict c, long n) {
     float s = 0;
     for (long i = 0; i < n; i++) s += a[i] * b[i];
-    return s;
+    c[0] = s;
+}
+"""
+
+# The packed loop lives in a helper that gcc clones as scale_by.constprop.0.
+HELPER = """
+static __attribute__((noinline)) void scale_by(float *restrict c, const float *restrict a, long n, float k) {
+    for (long i = 0; i < n; i++) c[i] = a[i] * k;
+}
+void solve(const float *restrict a, const float *restrict b, float *restrict c, long n) {
+    (void)b;
+    scale_by(c, a, n, 2.0f);
+}
+"""
+
+SELECT = """
+long solve(const int *restrict x, int *restrict out, long n, int t) {
+    long k = 0;
+    for (long i = 0; i < n; i++) if (x[i] > t) out[k++] = x[i];
+    return k;
+}
+"""
+
+# A packed pass over the input, then the selection in scalar code.
+PRE_PASS = """
+#include <stdlib.h>
+long solve(const int *restrict x, int *restrict out, long n, int t) {
+    int *y = malloc(n * sizeof *y);
+    for (long i = 0; i < n; i++) y[i] = x[i] + 1;
+    long k = 0;
+    for (long i = 0; i < n; i++) if (y[i] > t + 1) out[k++] = y[i] - 1;
+    free(y);
+    return k;
+}
+"""
+
+# A packed count of the kept scores, then the same scalar append.
+COUNT_THEN_APPEND = """
+long solve(const int *restrict x, int *restrict out, long n, int t) {
+    long m = 0;
+    for (long i = 0; i < n; i++) m += x[i] > t;
+    long k = 0;
+    for (long i = 0; i < n && k < m; i++) if (x[i] > t) out[k++] = x[i];
+    return k;
+}
+"""
+
+# A packed loop that the input never reaches, beside the scalar selection.
+DEAD_BRANCH = """
+long solve(const int *restrict x, int *restrict out, long n, int t) {
+    if (t < -1000000) {
+        for (long i = 0; i < n; i++) out[i] = x[i] * 3 + 1;
+        return n;
+    }
+    long k = 0;
+    for (long i = 0; i < n; i++) if (x[i] > t) out[k++] = x[i];
+    return k;
+}
+"""
+
+# The same, with the packed loop in inline assembly.
+ASM_DECOY = """
+long solve(const int *restrict x, int *restrict out, long n, int t) {
+    if (t < -1000000) {
+        for (long i = 0; i < n; i++) __asm__ volatile("vpaddd %%ymm0, %%ymm0, %%ymm0" ::: "xmm0");
+    }
+    long k = 0;
+    for (long i = 0; i < n; i++) if (x[i] > t) out[k++] = x[i];
+    return k;
 }
 """
 
 GO_MOD = "module probe\n\ngo 1.27.1\n"
+GO_MAIN = """package main
+
+import (
+\t"fmt"
+\t"runtime"
+)
+
+func init() { runtime.LockOSThread() }
+
+func main() {
+\tn := %d
+\ta := make([]int32, n)
+\tb := make([]int32, n)
+\tc := make([]int32, n)
+\tfor i := range a {
+\t\ta[i] = int32(i %% 7)
+\t\tb[i] = 3
+\t}
+\tsolve(a, b, c)
+\tfmt.Println(c[n-1])
+}
+""" % N
 
 # Vectorizes: the loop body is written in simd/archsimd's eight-lane types.
 GO_LANES = """package main
 
 import "simd/archsimd"
 
-func scale(a, b, c []int32) {
-	for i := 0; i+8 <= len(a); i += 8 {
-		archsimd.LoadInt32x8(a[i:]).Mul(archsimd.LoadInt32x8(b[i:])).Store(c[i:])
-	}
+//go:noinline
+func solve(a, b, c []int32) {
+\ti := 0
+\tfor ; i+8 <= len(a); i += 8 {
+\t\tarchsimd.LoadInt32x8(a[i:]).Mul(archsimd.LoadInt32x8(b[i:])).Store(c[i:])
+\t}
+\tfor ; i < len(a); i++ {
+\t\tc[i] = a[i] * b[i]
+\t}
 }
-
-func main() { scale(nil, nil, nil) }
 """
 
 # Stays scalar: the Go compiler does not vectorize a loop on its own.
 GO_PLAIN = """package main
 
-func scale(a, b, c []int32) {
-	for i := range a {
-		c[i] = a[i] * b[i]
-	}
+//go:noinline
+func solve(a, b, c []int32) {
+\tfor i := range a {
+\t\tc[i] = a[i] * b[i]
+\t}
+}
+"""
+
+# The packed loop in a helper that Go's inliner declines, so solve calls it.
+GO_HELPER = """package main
+
+import "simd/archsimd"
+
+//go:noinline
+func multiply(a, b, c []int32) {
+\ti := 0
+\tfor ; i+8 <= len(a); i += 8 {
+\t\tarchsimd.LoadInt32x8(a[i:]).Mul(archsimd.LoadInt32x8(b[i:])).Store(c[i:])
+\t}
+\tfor ; i < len(a); i++ {
+\t\tc[i] = a[i] * b[i]
+\t}
 }
 
-func main() { scale(nil, nil, nil) }
+//go:noinline
+func solve(a, b, c []int32) {
+\tmultiply(a, b, c)
+}
+"""
+
+# A cfg(target_feature) branch that is wrong only where AVX2 is enabled.
+RUST_CFG_SPLIT = """
+#[no_mangle]
+pub fn solve(x: &[i32]) -> i64 {
+    #[cfg(target_feature = "avx2")]
+    {
+        x.iter().map(|&v| v as i64).sum::<i64>() + 1
+    }
+    #[cfg(not(target_feature = "avx2"))]
+    {
+        x.iter().map(|&v| v as i64).sum()
+    }
+}
+"""
+RUST_TEST = """
+#[test]
+fn sums() {
+    assert_eq!(probe::solve(&[1, 2, 3]), 6);
+}
 """
 
 
-class VerdictTests(unittest.TestCase):
-    def check(self, source: str, function: str, expect: str) -> int:
+def grade(workdir: Path, binary: Path, function: str, expect: str) -> subprocess.CompletedProcess[str]:
+    """Runs vec_check on `binary` against an input whose unit count is N."""
+    (workdir / "input.json").write_text(json.dumps({"x": [0] * N}), encoding="utf-8")
+    return subprocess.run(
+        [sys.executable, vec_check.__file__, "--binary", str(binary), "--function", function,
+         "--input", str(workdir / "input.json"), "--units", "x", "--expect", expect,
+         "--sources", str(workdir)],
+        capture_output=True, text=True,
+    )
+
+
+class CTests(unittest.TestCase):
+    cc = "cc"
+
+    def check(self, driver: str, source: str, expect: str) -> subprocess.CompletedProcess[str]:
         with tempfile.TemporaryDirectory() as raw_dir:
             workdir = Path(raw_dir)
+            (workdir / "main.c").write_text(driver, encoding="utf-8")
             (workdir / "solution.c").write_text(source, encoding="utf-8")
-            done = subprocess.run(
-                [sys.executable, vec_check.__file__, "--workdir", str(workdir),
-                 "--lang", "c", "--function", function, "--expect", expect],
-                capture_output=True, text=True,
+            subprocess.run(
+                [self.cc, "-std=c11", "-O3", "-march=x86-64-v3", "-o", "prog", "main.c", "solution.c"],
+                cwd=workdir, check=True, capture_output=True,
             )
-            return done.returncode
+            return grade(workdir, workdir / "prog", "solve", expect)
+
+    def assert_grade(self, driver: str, source: str, expect: str) -> None:
+        done = self.check(driver, source, expect)
+        self.assertEqual(done.returncode, 0, done.stdout + done.stderr)
 
     def test_elementwise_multiply_is_vectorized(self) -> None:
-        self.assertEqual(self.check(ELEMENTWISE, "scale", "vectorized"), 0)
+        self.assert_grade(SCALE_MAIN, ELEMENTWISE, "vectorized")
 
-    def test_naive_float_dot_is_scalar(self) -> None:
-        self.assertEqual(self.check(DOT, "dot", "scalar"), 0)
+    def test_float_dot_with_packed_multiplies_is_scalar(self) -> None:
+        self.assert_grade(SCALE_MAIN, DOT, "scalar")
+
+    def test_packed_loop_in_a_helper_counts_for_solve(self) -> None:
+        self.assert_grade(SCALE_MAIN, HELPER, "vectorized")
+
+    def test_scalar_selection_is_scalar(self) -> None:
+        self.assert_grade(SELECT_MAIN, SELECT, "scalar")
+
+    def test_packed_pre_pass_does_not_hide_a_scalar_selection(self) -> None:
+        self.assert_grade(SELECT_MAIN, PRE_PASS, "scalar")
+
+    def test_packed_count_does_not_hide_a_scalar_append(self) -> None:
+        self.assert_grade(SELECT_MAIN, COUNT_THEN_APPEND, "scalar")
+
+    def test_packed_loop_the_input_never_runs_does_not_count(self) -> None:
+        self.assert_grade(SELECT_MAIN, DEAD_BRANCH, "scalar")
 
     def test_elementwise_multiply_rejects_a_scalar_expectation(self) -> None:
-        self.assertEqual(self.check(ELEMENTWISE, "scale", "scalar"), 1)
+        self.assertEqual(self.check(SCALE_MAIN, ELEMENTWISE, "scalar").returncode, 1)
 
-    def test_naive_float_dot_rejects_a_vectorized_expectation(self) -> None:
-        self.assertEqual(self.check(DOT, "dot", "vectorized"), 1)
+    def test_inline_assembly_is_refused(self) -> None:
+        done = self.check(SELECT_MAIN, ASM_DECOY, "vectorized")
+        self.assertEqual(done.returncode, 1)
+        self.assertIn("inline assembly", done.stdout)
 
     def test_missing_symbol_fails(self) -> None:
-        self.assertEqual(self.check(DOT, "absent", "scalar"), 1)
+        with tempfile.TemporaryDirectory() as raw_dir:
+            workdir = Path(raw_dir)
+            (workdir / "main.c").write_text("int main(void) { return 0; }\n", encoding="utf-8")
+            subprocess.run([self.cc, "-O2", "-o", "prog", "main.c"], cwd=workdir, check=True)
+            self.assertNotEqual(grade(workdir, workdir / "prog", "solve", "scalar").returncode, 0)
 
 
-class GoVerdictTests(unittest.TestCase):
-    def check(self, source: str, function: str, expect: str) -> int:
+@unittest.skipUnless(shutil.which("clang"), "clang is not on PATH")
+class ClangTests(CTests):
+    cc = "clang"
+
+
+@unittest.skipUnless(shutil.which("go"), "go is not on PATH")
+class GoTests(unittest.TestCase):
+    def check(self, source: str, expect: str) -> subprocess.CompletedProcess[str]:
         with tempfile.TemporaryDirectory() as raw_dir:
             workdir = Path(raw_dir)
             (workdir / "go.mod").write_text(GO_MOD, encoding="utf-8")
-            (workdir / "main.go").write_text(source, encoding="utf-8")
-            done = subprocess.run(
-                [sys.executable, vec_check.__file__, "--workdir", str(workdir),
-                 "--lang", "go", "--function", function, "--expect", expect],
-                capture_output=True, text=True,
+            (workdir / "main.go").write_text(GO_MAIN, encoding="utf-8")
+            (workdir / "solution.go").write_text(source, encoding="utf-8")
+            subprocess.run(
+                ["go", "build", "-o", "prog", "."], cwd=workdir, check=True, capture_output=True,
+                env={**os.environ, "GOEXPERIMENT": "simd", "GOAMD64": "v3"},
             )
-            return done.returncode
+            return grade(workdir, workdir / "prog", "main.solve", expect)
+
+    def assert_grade(self, source: str, expect: str) -> None:
+        done = self.check(source, expect)
+        self.assertEqual(done.returncode, 0, done.stdout + done.stderr)
 
     def test_lane_multiply_is_vectorized(self) -> None:
-        self.assertEqual(self.check(GO_LANES, "scale", "vectorized"), 0)
+        self.assert_grade(GO_LANES, "vectorized")
 
     def test_plain_multiply_is_scalar(self) -> None:
-        self.assertEqual(self.check(GO_PLAIN, "scale", "scalar"), 0)
+        self.assert_grade(GO_PLAIN, "scalar")
 
-    def test_lane_multiply_rejects_a_scalar_expectation(self) -> None:
-        self.assertEqual(self.check(GO_LANES, "scale", "scalar"), 1)
+    def test_lane_multiply_in_a_helper_counts_for_solve(self) -> None:
+        self.assert_grade(GO_HELPER, "vectorized")
 
-    def test_plain_multiply_rejects_a_vectorized_expectation(self) -> None:
-        self.assertEqual(self.check(GO_PLAIN, "scale", "vectorized"), 1)
+    def test_assembly_file_is_refused(self) -> None:
+        with tempfile.TemporaryDirectory() as raw_dir:
+            workdir = Path(raw_dir)
+            (workdir / "go.mod").write_text(GO_MOD, encoding="utf-8")
+            (workdir / "solve_amd64.s").write_text("", encoding="utf-8")
+            self.assertEqual(vec_check.lint(workdir), ["solve_amd64.s: compiled outside the graded build"])
 
-    def test_missing_symbol_fails(self) -> None:
-        self.assertEqual(self.check(GO_PLAIN, "absent", "scalar"), 1)
+
+@unittest.skipUnless(shutil.which("cargo"), "cargo is not on PATH")
+class RustBuildTests(unittest.TestCase):
+    def test_tests_run_the_build_the_grade_traces(self) -> None:
+        """A branch taken only under AVX2 must fail `make test`, because the
+        grade traces a build with AVX2 enabled."""
+        with tempfile.TemporaryDirectory() as raw_dir:
+            challenge = Path(raw_dir) / "99-medium-probe"
+            crate = challenge / "rust"
+            (crate / "src").mkdir(parents=True)
+            (crate / "tests").mkdir()
+            (Path(raw_dir) / "shared").symlink_to(ROOT / "shared")
+            (challenge / "vec.mk").write_text("VEC_INPUT := none\nVEC_UNITS := x\n", encoding="utf-8")
+            (crate / "Cargo.toml").write_text(
+                '[package]\nname = "probe"\nversion = "0.1.0"\nedition = "2021"\n', encoding="utf-8")
+            (crate / "src/lib.rs").write_text(RUST_CFG_SPLIT, encoding="utf-8")
+            (crate / "tests/sums.rs").write_text(RUST_TEST, encoding="utf-8")
+            shutil.copy(ROOT / "68-hard-sparse-activation-gate/rust/Makefile", crate / "Makefile")
+            done = subprocess.run(["make", "test"], cwd=crate, capture_output=True, text=True)
+            self.assertNotEqual(done.returncode, 0, done.stdout + done.stderr)
+            self.assertIn("left: 7", done.stdout + done.stderr)
+
+
+class LintTests(unittest.TestCase):
+    def lint(self, files: dict[str, str]) -> list[str]:
+        with tempfile.TemporaryDirectory() as raw_dir:
+            workdir = Path(raw_dir)
+            for name, text in files.items():
+                (workdir / name).parent.mkdir(parents=True, exist_ok=True)
+                (workdir / name).write_text(text, encoding="utf-8")
+            return vec_check.lint(workdir)
+
+    def test_c_refuses_what_changes_the_target_or_optimizer(self) -> None:
+        for source in (
+            '#pragma GCC target("avx512f")\n',
+            '_Pragma("GCC optimize(\\"O3\\")")\n',
+            '__attribute__((target("avx512f"))) void f(void) {}\n',
+            '__attribute__((noinline, optimize("unroll-loops"))) void f(void) {}\n',
+            '[[gnu::target_clones("avx2", "default")]] void f(void) {}\n',
+            'void f(void) { asm("nop"); }\n',
+        ):
+            with self.subTest(source=source):
+                self.assertTrue(self.lint({"solution.c": source}))
+
+    def test_c_allows_intrinsics_and_comments_that_name_the_constructs(self) -> None:
+        source = ('#include <immintrin.h>\n/* no asm, no #pragma here */\n'
+                  '__attribute__((noinline)) int f(void) { return _mm_popcnt_u32(3); }\n')
+        self.assertEqual(self.lint({"solution.c": source}), [])
+
+    def test_rust_refuses_assembly_target_features_and_build_scripts(self) -> None:
+        for files in (
+            {"src/lib.rs": "pub fn f() { unsafe { std::arch::asm!(\"nop\") } }\n"},
+            {"src/lib.rs": "#[target_feature(enable = \"avx512f\")]\npub unsafe fn f() {}\n"},
+            {"src/lib.rs": "pub fn f() {}\n", "build.rs": "fn main() {}\n"},
+        ):
+            with self.subTest(files=files):
+                self.assertEqual(len(self.lint({"Cargo.toml": "", **files})), 1)
+
+    def test_rust_allows_cfg_target_feature_and_intrinsics(self) -> None:
+        source = ("use std::arch::x86_64::_popcnt32;\n"
+                  "#[cfg(target_feature = \"avx2\")]\npub fn f() -> i32 { unsafe { _popcnt32(3) } }\n")
+        self.assertEqual(self.lint({"Cargo.toml": "", "src/lib.rs": source}), [])
+
+    def test_go_refuses_cgo(self) -> None:
+        source = 'package main\n\nimport "C"\n\nfunc solve() {}\n'
+        self.assertEqual(self.lint({"go.mod": GO_MOD, "solution.go": source}),
+                         ["solution.go: cgo"])
 
 
 if __name__ == "__main__":

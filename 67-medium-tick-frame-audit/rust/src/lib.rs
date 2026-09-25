@@ -9,8 +9,8 @@ pub struct Input {
 
 /// Returns the number of clean frames and the number of stray bytes.
 ///
-/// `#[no_mangle]` keeps this symbol named `solve` in the object file, so that
-/// `make vec` can find its loops in the emitted assembly.
+/// `#[no_mangle]` keeps this symbol named `solve` in the binary, so that
+/// `make vec` can find where each call to it starts and returns.
 #[no_mangle]
 pub fn solve(width: usize, separators: &[usize], stream: &[u8]) -> (u64, u64) {
     let _ = (width, separators, stream);

@@ -8,8 +8,8 @@ pub struct Input {
 
 /// Returns the scores strictly above `threshold`, in batch order.
 ///
-/// `#[no_mangle]` keeps this symbol named `solve` in the object file, so that
-/// `make vec` can find its loops in the emitted assembly.
+/// `#[no_mangle]` keeps this symbol named `solve` in the binary, so that
+/// `make vec` can find where each call to it starts and returns.
 #[no_mangle]
 pub fn solve(scores: &[i32], threshold: i32) -> Vec<i32> {
     let _ = (scores, threshold);

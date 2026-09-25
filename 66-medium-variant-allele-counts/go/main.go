@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"runtime"
 )
 
 type input struct {
@@ -12,6 +13,12 @@ type input struct {
 	Quality    []int32   `json:"quality"`
 	MinDepth   int32     `json:"min_depth"`
 	MinQuality int32     `json:"min_quality"`
+}
+
+// init keeps the main goroutine, and so solve, on the thread the program
+// started on: `make vec` single-steps that one thread.
+func init() {
+	runtime.LockOSThread()
 }
 
 func main() {

@@ -146,21 +146,29 @@ When scaffolding a new I/O challenge: write the reference first in
   stdin/stdout. The test *is* a stress test written in the language (many
   threads, barrier-synced, assert the invariant).
 - **vec** (66–68): reads JSON like an io challenge and keeps the golden/rotten
-  pair, but the contract is the shape of the emitted code rather than the
-  clock. `golden/` and `rotten/` are C directories that include both
+  pair, but the contract is the emitted machine code rather than the clock.
+  `golden/` and `rotten/` are C directories that include both
   `shared/c/io.mk` (correctness against `cases/`) and `shared/vec.mk`, which
   adds `make vec`. Golden and rotten run the SAME algorithm at the SAME
-  complexity and differ only in memory layout, so a timing gate cannot tell
-  them apart. No Python and no seeded large cases, so the `bench`
-  target io.mk supplies has nothing to generate. Solver
-  directories (`c/`, `rust/`, `go/`) include `shared/vec.mk` too; root
-  `make vec` checks only `golden/` and `rotten/`.
-  All four Makefiles pin `CFLAGS` to `-O3 -march=x86-64-v3`, matching what
-  `scripts/vec_check.py` compiles, and export `C_INCLUDE_PATH` so that the
-  standalone compile it runs can still find `shared/c`.
-  The `go/` Makefile exports `GOEXPERIMENT=simd`, without which
-  `simd/archsimd` does not exist, and `GOAMD64=v3`; `vec_check.py` builds Go
-  with the same two and grades `main.solve` from `go build -gcflags=-S`.
+  complexity and return the same answer; they differ in what the compiler can
+  emit for it (memory layout, control flow, or the order of floating-point
+  operations), and golden may use intrinsics. `make vec` runs the program
+  `make test` checks on the fixture the challenge's `vec.mk` names,
+  single-steps `solve` and everything it calls under ptrace
+  (`scripts/vec_check.py`), and passes when it retires fewer than one scalar
+  instruction per input element; golden must pass and rotten must fail. The
+  solver directories (`c/`, `rust/`, `go/`) are graded the same way; root
+  `make vec` checks only `golden/` and `rotten/`, with `cc` and, when it is on
+  PATH, `clang`. No Python and no seeded large cases, so `make bench` reports
+  that it has nothing to run.
+  Every Makefile builds for `x86-64-v3`, and `make test` and `make vec` use one
+  build: C pins `CFLAGS` to `-O3 -march=x86-64-v3`; Rust exports
+  `RUSTFLAGS=-C target-cpu=x86-64-v3` and builds and tests in release; Go
+  exports `GOAMD64=v3` and `GOEXPERIMENT=simd`, without which `simd/archsimd`
+  does not exist. Go's `main.go` locks the main goroutine to its thread and
+  `solution.go` keeps `solve` `//go:noinline`, so the tracer can follow the
+  call. `vec_check.py` refuses assembly, pragmas, target or optimize
+  attributes, `#[target_feature]`, `build.rs`, and cgo in the graded sources.
 
 ## Layout
 
@@ -182,8 +190,9 @@ NN-level-slug/
 
 sys challenges have no `python/`; sys challenges 31 and 33 have no `go/`.
 API challenges 21 and 22 have `golden/`, `python/`, and `go/` (no `rotten/`,
-`rust/`, or `c/`). vec challenges 66–68 have C `golden/` and `rotten/` and the
-solver dirs `c/`, `rust/`, and `go/` (no `python/`).
+`rust/`, or `c/`). vec challenges 66–68 have C `golden/` and `rotten/`, the
+solver dirs `c/`, `rust/`, and `go/` (no `python/`), and a `vec.mk` naming the
+fixture `make vec` traces.
 
 ## Input / output format
 

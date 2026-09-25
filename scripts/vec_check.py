@@ -1,206 +1,452 @@
-"""Report whether a function compiled to packed SIMD instructions.
+"""Grade whether a solve does its per-element work in packed SIMD lanes.
 
-A vec challenge is graded on the shape of the emitted code, not on wall time.
-Its golden reference must vectorize and its rotten control must not, and both
-have the same complexity, so a timing gate cannot separate them.
+A vec challenge is graded on the instructions the compiler emitted, weighted by
+how often they run. This runs the built binary on one input under ptrace, stops
+at the entry of the graded function, and single-steps every instruction until
+that call returns: its own code, every helper it calls, and every library
+routine those call. Each instruction is classified from objdump's disassembly
+of the running process.
 
-Builds for x86-64-v3, the AVX2 baseline, rather than the host CPU, so a verdict
-is reproducible on any machine that can build the repository. Go names that
-target GOAMD64=v3, and builds with GOEXPERIMENT=simd so that `simd/archsimd`
-can be imported.
+The grade counts scalar work, of two kinds:
+
+- scalar floating-point arithmetic, element-sized loads and stores that do not
+  address the stack, and moves of one lane out of a vector register into a
+  general-purpose one, wherever they run;
+- arithmetic, logic, compares, shifts, bit manipulation, and conditional sets
+  and moves on general-purpose registers, except in vector iterations.
+
+The instruction stream is cut into iterations at every backward jump, and an
+iteration that loads several elements into a vector register in one instruction
+is a vector iteration. Its general-purpose bookkeeping, loop control, bounds
+checks, and mask arithmetic, is paid once per vector rather than once per
+element, and is what separates C, Rust, and Go most; leaving it out lets one
+budget mean the same thing in all three. Packed arithmetic, data movement
+between registers, the stack, and control flow count on neither side.
+
+The count is divided by the length of one array in the input, the challenge's
+unit of work. A function is vectorized when it retires fewer than `--budget`
+scalar instructions per unit and at least PACKED_FLOOR packed ones. Any scalar
+pass over the input costs at least one per unit, a load or a floating-point
+add, however many vector loops run beside it, while setup, a remainder tail,
+and a horizontal sum cost a fraction of one. A loop the input never runs costs
+nothing.
+
+Before tracing, the solver's sources are checked for the ways to emit code the
+compiler did not choose for x86-64-v3: inline or standalone assembly, pragmas
+and attributes that change the target or the optimizer, Rust's
+`#[target_feature]`, and build scripts and cgo that compile code outside the
+graded build. While tracing, an AVX-512 instruction in the program's own code
+is refused for the same reason.
 """
 
 from __future__ import annotations
 
 import argparse
+import ctypes
+import enum
+import json
 import os
 import re
+import signal
 import subprocess
 import sys
+import tempfile
+from dataclasses import dataclass
 from pathlib import Path
 
-TARGET = "x86-64-v3"
-GO_ENV = {"GOAMD64": "v3", "GOEXPERIMENT": "simd"}
+BUDGET = 1.0
+PACKED_FLOOR = 0.02
+WINDOW = 256
+LONGEST = 15
+STEPS_PER_UNIT = 400
+WORD = 2**64 - 1
 
-# Packed arithmetic, comparison, shuffle, and mask extraction. Scalar forms end
-# in ss/sd and are absent on purpose: they are what a failed vectorization
-# leaves behind. Logical ops are absent too, because vxorps is the
-# register-zeroing idiom and appears just as often in scalar code.
-PACKED = re.compile(
-    r"^\s*v?("
-    r"(add|sub|mul|div|max|min|sqrt|rcp|rsqrt|cmp|blend|round|movmsk)p[sd]"
-    r"|f(n?madd|n?msub)[0-9]*p[sd]"
-    r"|p(add|sub|mull|mulh|maxs|maxu|mins|minu|cmpeq|cmpgt|shufb|shufd"
-    r"|blendvb|ackus|ackss|unpck|sll|srl|sra|avg|sad|movmskb)[a-z]*"
-    r"|perm[a-z0-9]*|broadcast[a-z0-9]*|gather[a-z0-9]*"
-    r")\b",
-    re.IGNORECASE,
+TRACEME = 0
+PEEKTEXT = 1
+POKETEXT = 4
+CONT = 7
+SINGLESTEP = 9
+GETREGS = 12
+SETREGS = 13
+DETACH = 17
+
+libc = ctypes.CDLL(None, use_errno=True)
+libc.ptrace.restype = ctypes.c_long
+libc.ptrace.argtypes = (ctypes.c_long, ctypes.c_long, ctypes.c_void_p, ctypes.c_void_p)
+
+
+class Regs(ctypes.Structure):
+    _fields_ = [(name, ctypes.c_ulonglong) for name in (
+        "r15 r14 r13 r12 rbp rbx r11 r10 r9 r8 rax rcx rdx rsi rdi orig_rax "
+        "rip cs eflags rsp ss fs_base gs_base ds es fs gs").split()]
+
+
+class Kind(enum.Enum):
+    INTEGER = "integer"
+    SCALAR = "scalar"
+    PACKED = "packed"
+    OTHER = "other"
+
+
+@dataclass(frozen=True, slots=True)
+class Insn:
+    kind: Kind
+    jump: bool
+    vector_load: bool
+    evex: bool
+
+
+@dataclass
+class Count:
+    scalar: int = 0
+    packed: int = 0
+    returned: bool = False
+
+
+PREFIXES = {"lock", "rep", "repz", "repe", "repnz", "repne", "notrack", "bnd",
+            "data16", "addr32", "cs", "ds", "es", "fs", "gs", "ss"}
+LEGACY_PREFIX_BYTES = {0x26, 0x2E, 0x36, 0x3E, 0x64, 0x65, 0x67}
+VECTOR_REGISTER = re.compile(r"%[xyz]mm\d")
+GPR_ARITHMETIC = re.compile(
+    r"^(add|sub|adc|sbb|inc|dec|neg|not|and|andn|or|xor|imul|mul|div|idiv"
+    r"|cmp|test|sal|sar|shl|shr|rol|ror|rcl|rcr|shld|shrd|sarx|shlx|shrx|rorx"
+    r"|lea|bt|btc|btr|bts|bsf|bsr|popcnt|lzcnt|tzcnt|bextr|blsi|blsmsk|blsr"
+    r"|bzhi|pdep|pext|mulx|adcx|adox|xadd|bswap|cbtw|cwtl|cltq|cwtd|cltd|cqto"
+    r")[bwlq]?$|^(set|cmov)[a-z]+$|^cmpxchg"
 )
-SCALAR = re.compile(r"^\s*v?(add|sub|mul|div|max|min|sqrt|cmp|f?n?madd[0-9]*)s[sd]\b", re.IGNORECASE)
+X87_ARITHMETIC = re.compile(r"^fi?(add|sub|subr|mul|div|divr|com|ucom|sqrt|abs|chs)")
+VECTOR_MOVE = re.compile(
+    r"^v?(mov(?!msk)|maskmov|pmaskmov|lddqu|broadcast|pbroadcast|insert|extract"
+    r"|pinsr|pextr|zero)"
+)
+SCALAR_FLOAT = re.compile(
+    r"^v?((add|sub|mul|div|min|max|sqrt|rcp|rsqrt|round|cmp[a-z]*|u?comi"
+    r"|f(n?madd|n?msub)\d*|getexp|getmant|scalef|rndscale|range|reduce"
+    r"|fixupimm)s[sdh]"
+    r"|cvt(t?s[sdh]2u?si|u?si2s[sdh]|s[sdh]2s[sdh]))$"
+)
+ELEMENT_ACCESS = re.compile(
+    r"^v?(movd|movq|movss|movsd|movsh|movhp[sd]|movlp[sd]|pinsr[bwdq]|pextr[bwdq]"
+    r"|extractps|pbroadcast[bwdq]|broadcasts[sdh]|movddup)$"
+)
+GENERAL_REGISTER = re.compile(r"%(r[a-z0-9]+|e[a-z]{2}|[a-d][lhx]|[sd]il?|[sb]pl?)$")
+STACK = re.compile(r"\(%[re](sp|bp)\b")
+NO_ACCESS = re.compile(r"^(lea|nop|prefetch|j|call|endbr|clflush|clwb)")
+STRING = re.compile(r"^(movs|stos|lods|cmps|scas)[bwlq]?$")
 
-LABEL = re.compile(r"^\s*(\.[\w.$]+):")
-# A conditional branch to a label. Plain jmp is excluded: it also jumps
-# backwards, to rejoin a tail the compiler hoisted out of line, and that is not
-# a loop.
-BRANCH = re.compile(r"^\s*j(?!mpq?\b)\w+\s+(\.[\w.$]+)\s*$")
+C_BANNED = [
+    (re.compile(r"\b(asm|__asm__|__asm)\b"), "inline assembly"),
+    (re.compile(r"^\s*#\s*pragma\b|\b_Pragma\s*\(", re.MULTILINE), "a #pragma"),
+    (re.compile(r"\b_*(target|optimize|target_clones)_*\s*\("), "a target or optimize attribute"),
+]
+RUST_BANNED = [
+    (re.compile(r"\b(asm|global_asm|naked_asm)!"), "inline assembly"),
+    (re.compile(r"#!?\[\s*(unsafe\s*\(\s*)?(target_feature|naked)\b"), "#[target_feature] or #[naked]"),
+]
+GO_BANNED = [
+    (re.compile(r'^\s*import\s*(\(\s*)?"C"', re.MULTILINE), "cgo"),
+]
+GO_OUTSIDE = {".s", ".S", ".syso", ".c", ".cc", ".cpp"}
 
-# Go's -S output heads each function with `main.NAME STEXT` and prints one
-# instruction per line after its hex and decimal offsets and its source
-# position. The hex dump and relocations that follow a function have no source
-# position, so they never match.
-GO_SYMBOL = re.compile(r"^main\.(\S+) STEXT\b")
-GO_INSTRUCTION = re.compile(r"^\t0x[0-9a-f]+ (\d+) \(.*?\)\t(\w+)\t?(.*)$")
+
+def ptrace(request: int, pid: int, addr: int = 0, data: int = 0) -> int:
+    ctypes.set_errno(0)
+    result = libc.ptrace(request, pid, ctypes.c_void_p(addr), ctypes.c_void_p(data))
+    error = ctypes.get_errno()
+    if result == -1 and error:
+        raise OSError(error, f"ptrace: {os.strerror(error)}")
+    return result
 
 
-def go_listing(compiled: str) -> str:
-    """Go's -S output in the shape of a GNU listing, so that the parser which
-    reads C and Rust assembly reads Go's too.
+def split_operands(operands: str) -> list[str]:
+    parts = []
+    depth = 0
+    start = 0
+    for index, char in enumerate(operands):
+        depth += (char == "(") - (char == ")")
+        if char == "," and depth == 0:
+            parts.append(operands[start:index])
+            start = index + 1
+    parts.append(operands[start:])
+    return [part.strip() for part in parts if part.strip()]
 
-    Go names a branch target by its decimal offset rather than by a label. This
-    puts `NAME:` and `.size NAME` around each function of package main, a
-    `.L<offset>:` label before every branch target, and points each branch at
-    that label.
-    """
-    functions: list[tuple[str, list[tuple[int, str, str]]]] = []
-    current: list[tuple[int, str, str]] | None = None
-    for line in compiled.splitlines():
-        if line and not line[0].isspace():
-            symbol = GO_SYMBOL.match(line)
-            current = [] if symbol else None
-            if symbol:
-                functions.append((symbol.group(1), current))
+
+def decode(mnemonic: str, operands: str, first_byte: int) -> Insn:
+    """How one disassembled instruction counts toward the grade."""
+    parts = split_operands(operands.partition("#")[0])
+    vector = any(VECTOR_REGISTER.search(part) for part in parts)
+    memory = (any("(" in part and not STACK.search(part) for part in parts)
+              and not NO_ACCESS.match(mnemonic))
+    extracts = bool(parts) and GENERAL_REGISTER.match(parts[-1]) is not None
+    if STRING.match(mnemonic):
+        kind = Kind.OTHER
+    elif vector and VECTOR_MOVE.match(mnemonic):
+        element = ELEMENT_ACCESS.match(mnemonic) and (memory or extracts)
+        kind = Kind.SCALAR if element else Kind.OTHER
+    elif vector:
+        kind = Kind.SCALAR if SCALAR_FLOAT.match(mnemonic) else Kind.PACKED
+    elif memory or X87_ARITHMETIC.match(mnemonic):
+        kind = Kind.SCALAR
+    elif GPR_ARITHMETIC.match(mnemonic):
+        kind = Kind.INTEGER
+    else:
+        kind = Kind.OTHER
+    loads = any("(" in part for part in parts[:-1])
+    vector_load = vector and loads and kind is not Kind.SCALAR
+    return Insn(kind, mnemonic.startswith(("j", "loop")), vector_load, first_byte == 0x62)
+
+
+def disassemble(code: bytes, address: int) -> dict[int, Insn]:
+    """Every instruction objdump decodes from `code`, read from the traced
+    process at `address`, an instruction boundary, except those that start in
+    the last LONGEST bytes, which the window may have cut short."""
+    with tempfile.NamedTemporaryFile(suffix=".bin") as blob:
+        blob.write(code)
+        blob.flush()
+        done = subprocess.run(
+            ["objdump", "-D", "-b", "binary", "-m", "i386:x86-64", "--insn-width=16",
+             f"--adjust-vma={address:#x}", blob.name],
+            capture_output=True, text=True, check=True,
+        )
+    found: dict[int, Insn] = {}
+    for line in done.stdout.splitlines():
+        fields = line.split("\t")
+        if len(fields) < 3 or not re.fullmatch(r"\s*[0-9a-f]+:", fields[0]):
             continue
-        instruction = GO_INSTRUCTION.match(line)
-        if instruction and current is not None:
-            offset, mnemonic, operands = instruction.groups()
-            current.append((int(offset), mnemonic.lower(), operands))
-
-    out = []
-    for name, instructions in functions:
-        targets = {int(operands) for _, mnemonic, operands in instructions
-                   if mnemonic.startswith("j") and operands.isdigit()}
-        out.append(f"{name}:")
-        for offset, mnemonic, operands in instructions:
-            if offset in targets:
-                out.append(f".L{offset}:")
-                targets.discard(offset)
-            if mnemonic.startswith("j") and operands.isdigit():
-                operands = f".L{operands}"
-            out.append(f"\t{mnemonic}\t{operands}")
-        out.append(f"\t.size\t{name}, .-{name}")
-    return "\n".join(out) + "\n"
-
-
-def assembly(workdir: Path, lang: str) -> str:
-    if lang == "go":
-        done = subprocess.run(
-            ["go", "build", "-gcflags=-S", "-o", os.devnull, "."],
-            cwd=workdir, capture_output=True, text=True, env={**os.environ, **GO_ENV},
-        )
-        if done.returncode != 0:
-            sys.exit(f"vec_check: go build failed\n{done.stderr}")
-        return go_listing(done.stderr)
-
-    if lang == "c":
-        sources = sorted(p.name for p in workdir.glob("*.c"))
-        if not sources:
-            sys.exit(f"vec_check: no .c sources in {workdir}")
-        done = subprocess.run(
-            ["cc", "-std=c11", "-O3", f"-march={TARGET}", "-S", "-o", "-", *sources],
-            cwd=workdir, capture_output=True, text=True,
-        )
-        if done.returncode != 0:
-            sys.exit(f"vec_check: compile failed\n{done.stderr}")
-        return done.stdout
-
-    done = subprocess.run(
-        ["cargo", "rustc", "--release", "--lib", "--quiet", "--",
-         "--emit", "asm", "-C", f"target-cpu={TARGET}"],
-        cwd=workdir, capture_output=True, text=True,
-    )
-    if done.returncode != 0:
-        sys.exit(f"vec_check: cargo failed\n{done.stderr}")
-    emitted = sorted((workdir / "target/release/deps").glob("*.s"), key=lambda p: p.stat().st_mtime)
-    if not emitted:
-        sys.exit("vec_check: cargo emitted no assembly")
-    return emitted[-1].read_text()
-
-
-def body(asm: str, name: str) -> str | None:
-    """The assembly between a symbol's label and its .size directive."""
-    label = re.search(rf"^{re.escape(name)}:", asm, re.MULTILINE)
-    if label is None:
-        return None
-    rest = asm[label.end():]
-    end = re.search(rf"^\s*\.size\s+{re.escape(name)}\b", rest, re.MULTILINE)
-    return rest[: end.start()] if end else rest
-
-
-def loops(lines: list[str]) -> list[list[str]]:
-    """Every loop body: a label, and a later conditional branch back to it."""
-    labelled: dict[str, int] = {}
-    found = []
-    for index, line in enumerate(lines):
-        label = LABEL.match(line)
-        if label:
-            labelled[label.group(1)] = index
-        branch = BRANCH.match(line)
-        if branch and branch.group(1) in labelled:
-            found.append(lines[labelled[branch.group(1)] : index + 1])
+        start = int(fields[0].strip()[:-1], 16)
+        if start >= address + len(code) - LONGEST:
+            continue
+        raw = [int(byte, 16) for byte in fields[1].split()]
+        first = next((byte for byte in raw if byte not in LEGACY_PREFIX_BYTES), 0)
+        tokens = fields[2].split(None, 1)
+        while len(tokens) > 1 and tokens[0] in PREFIXES:
+            tokens = tokens[1].split(None, 1)
+        if tokens:
+            found[start] = decode(tokens[0], tokens[1] if len(tokens) > 1 else "", first)
     return found
 
 
-def arithmetic(loop: list[str]) -> tuple[int, int]:
-    """How many packed and how many scalar arithmetic instructions a loop runs."""
-    return (
-        sum(1 for line in loop if PACKED.match(line)),
-        sum(1 for line in loop if SCALAR.match(line)),
-    )
+def read_memory(pid: int, address: int, size: int) -> bytes:
+    return b"".join((ptrace(PEEKTEXT, pid, address + offset) & WORD).to_bytes(8, "little")
+                    for offset in range(0, size, 8))
 
 
-def verdict(lines: list[str]) -> tuple[str, list[tuple[int, int]]]:
-    """A function is vectorized when one of its loops keeps ALL its arithmetic
-    in vector lanes: packed instructions, and not one scalar instruction.
+def find_symbol(binary: Path, name: str) -> tuple[int, bool]:
+    """The link-time address of `name` in `binary`, and whether the binary is
+    position-independent, so that the address is relative to its load base."""
+    listed = subprocess.run(["nm", "--defined-only", str(binary)], capture_output=True, text=True)
+    if listed.returncode != 0:
+        sys.exit(f"vec_check: cannot read symbols from {binary}\n{listed.stderr}")
+    for line in listed.stdout.splitlines():
+        fields = line.split()
+        if len(fields) == 3 and fields[2] == name and fields[1] in "tTwW":
+            header = binary.read_bytes()[:18]
+            return int(fields[0], 16), int.from_bytes(header[16:18], "little") == 3
+    sys.exit(f"vec_check: {binary} defines no function {name}")
 
-    Counting over the whole function cannot decide this. A correctly vectorized
-    reduction emits MORE scalar instructions than the scalar version it beats,
-    because its horizontal sum and its remainder tail are legitimately scalar.
-    Only the loop bodies separate the two, and they separate them absolutely:
-    the vectorized loop has no scalar arithmetic left in it at all, while a
-    loop the compiler gave up on keeps its serial dependency in scalar
-    registers however much packed work surrounds it.
-    """
-    shape = [arithmetic(loop) for loop in loops(lines)]
-    vectorized = any(packed and not scalar for packed, scalar in shape)
-    return "vectorized" if vectorized else "scalar", shape
+
+def find_image(pid: int, binary: Path) -> tuple[int, int, int]:
+    """The load base of `binary` in the process, and the span of its mappings."""
+    spans = []
+    for line in Path(f"/proc/{pid}/maps").read_text().splitlines():
+        fields = line.split()
+        if len(fields) >= 6 and fields[5] == str(binary):
+            low, high = fields[0].split("-")
+            spans.append((int(low, 16), int(high, 16), int(fields[2], 16)))
+    if not spans:
+        sys.exit(f"vec_check: {binary} is not mapped into its own process")
+    base = min(low - offset for low, _, offset in spans)
+    return base, min(low for low, _, _ in spans), max(high for _, high, _ in spans)
+
+
+def launch(binary: Path, stdin: Path, stdout: int, stderr: int) -> int:
+    """Starts `binary` as a tracee, stopped before its first instruction.
+
+    Go's asynchronous preemption and its collector are switched off: both
+    interrupt the traced thread with work that is not the solver's."""
+    env = {**os.environ, "GODEBUG": "asyncpreemptoff=1", "GOGC": "off"}
+    pid = os.fork()
+    if pid == 0:
+        try:
+            os.dup2(os.open(stdin, os.O_RDONLY), 0)
+            os.dup2(stdout, 1)
+            os.dup2(stderr, 2)
+            libc.ptrace(TRACEME, 0, None, None)
+            os.execve(binary, [str(binary)], env)
+        finally:
+            os._exit(127)
+    _, status = os.waitpid(pid, 0)
+    if not os.WIFSTOPPED(status):
+        sys.exit(f"vec_check: could not start {binary} under ptrace")
+    return pid
+
+
+def enter(pid: int, entry: int) -> tuple[int, int]:
+    """Runs the tracee to the first call of `entry`, and returns where that
+    call returns to and its stack pointer once it has."""
+    regs = Regs()
+    original = ptrace(PEEKTEXT, pid, entry) & WORD
+    ptrace(POKETEXT, pid, entry, (original & ~0xFF) | 0xCC)
+    pending = 0
+    while True:
+        ptrace(CONT, pid, 0, pending)
+        _, status = os.waitpid(pid, 0)
+        if not os.WIFSTOPPED(status):
+            sys.exit("vec_check: the program exited without calling the graded function;"
+                     " was it inlined into its caller?")
+        pending = os.WSTOPSIG(status)
+        if pending != signal.SIGTRAP:
+            continue
+        pending = 0
+        ptrace(GETREGS, pid, 0, ctypes.addressof(regs))
+        if regs.rip == entry + 1:
+            break
+    ptrace(POKETEXT, pid, entry, original)
+    regs.rip = entry
+    ptrace(SETREGS, pid, 0, ctypes.addressof(regs))
+    return ptrace(PEEKTEXT, pid, regs.rsp) & WORD, regs.rsp + 8
+
+
+def trace(pid: int, entry: int, image: range, scalar_limit: float, step_limit: int) -> Count:
+    """Single-steps the call at `entry` until it returns, or until its scalar
+    iterations have retired more than `scalar_limit` scalar instructions, which
+    already decides the verdict."""
+    returns, frame = enter(pid, entry)
+    regs = Regs()
+    table: dict[int, Insn] = {}
+    count = Count()
+    segment = 0
+    vector = False
+    rip = entry
+    pending = 0
+    for _ in range(step_limit):
+        insn = table.get(rip)
+        if insn is None:
+            table.update(disassemble(read_memory(pid, rip, WINDOW), rip))
+            insn = table[rip]
+        if insn.evex and rip in image:
+            sys.exit(f"vec_check: AVX-512 instruction at {rip:#x}, outside x86-64-v3")
+        segment += insn.kind is Kind.INTEGER
+        count.scalar += insn.kind is Kind.SCALAR
+        count.packed += insn.kind is Kind.PACKED
+        vector |= insn.vector_load
+        ptrace(SINGLESTEP, pid, 0, pending)
+        _, status = os.waitpid(pid, 0)
+        if not os.WIFSTOPPED(status):
+            sys.exit("vec_check: the program exited inside the graded function")
+        pending = os.WSTOPSIG(status)
+        if pending != signal.SIGTRAP:
+            continue
+        pending = 0
+        ptrace(GETREGS, pid, 0, ctypes.addressof(regs))
+        returned = regs.rip == returns and regs.rsp == frame
+        if returned or (insn.jump and regs.rip <= rip):
+            count.scalar += 0 if vector else segment
+            segment = 0
+            vector = False
+            if count.scalar > scalar_limit:
+                return count
+        rip = regs.rip
+        if returned:
+            count.returned = True
+            return count
+    sys.exit(f"vec_check: the graded function did not return within {step_limit} instructions")
+
+
+def strip_comments(source: str) -> str:
+    source = re.sub(r"/\*.*?\*/", " ", source, flags=re.DOTALL)
+    return re.sub(r"//[^\n]*", "", source)
+
+
+def lint(workdir: Path) -> list[str]:
+    """Every construct in the sources under `workdir` that emits code the
+    compiler did not choose for the graded target."""
+    if (workdir / "Cargo.toml").exists():
+        sources = sorted((workdir / "src").rglob("*.rs"))
+        banned = RUST_BANNED
+        outside = [path for path in [workdir / "build.rs"] if path.exists()]
+    elif (workdir / "go.mod").exists():
+        sources = sorted(p for p in workdir.glob("*.go") if not p.name.endswith("_test.go"))
+        banned = GO_BANNED
+        outside = sorted(p for p in workdir.iterdir() if p.suffix in GO_OUTSIDE)
+    else:
+        sources = sorted([*workdir.glob("*.c"), *workdir.glob("*.h")])
+        banned = C_BANNED
+        outside = []
+    problems = [f"{path.name}: compiled outside the graded build" for path in outside]
+    for path in sources:
+        text = strip_comments(path.read_text(encoding="utf-8"))
+        problems += [f"{path.relative_to(workdir)}: {what}"
+                     for pattern, what in banned if pattern.search(text)]
+    return problems
+
+
+def count_units(input_path: Path, key: str) -> int:
+    value = json.loads(input_path.read_text(encoding="utf-8"))[key]
+    return len(value.encode() if isinstance(value, str) else value)
+
+
+def run(binary: Path, function: str, input_path: Path, scalar_limit: float, step_limit: int) -> Count:
+    """Traces one call of `function` while `binary` reads `input_path`, and
+    checks the program's answer against the `.out` beside the input when the
+    call ran to completion."""
+    address, relocated = find_symbol(binary, function)
+    with tempfile.TemporaryFile() as out, tempfile.TemporaryFile() as err:
+        pid = launch(binary, input_path, out.fileno(), err.fileno())
+        base, low, high = find_image(pid, binary)
+        entry = address + (base if relocated else 0)
+        count = trace(pid, entry, range(low, high), scalar_limit, step_limit)
+        if not count.returned:
+            os.kill(pid, signal.SIGKILL)
+            os.waitpid(pid, 0)
+            return count
+        ptrace(DETACH, pid)
+        _, status = os.waitpid(pid, 0)
+        out.seek(0)
+        err.seek(0)
+        if os.waitstatus_to_exitcode(status) != 0:
+            sys.exit(f"vec_check: {binary.name} failed\n{err.read().decode(errors='replace')}")
+        expected = input_path.with_suffix(".out")
+        if expected.exists() and out.read().decode() != expected.read_text(encoding="utf-8"):
+            sys.exit(f"vec_check: {binary.name} printed the wrong answer for {input_path.name}")
+    return count
 
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--workdir", type=Path, default=Path.cwd())
-    parser.add_argument("--lang", choices=("rust", "c", "go"), required=True)
-    parser.add_argument("--function", action="append", required=True)
+    parser.add_argument("--binary", type=Path, required=True)
+    parser.add_argument("--function", required=True)
+    parser.add_argument("--input", type=Path, required=True)
+    parser.add_argument("--units", required=True,
+                        help="the input field whose length is the unit of work")
+    parser.add_argument("--budget", type=float, default=BUDGET,
+                        help="scalar work allowed per unit")
     parser.add_argument("--expect", choices=("vectorized", "scalar"), required=True)
+    parser.add_argument("--sources", type=Path, default=Path.cwd())
     return parser.parse_args()
 
 
 def main() -> None:
     args = parse_args()
-    asm = assembly(args.workdir.resolve(), args.lang)
-    failed = False
-    for name in args.function:
-        lines = body(asm, name)
-        if lines is None:
-            print(f"  {name}: NOT FOUND — needs #[no_mangle] or external linkage")
-            failed = True
-            continue
-        found, shape = verdict(lines.splitlines())
-        ok = found == args.expect
-        failed |= not ok
-        loop_shapes = " ".join(f"{packed}p/{scalar}s" for packed, scalar in shape) or "no loops"
-        print(f"  {name}: {loop_shapes} -> {found}"
-              f"{'' if ok else '  EXPECTED ' + args.expect}")
-    sys.exit(1 if failed else 0)
+    problems = lint(args.sources)
+    for problem in problems:
+        print(f"  {problem} is not allowed")
+    if problems:
+        sys.exit(1)
+
+    units = max(count_units(args.input, args.units), 1)
+    count = run(args.binary.resolve(), args.function, args.input,
+                args.budget * units, STEPS_PER_UNIT * units + 10**6)
+    scalar = count.scalar / units
+    packed = count.packed / units
+    vectorized = count.returned and scalar < args.budget and packed >= PACKED_FLOOR
+    found = "vectorized" if vectorized else "scalar"
+    shape = (f"{scalar:.2f} scalar, {packed:.2f} packed" if count.returned
+             else f"over {args.budget:.2f} scalar")
+    ok = found == args.expect
+    print(f"  {args.function}: {shape} per element of {args.units} ({units})"
+          f" -> {found}{'' if ok else '  EXPECTED ' + args.expect}")
+    sys.exit(0 if ok else 1)
 
 
 if __name__ == "__main__":

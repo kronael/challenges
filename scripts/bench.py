@@ -206,10 +206,14 @@ def main() -> None:
     args = parse_args()
     workdir = args.workdir.resolve()
     challenge = args.challenge or workdir.parent.name
+    try:
+        cases = get_cases(challenge)
+    except ValueError:
+        raise SystemExit(f"bench: {challenge} has no seeded large cases to run") from None
     TMP.mkdir(exist_ok=True)
 
     failures = []
-    for case in get_cases(challenge):
+    for case in cases:
         failure = benchmark_case(
             case,
             args.program,
