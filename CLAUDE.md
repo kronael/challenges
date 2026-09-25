@@ -20,7 +20,7 @@ fails — never state the technique or write solving code for them.
 
 # challenges/
 
-Personal coding-practice bench. 57 self-contained challenges, one per sitting.
+Personal coding-practice bench. 60 self-contained challenges, one per sitting.
 Harness is **editor + `make test`**. Each challenge has its own dir
 `NN-level-slug/`.
 
@@ -124,6 +124,19 @@ When scaffolding a new I/O challenge: write the reference first in
   threads, barrier-synced, assert the invariant).
 - **quiz** (40): standalone Go memory-model exercises. This does not use the
   golden/rotten layout.
+- **vec** (58): reads JSON like an io challenge and keeps the golden/rotten
+  pair, but the contract is the shape of the emitted code rather than the
+  clock. `golden/` and `rotten/` are C directories that include both
+  `shared/c/io.mk` (correctness against `cases/`) and `shared/vec.mk`, which
+  adds `make vec`. Golden and rotten run the SAME algorithm at the SAME
+  complexity and differ only in memory layout, so a timing gate cannot tell
+  them apart. No Python, no Go, and no seeded large cases, so the `bench`
+  target io.mk supplies has nothing to generate. Solver
+  directories include `shared/vec.mk` too; root `make vec` checks only
+  `golden/` and `rotten/`.
+  All four Makefiles pin `CFLAGS` to `-O3 -march=x86-64-v3`, matching what
+  `scripts/vec_check.py` compiles, and export `C_INCLUDE_PATH` so that the
+  standalone compile it runs can still find `shared/c`.
 
 ## Layout
 
@@ -253,6 +266,7 @@ The race detector and the stress test are your debugger for sys challenges.
 - 21–22: Python API exercises with direct tests and no rotten reference.
 - 29–34: sys challenges with stress tests.
 - 40: standalone Go concurrency quizzes.
+- 58–60: vec challenges — C and Rust only, graded on emitted code by `make vec`.
 
 ## Sources
 

@@ -1,6 +1,6 @@
 # Coding Challenges
 
-57 self-contained algorithm and systems challenges. Most use file-based cases,
+60 self-contained algorithm and systems challenges. Most use file-based cases,
 an optimized reference, a deliberately naive benchmark control, and stubs in
 Python, Go, Rust, and C. A few exercises use an API test suite or a systems
 stress test instead. Run `make` in a language directory to format, build, lint,
@@ -25,6 +25,7 @@ make golden      # I/O and API golden tests pass; I/O benchmarks stay fast
 make rotten      # I/O rotten controls pass small cases; every large case times out
 make sys         # systems golden C stress tests pass
 make sys-rotten  # systems controls pass sanity and fail controlled stress
+make vec         # every vec golden vectorizes and every vec rotten stays scalar
 ```
 
 I/O solver directories share these targets:
@@ -83,6 +84,9 @@ comparisons, lives in `HINTS.md`.
 - **api** — implements functions checked directly by a language test suite
 - **sys** — exposes a systems API; the test is a stress test rather than files
 - **quiz** — asks for predictions about standalone programs, then checks them
+- **vec** — reads JSON like an io challenge, and is graded on the machine code
+  as well as the answer: `make vec` compiles the solution for `x86-64-v3` and
+  checks whether its hot loop kept the arithmetic in vector lanes
 
 I/O challenge input is always JSON
 (`{"n":4,"edges":[[0,1]],"loads":[10,null]}`), so parsing is real work rather
@@ -154,6 +158,9 @@ implementation burden, and the constraints enforced by `make bench`.
 | [55](55-hard-changing-network-queries/) | Changing Network Queries | hard | py go rs c |
 | [56](56-hard-orthogonal-segment-crossings/) | Orthogonal Segment Crossings | hard | py go rs c |
 | [57](57-hard-causal-event-replay/) | Causal Event Replay | hard | py go rs c |
+| [58](58-medium-columnar-aggregate/) | Variant Allele Counts | medium | rs c |
+| [59](59-medium-byte-class-scan/) | Tick Frame Audit | medium | rs c |
+| [60](60-hard-stream-compaction/) | Sparse Activation Gate | hard | rs c |
 
 ---
 

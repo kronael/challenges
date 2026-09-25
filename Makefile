@@ -17,17 +17,23 @@ GOLDEN := $(sort $(dir $(wildcard [0-9][0-9]-*/golden/test_solution.py)))
 ROTTEN := $(sort $(dir $(wildcard [0-9][0-9]-*/rotten/test_solution.py)))
 SYS    := $(sort $(dir $(wildcard [0-9][0-9]-*/golden/main.c)))
 SYS_ROTTEN := $(sort $(dir $(wildcard [0-9][0-9]-*/rotten/main.c)))
+# vec challenges: the golden and rotten controls whose Makefile includes the shape
+# assertion. golden/ expects vectorized and rotten/ expects scalar, so one target
+# checks both ends of the contract. Solver directories include it too, but theirs
+# is their own gate and fails until solved, exactly like their `make test`.
+VEC    := $(sort $(dir $(shell grep -l 'shared/vec.mk' \
+	[0-9][0-9]-*/golden/Makefile [0-9][0-9]-*/rotten/Makefile 2>/dev/null)))
 CLEAN := $(sort \
 	$(dir $(wildcard [0-9][0-9]-*/c/Makefile)) \
 	$(dir $(wildcard [0-9][0-9]-*/go/Makefile)) \
 	$(dir $(wildcard [0-9][0-9]-*/rust/Makefile)) \
-	$(SYS) $(SYS_ROTTEN) \
+	$(SYS) $(SYS_ROTTEN) $(VEC) \
 	template/c/ template/go/ template/rust/)
 
 GOLDEN_TIMEOUT ?= 15   # generous: golden must finish well within this
 ROTTEN_TIMEOUT ?= 5    # short: the naive trap must blow past this
 
-.PHONY: all test cases golden rotten sys sys-rotten clean help
+.PHONY: all test cases golden rotten sys sys-rotten vec clean help
 
 all: test
 
@@ -37,7 +43,7 @@ cases:
 test:
 	cd scripts && python3 -X dev -W error -m unittest discover -p 'test_*.py'
 	@fail=0; \
-	for d in $(GOLDEN) $(ROTTEN); do \
+	for d in $(GOLDEN) $(ROTTEN) $(VEC); do \
 	  printf "test  %-34s " "$$d"; \
 	  if (cd $$d && make test) >/tmp/ptest.log 2>&1; then echo "ok"; \
 	  else echo "FAIL"; sed 's/^/    /' /tmp/ptest.log | tail -3; fail=1; fi; \
@@ -104,6 +110,16 @@ sys-rotten:
 	done; \
 	[ $$fail -eq 0 ] && echo "all sys rotten controls expose their defect" || { echo "FAILURES above"; exit 1; }
 
+vec:
+	@fail=0; \
+	for d in $(VEC); do \
+	  printf "vec    %-33s " "$$d"; \
+	  if out=$$(cd $$d && $(MAKE) --no-print-directory vec 2>&1); then echo "ok"; \
+	  else echo "FAIL"; fail=1; fi; \
+	  echo "$$out" | sed 's/^/    /'; \
+	done; \
+	[ $$fail -eq 0 ] && echo "every vec golden vectorizes and every vec rotten stays scalar" || { echo "FAILURES above"; exit 1; }
+
 clean:
 	@for d in $(CLEAN); do \
 	  $(MAKE) --no-print-directory -C "$$d" clean || exit $$?; \
@@ -116,5 +132,6 @@ help:
 	@echo "rotten  — every io rotten passes small tests and generated cases time out"
 	@echo "sys     — every sys (29-34) golden C stress test passes"
 	@echo "sys-rotten — every sys rotten passes sanity and fails controlled stress"
+	@echo "vec     — every vec golden vectorizes and every vec rotten stays scalar"
 	@echo "clean   — remove compiled artifacts from every challenge"
 	@echo "Override GOLDEN_TIMEOUT (def 15s) / ROTTEN_TIMEOUT (def 5s)."
