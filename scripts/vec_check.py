@@ -63,6 +63,7 @@ WINDOW = 256
 LONGEST = 15
 TIMEOUT = 60
 WORD = 2**64 - 1
+REFUSED = 126
 
 TRACEME = 0
 PEEKTEXT = 1
@@ -276,11 +277,15 @@ def launch(binary: Path, stdin: Path, stdout: int, stderr: int) -> int:
             os.dup2(stdout, 1)
             os.dup2(stderr, 2)
             libc.prctl(SET_PDEATHSIG, ctypes.c_ulong(signal.SIGKILL))
-            libc.ptrace(TRACEME, 0, None, None)
+            if libc.ptrace(TRACEME, 0, None, None) == -1:
+                os._exit(REFUSED)
             os.execve(binary, [str(binary)], env)
         finally:
             os._exit(127)
     _, status = os.waitpid(pid, 0)
+    if os.WIFEXITED(status) and os.WEXITSTATUS(status) == REFUSED:
+        sys.exit("vec_check: this system does not permit ptrace, which the grade needs:"
+                 " kernel.yama.ptrace_scope must be 0 or 1 and no seccomp filter may block it")
     if not os.WIFSTOPPED(status):
         sys.exit(f"vec_check: could not start {binary} under ptrace")
     return pid
