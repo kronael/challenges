@@ -91,6 +91,33 @@ decision) or BY-DESIGN (accepted variance).
 
 ## Status — 2026-09-25 — found while rebuilding the vec grader
 
+- **VEC-OTHER-THREADS-UNTRACED** (MED, grading) — Record-only, confirmed
+  2026-09-25. `scripts/vec_check.py` single-steps only the thread that calls
+  `solve`. A C `solve` that runs one packed pass and hands the scalar selection
+  to a `pthread_create` worker it then joins grades `0.01 scalar, 0.50 packed
+  -> vectorized`. A Go `solve` can do the same with `go f()` and no new thread,
+  since goroutines run on threads the runtime already has. **Fix (needs
+  sign-off, it adds a rule to the grade):** refuse a `solve` that makes a
+  clone, clone3, fork, or vfork syscall (read `orig_rax` after stepping a
+  `syscall`) or enters `runtime.newproc`.
+- **VEC-LINT-SHALLOW** (LOW, hardening) — Record-only. `lint()` in
+  `scripts/vec_check.py` regex-scans only the top-level sources. It misses
+  `use core::arch::asm as emit; emit!(…)`,
+  `#[cfg_attr(all(), target_feature(enable = "avx512f"))]`, a `build = "gen.rs"`
+  key in `Cargo.toml`, Go assembly in a subpackage (`k/k_amd64.s`), and a C
+  `#include` of a `.inc` that holds `__asm__`; each takes deliberate
+  construction. It wrongly refuses `#pragma once` and a C function named
+  `target`. **Fix:** scan every file under the solver directory, read
+  `Cargo.toml`'s `build` key, and exempt `#pragma once`; aliases and
+  `cfg_attr` need a parser rather than a regex.
+- **VEC-RBP-COUNTS-AS-STACK** (LOW, grading) — Record-only, not observed in
+  66–68. `STACK` in `scripts/vec_check.py` treats every `%rbp`-based address as
+  the stack, but gcc, clang, and rustc at release settings omit the frame
+  pointer, so `%rbp` can hold a heap pointer whose loads and stores then go
+  uncounted. The loop's general-purpose arithmetic and any scalar
+  floating-point work still count. **Fix:** treat only `%rsp`-based addresses
+  as the stack, after checking what Go, which keeps frame pointers, then
+  counts.
 - **VEC-UNROLLED-STACK-LANES** (LOW, grading) — BY-DESIGN. `scripts/vec_check.py`
   does not count general-purpose arithmetic or stack accesses inside an
   iteration that loads a vector, because that is where Go spills and where every
