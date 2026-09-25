@@ -25,6 +25,34 @@ float dot(const float *restrict a, const float *restrict b, long n) {
 }
 """
 
+GO_MOD = "module probe\n\ngo 1.27.1\n"
+
+# Vectorizes: the loop body is written in simd/archsimd's eight-lane types.
+GO_LANES = """package main
+
+import "simd/archsimd"
+
+func scale(a, b, c []int32) {
+	for i := 0; i+8 <= len(a); i += 8 {
+		archsimd.LoadInt32x8(a[i:]).Mul(archsimd.LoadInt32x8(b[i:])).Store(c[i:])
+	}
+}
+
+func main() { scale(nil, nil, nil) }
+"""
+
+# Stays scalar: the Go compiler does not vectorize a loop on its own.
+GO_PLAIN = """package main
+
+func scale(a, b, c []int32) {
+	for i := range a {
+		c[i] = a[i] * b[i]
+	}
+}
+
+func main() { scale(nil, nil, nil) }
+"""
+
 
 class VerdictTests(unittest.TestCase):
     def check(self, source: str, function: str, expect: str) -> int:
@@ -52,6 +80,35 @@ class VerdictTests(unittest.TestCase):
 
     def test_missing_symbol_fails(self) -> None:
         self.assertEqual(self.check(DOT, "absent", "scalar"), 1)
+
+
+class GoVerdictTests(unittest.TestCase):
+    def check(self, source: str, function: str, expect: str) -> int:
+        with tempfile.TemporaryDirectory() as raw_dir:
+            workdir = Path(raw_dir)
+            (workdir / "go.mod").write_text(GO_MOD, encoding="utf-8")
+            (workdir / "main.go").write_text(source, encoding="utf-8")
+            done = subprocess.run(
+                [sys.executable, vec_check.__file__, "--workdir", str(workdir),
+                 "--lang", "go", "--function", function, "--expect", expect],
+                capture_output=True, text=True,
+            )
+            return done.returncode
+
+    def test_lane_multiply_is_vectorized(self) -> None:
+        self.assertEqual(self.check(GO_LANES, "scale", "vectorized"), 0)
+
+    def test_plain_multiply_is_scalar(self) -> None:
+        self.assertEqual(self.check(GO_PLAIN, "scale", "scalar"), 0)
+
+    def test_lane_multiply_rejects_a_scalar_expectation(self) -> None:
+        self.assertEqual(self.check(GO_LANES, "scale", "scalar"), 1)
+
+    def test_plain_multiply_rejects_a_vectorized_expectation(self) -> None:
+        self.assertEqual(self.check(GO_PLAIN, "scale", "vectorized"), 1)
+
+    def test_missing_symbol_fails(self) -> None:
+        self.assertEqual(self.check(GO_PLAIN, "absent", "scalar"), 1)
 
 
 if __name__ == "__main__":

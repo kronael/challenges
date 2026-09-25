@@ -126,3 +126,22 @@ challenge now has to repeat.
 - **Source:** `scripts/vec_check.py:assembly`, `shared/vec.mk:24`
 - **Status:** open
 - **Fix:**
+
+## V3 — vec_check fails a Go solve whose packed loop sits in a helper (2026-09-25, open)
+
+The Go path grades only the loops inside `main.solve`'s own body, the same
+rule as C and Rust. Go's inliner declines a function whose cost exceeds its
+budget, which a loop over `simd/archsimd` calls readily does, so a helper that
+holds the packed loop keeps its own symbol and `solve` shows none. Verified with
+a temporary control of 68: the same loop passes `make test` in both shapes, and
+grades `0p/0s 0p/0s 3p/0s 0p/0s -> vectorized` written inside `solve` but
+`0p/0s -> scalar` moved into a helper that `solve` calls (`-gcflags=-m` does
+not report the helper as inlinable). The README tells the solver only that
+`solve` is compiled, so the failure does not say why.
+
+- **Severity:** low
+- **Scope:** vec challenge grading
+- **Affected:** the `go/` solver directories of 66, 67, and 68
+- **Source:** `scripts/vec_check.py:body`, `scripts/vec_check.py:go_listing`
+- **Status:** open
+- **Fix:**

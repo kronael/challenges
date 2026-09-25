@@ -8,14 +8,14 @@
 #
 #   VEC_FUNCS  := dot_product           symbols to inspect
 #   VEC_EXPECT := vectorized | scalar   what this directory must compile to
-#   VEC_LANG   := c | rust              inferred from Cargo.toml when unset
+#   VEC_LANG   := c | rust | go         inferred from Cargo.toml or go.mod when unset
 #
 # This adds only the `vec` target, so it composes with shared/c/io.mk without
 # colliding on build, test, bench, or clean.
 
 .PHONY: vec
 
-VEC_LANG   ?= $(if $(wildcard Cargo.toml),rust,c)
+VEC_LANG   ?= $(if $(wildcard Cargo.toml),rust,$(if $(wildcard go.mod),go,c))
 VEC_EXPECT ?= vectorized
 VEC_ROOT   := $(abspath $(dir $(lastword $(MAKEFILE_LIST)))/..)
 

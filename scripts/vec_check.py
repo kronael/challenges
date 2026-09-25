@@ -5,18 +5,22 @@ Its golden reference must vectorize and its rotten control must not, and both
 have the same complexity, so a timing gate cannot separate them.
 
 Builds for x86-64-v3, the AVX2 baseline, rather than the host CPU, so a verdict
-is reproducible on any machine that can build the repository.
+is reproducible on any machine that can build the repository. Go names that
+target GOAMD64=v3, and builds with GOEXPERIMENT=simd so that `simd/archsimd`
+can be imported.
 """
 
 from __future__ import annotations
 
 import argparse
+import os
 import re
 import subprocess
 import sys
 from pathlib import Path
 
 TARGET = "x86-64-v3"
+GO_ENV = {"GOAMD64": "v3", "GOEXPERIMENT": "simd"}
 
 # Packed arithmetic, comparison, shuffle, and mask extraction. Scalar forms end
 # in ss/sd and are absent on purpose: they are what a failed vectorization
@@ -40,8 +44,63 @@ LABEL = re.compile(r"^\s*(\.[\w.$]+):")
 # a loop.
 BRANCH = re.compile(r"^\s*j(?!mpq?\b)\w+\s+(\.[\w.$]+)\s*$")
 
+# Go's -S output heads each function with `main.NAME STEXT` and prints one
+# instruction per line after its hex and decimal offsets and its source
+# position. The hex dump and relocations that follow a function have no source
+# position, so they never match.
+GO_SYMBOL = re.compile(r"^main\.(\S+) STEXT\b")
+GO_INSTRUCTION = re.compile(r"^\t0x[0-9a-f]+ (\d+) \(.*?\)\t(\w+)\t?(.*)$")
+
+
+def go_listing(compiled: str) -> str:
+    """Go's -S output in the shape of a GNU listing, so that the parser which
+    reads C and Rust assembly reads Go's too.
+
+    Go names a branch target by its decimal offset rather than by a label. This
+    puts `NAME:` and `.size NAME` around each function of package main, a
+    `.L<offset>:` label before every branch target, and points each branch at
+    that label.
+    """
+    functions: list[tuple[str, list[tuple[int, str, str]]]] = []
+    current: list[tuple[int, str, str]] | None = None
+    for line in compiled.splitlines():
+        if line and not line[0].isspace():
+            symbol = GO_SYMBOL.match(line)
+            current = [] if symbol else None
+            if symbol:
+                functions.append((symbol.group(1), current))
+            continue
+        instruction = GO_INSTRUCTION.match(line)
+        if instruction and current is not None:
+            offset, mnemonic, operands = instruction.groups()
+            current.append((int(offset), mnemonic.lower(), operands))
+
+    out = []
+    for name, instructions in functions:
+        targets = {int(operands) for _, mnemonic, operands in instructions
+                   if mnemonic.startswith("j") and operands.isdigit()}
+        out.append(f"{name}:")
+        for offset, mnemonic, operands in instructions:
+            if offset in targets:
+                out.append(f".L{offset}:")
+                targets.discard(offset)
+            if mnemonic.startswith("j") and operands.isdigit():
+                operands = f".L{operands}"
+            out.append(f"\t{mnemonic}\t{operands}")
+        out.append(f"\t.size\t{name}, .-{name}")
+    return "\n".join(out) + "\n"
+
 
 def assembly(workdir: Path, lang: str) -> str:
+    if lang == "go":
+        done = subprocess.run(
+            ["go", "build", "-gcflags=-S", "-o", os.devnull, "."],
+            cwd=workdir, capture_output=True, text=True, env={**os.environ, **GO_ENV},
+        )
+        if done.returncode != 0:
+            sys.exit(f"vec_check: go build failed\n{done.stderr}")
+        return go_listing(done.stderr)
+
     if lang == "c":
         sources = sorted(p.name for p in workdir.glob("*.c"))
         if not sources:
@@ -119,7 +178,7 @@ def verdict(lines: list[str]) -> tuple[str, list[tuple[int, int]]]:
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument("--workdir", type=Path, default=Path.cwd())
-    parser.add_argument("--lang", choices=("rust", "c"), required=True)
+    parser.add_argument("--lang", choices=("rust", "c", "go"), required=True)
     parser.add_argument("--function", action="append", required=True)
     parser.add_argument("--expect", choices=("vectorized", "scalar"), required=True)
     return parser.parse_args()
