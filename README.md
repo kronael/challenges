@@ -165,9 +165,9 @@ implementation burden, and the constraints enforced by `make bench`.
 | [63](63-hard-liquidity-wall/) | Liquidity Wall | hard | py go rs c |
 | [64](64-medium-signal-path/) | Signal Path | medium | py go rs c |
 | [65](65-hard-strategy-portfolio/) | Strategy Portfolio | hard | py go rs c |
-| [66](66-medium-columnar-aggregate/) | Variant Allele Counts | medium | go rs c |
-| [67](67-medium-byte-class-scan/) | Tick Frame Audit | medium | go rs c |
-| [68](68-hard-stream-compaction/) | Sparse Activation Gate | hard | go rs c |
+| [66](66-medium-variant-allele-counts/) | Variant Allele Counts | medium | go rs c |
+| [67](67-medium-tick-frame-audit/) | Tick Frame Audit | medium | go rs c |
+| [68](68-hard-sparse-activation-gate/) | Sparse Activation Gate | hard | go rs c |
 
 ---
 
