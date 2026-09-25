@@ -16,10 +16,15 @@ fn cases() {
     for path in inputs {
         let input: Input = serde_json::from_str(&fs::read_to_string(&path).unwrap()).unwrap();
         let want = fs::read_to_string(path.with_extension("out")).unwrap();
-        let (allele_count, called_alleles) =
-            solve(&input.samples, input.min_depth, input.min_quality);
+        let (allele_count, called_alleles) = solve(
+            &input.dosage,
+            &input.depth,
+            &input.quality,
+            input.min_depth,
+            input.min_quality,
+        );
         assert_eq!(
-            format!("{allele_count} {called_alleles}"),
+            format!("{allele_count:.12} {called_alleles}"),
             want.trim_end(),
             "{:?}",
             path.file_name().unwrap()

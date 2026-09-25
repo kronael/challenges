@@ -1,1 +1,1 @@
-{"samples":[],"min_depth":10,"min_quality":20}
+{"dosage":[1.5,0.25,2],"depth":[30,8,44],"quality":[99,50,15],"min_depth":10,"min_quality":20}

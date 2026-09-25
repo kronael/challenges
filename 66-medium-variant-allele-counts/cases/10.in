@@ -1,1 +1,1 @@
-{"samples":[{"genotype":0,"depth":0,"quality":0},{"genotype":1,"depth":0,"quality":5},{"genotype":2,"depth":5,"quality":0},{"genotype":0,"depth":7,"quality":7},{"genotype":1,"depth":1,"quality":1},{"genotype":2,"depth":2,"quality":2},{"genotype":0,"depth":3,"quality":3},{"genotype":1,"depth":4,"quality":4},{"genotype":2,"depth":6,"quality":6}],"min_depth":0,"min_quality":0}
+{"dosage":[2,0,0.541015625,0.37451171875,1.960693359375,1.254638671875,1,0.2412109375],"depth":[9,36,29,60,1,57,26,58],"quality":[48,90,91,99,72,45,77,76],"min_depth":10,"min_quality":20}

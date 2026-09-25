@@ -8,20 +8,16 @@
 #include <stdio.h>
 
 typedef struct {
-	int32_t genotype;
-	int32_t depth;
-	int32_t quality;
-} Sample;
-
-typedef struct {
-	Sample **sample; // one entry per sample; NULL where there is no call
+	double *dosage;   // expected alternate alleles per sample, in [0, 2]
+	int32_t *depth;   // reads behind each sample's call
+	int32_t *quality; // the caller's confidence in each sample's call
 	size_t n;
 	int32_t min_depth;
 	int32_t min_quality;
 } Input;
 
 typedef struct {
-	long long allele_count;   // alternate alleles over the passing samples
+	double allele_count;      // summed dosage over the passing samples
 	long long called_alleles; // two per passing sample
 } Answer;
 

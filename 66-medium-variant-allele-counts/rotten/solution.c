@@ -3,62 +3,53 @@
 #include <stdlib.h>
 
 void input_parse(const JsonValue *root, Input *in) {
-	const JsonValue *samples = json_get(root, "samples");
-	in->n = json_len(samples);
-	in->sample = (Sample **)xmalloc(in->n * sizeof *in->sample);
+	const JsonValue *dosage = json_get(root, "dosage");
+	const JsonValue *depth = json_get(root, "depth");
+	const JsonValue *quality = json_get(root, "quality");
+	in->n = json_len(dosage);
+	in->dosage = (double *)xmalloc(in->n * sizeof *in->dosage);
+	in->depth = (int32_t *)xmalloc(in->n * sizeof *in->depth);
+	in->quality = (int32_t *)xmalloc(in->n * sizeof *in->quality);
 	for (size_t i = 0; i < in->n; i++) {
-		const JsonValue *entry = json_at(samples, i);
-		if (json_is_null(entry)) {
-			in->sample[i] = NULL;
-			continue;
-		}
-		Sample *s = (Sample *)xmalloc(sizeof *s);
-		s->genotype = (int32_t)json_int(json_get(entry, "genotype"));
-		s->depth = (int32_t)json_int(json_get(entry, "depth"));
-		s->quality = (int32_t)json_int(json_get(entry, "quality"));
-		in->sample[i] = s;
+		in->dosage[i] = json_num(json_at(dosage, i));
+		in->depth[i] = (int32_t)json_int(json_at(depth, i));
+		in->quality[i] = (int32_t)json_int(json_at(quality, i));
 	}
 	in->min_depth = (int32_t)json_int(json_get(root, "min_depth"));
 	in->min_quality = (int32_t)json_int(json_get(root, "min_quality"));
 }
 
 void input_free(Input *in) {
-	for (size_t i = 0; i < in->n; i++) {
-		free(in->sample[i]);
-	}
-	free(in->sample);
-	in->sample = NULL;
+	free(in->dosage);
+	free(in->depth);
+	free(in->quality);
+	in->dosage = NULL;
+	in->depth = NULL;
+	in->quality = NULL;
 	in->n = 0;
 }
 
 Answer solve(const Input *in) {
-	const int32_t qmin = in->min_quality;
-	const int32_t dmin = in->min_depth;
-
-	// Reads the samples where they lie: a table of pointers, each record its own
-	// allocation. Every iteration loads a pointer, tests it, and only then loads
-	// through it, so the compiler has no way to know where sample i+1 sits until
-	// it has read sample i's pointer — consecutive samples can never become
-	// lanes of one load. Same O(samples) work and the same answer as the
-	// reference; the arithmetic just never leaves scalar registers.
-	int32_t alt = 0;
-	int32_t kept = 0;
+	// One running total, added to in sample order. Floating-point addition is
+	// not associative, so without -ffast-math the compiler has to perform the
+	// adds in exactly this order: each waits on the sum the previous one
+	// produced, and gcc and clang both keep the loop in scalar registers at any
+	// -mtune. Same O(samples) work and the same answer as the reference.
+	double ac = 0.0;
+	long long kept = 0;
 	for (size_t i = 0; i < in->n; i++) {
-		const Sample *s = in->sample[i];
-		if (s == NULL) {
-			continue;
+		if (in->depth[i] >= in->min_depth && in->quality[i] >= in->min_quality) {
+			ac += in->dosage[i];
+			kept++;
 		}
-		const int32_t keep = (s->quality >= qmin) & (s->depth >= dmin);
-		alt += keep * s->genotype;
-		kept += keep;
 	}
 
-	Answer a = { alt, 2LL * kept };
+	Answer a = { ac, 2 * kept };
 	return a;
 }
 
 void answer_print(FILE *out, const Answer *a) {
-	fprintf(out, "%lld %lld\n", a->allele_count, a->called_alleles);
+	fprintf(out, "%.12f %lld\n", a->allele_count, a->called_alleles);
 }
 
 void answer_free(Answer *a) {

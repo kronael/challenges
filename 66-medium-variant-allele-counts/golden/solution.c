@@ -1,79 +1,93 @@
 #include "solution.h"
 
+#include <immintrin.h>
 #include <stdlib.h>
 
 void input_parse(const JsonValue *root, Input *in) {
-	const JsonValue *samples = json_get(root, "samples");
-	in->n = json_len(samples);
-	in->sample = (Sample **)xmalloc(in->n * sizeof *in->sample);
+	const JsonValue *dosage = json_get(root, "dosage");
+	const JsonValue *depth = json_get(root, "depth");
+	const JsonValue *quality = json_get(root, "quality");
+	in->n = json_len(dosage);
+	in->dosage = (double *)xmalloc(in->n * sizeof *in->dosage);
+	in->depth = (int32_t *)xmalloc(in->n * sizeof *in->depth);
+	in->quality = (int32_t *)xmalloc(in->n * sizeof *in->quality);
 	for (size_t i = 0; i < in->n; i++) {
-		const JsonValue *entry = json_at(samples, i);
-		if (json_is_null(entry)) {
-			in->sample[i] = NULL;
-			continue;
-		}
-		Sample *s = (Sample *)xmalloc(sizeof *s);
-		s->genotype = (int32_t)json_int(json_get(entry, "genotype"));
-		s->depth = (int32_t)json_int(json_get(entry, "depth"));
-		s->quality = (int32_t)json_int(json_get(entry, "quality"));
-		in->sample[i] = s;
+		in->dosage[i] = json_num(json_at(dosage, i));
+		in->depth[i] = (int32_t)json_int(json_at(depth, i));
+		in->quality[i] = (int32_t)json_int(json_at(quality, i));
 	}
 	in->min_depth = (int32_t)json_int(json_get(root, "min_depth"));
 	in->min_quality = (int32_t)json_int(json_get(root, "min_quality"));
 }
 
 void input_free(Input *in) {
-	for (size_t i = 0; i < in->n; i++) {
-		free(in->sample[i]);
-	}
-	free(in->sample);
-	in->sample = NULL;
+	free(in->dosage);
+	free(in->depth);
+	free(in->quality);
+	in->dosage = NULL;
+	in->depth = NULL;
+	in->quality = NULL;
 	in->n = 0;
 }
 
 Answer solve(const Input *in) {
 	const size_t n = in->n;
-	const int32_t qmin = in->min_quality;
-	const int32_t dmin = in->min_depth;
+	const double *dosage = in->dosage;
+	const int32_t *depth = in->depth;
+	const int32_t *quality = in->quality;
 
-	// One pass copies the called samples out of their separate records into an
-	// array per field, dropping the absent ones on the way.
-	int32_t *genotype = (int32_t *)xmalloc(n * sizeof *genotype);
-	int32_t *depth = (int32_t *)xmalloc(n * sizeof *depth);
-	int32_t *quality = (int32_t *)xmalloc(n * sizeof *quality);
-	size_t called = 0;
-	for (size_t i = 0; i < n; i++) {
-		const Sample *s = in->sample[i];
-		if (s == NULL) {
-			continue;
+	// Eight samples per step, kept as eight separate running sums: lanes 0-3 in
+	// `lo` and 4-7 in `hi`. A lane adds its sample's dosage when both compares
+	// keep it and +0.0 when they do not. `kept` counts in integer lanes: a kept
+	// sample's mask is -1, so subtracting the mask adds one.
+	//
+	// Eight sums add the dosages in a different order than one running total.
+	// Every dosage is a multiple of 2^-12 and no sum passes 4 * 10^5 < 2^19, so
+	// every partial sum fits a double's 53 bits exactly, and the order cannot
+	// change the answer.
+	const __m256i dmin = _mm256_set1_epi32(in->min_depth - 1);
+	const __m256i qmin = _mm256_set1_epi32(in->min_quality - 1);
+	__m256d lo = _mm256_setzero_pd();
+	__m256d hi = _mm256_setzero_pd();
+	__m256i kept = _mm256_setzero_si256();
+	size_t i = 0;
+	for (; i + 8 <= n; i += 8) {
+		const __m256i d = _mm256_loadu_si256((const __m256i *)(depth + i));
+		const __m256i q = _mm256_loadu_si256((const __m256i *)(quality + i));
+		const __m256i keep = _mm256_and_si256(_mm256_cmpgt_epi32(d, dmin), _mm256_cmpgt_epi32(q, qmin));
+		kept = _mm256_sub_epi32(kept, keep);
+		const __m256d keep_lo = _mm256_castsi256_pd(_mm256_cvtepi32_epi64(_mm256_castsi256_si128(keep)));
+		const __m256d keep_hi = _mm256_castsi256_pd(_mm256_cvtepi32_epi64(_mm256_extracti128_si256(keep, 1)));
+		lo = _mm256_add_pd(lo, _mm256_and_pd(keep_lo, _mm256_loadu_pd(dosage + i)));
+		hi = _mm256_add_pd(hi, _mm256_and_pd(keep_hi, _mm256_loadu_pd(dosage + i + 4)));
+	}
+
+	double lane[8];
+	int32_t count[8];
+	_mm256_storeu_pd(lane, lo);
+	_mm256_storeu_pd(lane + 4, hi);
+	_mm256_storeu_si256((__m256i *)count, kept);
+	long long passing = 0;
+	for (int j = 0; j < 8; j++) {
+		passing += count[j];
+	}
+	for (; i < n; i++) {
+		if (depth[i] >= in->min_depth && quality[i] >= in->min_quality) {
+			lane[0] += dosage[i];
+			passing++;
 		}
-		genotype[called] = s->genotype;
-		depth[called] = s->depth;
-		quality[called] = s->quality;
-		called++;
+	}
+	double ac = 0.0;
+	for (int j = 0; j < 8; j++) {
+		ac += lane[j];
 	}
 
-	// Both thresholds and both running totals now read unit-stride streams, so
-	// consecutive samples are lanes of one vector and no operand needs a scalar
-	// register. `keep` is 0 or 1, which turns the filter into a multiply.
-	int32_t alt = 0;
-	int32_t kept = 0;
-	for (size_t i = 0; i < called; i++) {
-		const int32_t keep = (quality[i] >= qmin) & (depth[i] >= dmin);
-		alt += keep * genotype[i];
-		kept += keep;
-	}
-
-	free(quality);
-	free(depth);
-	free(genotype);
-
-	Answer a = { alt, 2LL * kept };
+	Answer a = { ac, 2 * passing };
 	return a;
 }
 
 void answer_print(FILE *out, const Answer *a) {
-	fprintf(out, "%lld %lld\n", a->allele_count, a->called_alleles);
+	fprintf(out, "%.12f %lld\n", a->allele_count, a->called_alleles);
 }
 
 void answer_free(Answer *a) {

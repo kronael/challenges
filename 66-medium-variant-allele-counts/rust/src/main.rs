@@ -6,7 +6,12 @@ fn main() {
     let mut buf = String::new();
     io::stdin().read_to_string(&mut buf).unwrap();
     let input: Input = serde_json::from_str(&buf).unwrap();
-    let (allele_count, called_alleles) =
-        solve(&input.samples, input.min_depth, input.min_quality);
-    println!("{allele_count} {called_alleles}");
+    let (allele_count, called_alleles) = solve(
+        &input.dosage,
+        &input.depth,
+        &input.quality,
+        input.min_depth,
+        input.min_quality,
+    );
+    println!("{allele_count:.12} {called_alleles}");
 }

@@ -1,30 +1,28 @@
 # 66 — Medium — Variant Allele Counts
 
-**Task**: Given one variant's per-sample calls, report the alternate-allele
-count and the called-allele count over the samples that clear a depth and a
-quality threshold.
+**Task**: Given one variant's per-sample dosages, depths, and qualities,
+report the summed dosage and the called-allele count over the samples that
+clear a depth and a quality threshold.
 
 **Difficulty**: medium
 **Time estimate**: ~30 min
 
 ## Problem
 
-A variant caller has genotyped one position across a cohort. `samples` holds one
-entry per sample, in cohort order. An entry is either a call —
+A variant caller has scored one position across a cohort. The three arrays
+hold one entry per sample, in cohort order:
 
-- `genotype` — how many alternate alleles the sample carries: `0`, `1`, or `2`
-- `depth` — how many reads the call rests on
-- `quality` — how confident the caller is in it
+- `dosage` — the expected number of alternate alleles the sample carries, a
+  real number from `0` to `2`
+- `depth` — how many reads the sample's call rests on
+- `quality` — how confident the caller is in that call
 
-— or `null`, meaning the caller produced no call for that sample.
-
-A sample **passes** when it has a call, its `depth` is at least `min_depth`, and
-its `quality` is at least `min_quality`. Both thresholds are inclusive. A sample
-with no call never passes, whatever the thresholds are.
+A sample **passes** when its `depth` is at least `min_depth` and its `quality`
+is at least `min_quality`. Both thresholds are inclusive.
 
 Report two numbers over the passing samples:
 
-- `AC` — the sum of their `genotype` values
+- `AC` — the sum of their `dosage` values
 - `AN` — two per passing sample
 
 ## Two gates
@@ -43,36 +41,41 @@ challenge is graded on the code the compiler emits, not on elapsed time.
 
 ## Constraints
 
-- `0 ≤ len(samples) ≤ 200000`
-- `genotype ∈ {0, 1, 2}`
+- `0 ≤ n ≤ 200000`, where `dosage`, `depth`, and `quality` all have length `n`
+- every `dosage` is a multiple of `1/4096` from `0` to `2`
 - `0 ≤ depth ≤ 10^6` and `0 ≤ quality ≤ 10^6`
 - `0 ≤ min_depth ≤ 10^6` and `0 ≤ min_quality ≤ 10^6`
-- `AC` and `AN` both fit in a signed 32-bit integer
 
 ## Input
 
 ```json
-{"samples":[{"genotype":1,"depth":30,"quality":99},null,{"genotype":0,"depth":44,"quality":15}],"min_depth":10,"min_quality":20}
+{"dosage":[1.5,0.25,2],"depth":[30,8,44],"quality":[99,50,15],"min_depth":10,"min_quality":20}
 ```
 
 ## Output
 
-One line: `AC`, a single space, `AN`.
+One line: `AC` written with exactly twelve digits after the decimal point, a
+single space, then `AN`.
 
 ```
-1 2
+1.500000000000 2
 ```
 
 ## Examples
 
-**Example 1** — the second sample has no call, the third is under the quality floor
+**Example 1** — the second sample is under the depth floor, the third under the quality floor
 ```
-{"samples":[{"genotype":1,"depth":30,"quality":99},null,{"genotype":0,"depth":44,"quality":15}],"min_depth":10,"min_quality":20} → 1 2
+{"dosage":[1.5,0.25,2],"depth":[30,8,44],"quality":[99,50,15],"min_depth":10,"min_quality":20} → 1.500000000000 2
 ```
 
 **Example 2** — a sample sitting exactly on both thresholds passes; one read short does not
 ```
-{"samples":[{"genotype":2,"depth":10,"quality":20},{"genotype":2,"depth":9,"quality":20}],"min_depth":10,"min_quality":20} → 2 2
+{"dosage":[0.0009765625,2],"depth":[10,9],"quality":[20,20],"min_depth":10,"min_quality":20} → 0.000976562500 2
+```
+
+**Example 3** — no sample passes
+```
+{"dosage":[1,2,0.5],"depth":[5,30,12],"quality":[99,10,60],"min_depth":20,"min_quality":20} → 0.000000000000 0
 ```
 
 ## Run
@@ -97,4 +100,4 @@ import `simd/archsimd`. Its `go.mod` requires Go 1.27.1 or newer.
 > No debug prints. Extra stdout breaks the test harness and signals you don't
 > have a mental model yet. Build the model, then write the code.
 
-Stuck? See `HINTS.md`.
+Stuck? See `hints/01.md`.

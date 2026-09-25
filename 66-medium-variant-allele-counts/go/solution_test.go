@@ -34,8 +34,8 @@ func TestCases(t *testing.T) {
 				t.Fatal(err)
 			}
 			want := strings.TrimRight(string(out), "\n")
-			alleleCount, calledAlleles := solve(in.Samples, in.MinDepth, in.MinQuality)
-			if got := fmt.Sprintf("%d %d", alleleCount, calledAlleles); got != want {
+			alleleCount, calledAlleles := solve(in.Dosage, in.Depth, in.Quality, in.MinDepth, in.MinQuality)
+			if got := fmt.Sprintf("%.12f %d", alleleCount, calledAlleles); got != want {
 				t.Fatalf("got %q want %q", got, want)
 			}
 		})
