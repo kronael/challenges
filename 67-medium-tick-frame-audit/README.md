@@ -59,7 +59,7 @@ has nothing to run here.
 
 ## Constraints
 
-- `1 ≤ width ≤ 1024`
+- `32 ≤ width ≤ 1024`
 - `separators` is strictly increasing, each entry in `[0, width − 2]`; it may
   be empty
 - `0 ≤ len(stream) ≤ 2^20`, and `len(stream)` is a multiple of `width`
@@ -69,7 +69,7 @@ has nothing to run here.
 ## Input
 
 ```json
-{"width":13,"separators":[4,9],"stream":"AAPL|1234|56\nMSFT|0078|12\n"}
+{"width":32,"separators":[4,15,22],"stream":"AAPL|0000187.25|000300|00000017\nMSFT|0000411.10|001200|00000018\n"}
 ```
 
 `stream` is a JSON string. Its `\n`, `\"`, and `\\` escapes decode to the
@@ -87,17 +87,17 @@ One line: `clean`, a single space, `stray`.
 
 **Example 1** — two frames that follow the layout
 ```
-{"width":13,"separators":[4,9],"stream":"AAPL|1234|56\nMSFT|0078|12\n"} → 2 0
+{"width":32,"separators":[4,15,22],"stream":"AAPL|0000187.25|000300|00000017\nMSFT|0000411.10|001200|00000018\n"} → 2 0
 ```
 
 **Example 2** — a separator missing from the second frame; a pipe and a newline inside the third frame's payload
 ```
-{"width":13,"separators":[4,9],"stream":"AAPL|1234|56\nMSFT 0078|12\nGO|G|00\n1|3X\n"} → 1 3
+{"width":32,"separators":[4,15,22],"stream":"AAPL|0000187.25|000300|00000017\nMSFT|0000411.10 001200|00000018\nGOOG|00|0174.50|000050|000\n0019\n"} → 1 3
 ```
 
-**Example 3** — with `width` 1 there is no room for a separator, and every byte is its own frame
+**Example 3** — the newline arrives one byte early, so the payload and the terminator are both wrong
 ```
-{"width":1,"separators":[],"stream":"\n\n|\n"} → 3 1
+{"width":32,"separators":[4,15,22],"stream":"NVDA|0000121.75|000900|0000002\nX"} → 0 2
 ```
 
 ## Run
@@ -123,4 +123,4 @@ import `simd/archsimd`. Its `go.mod` requires Go 1.27.1 or newer.
 > No debug prints. Extra stdout breaks the test harness and signals you don't
 > have a mental model yet. Build the model, then write the code.
 
-Stuck? See `HINTS.md`.
+Stuck? See `hints/01.md`.
