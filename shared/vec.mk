@@ -11,10 +11,10 @@
 #   VEC_INPUT := ../cases/14.in   the fixture solve runs on
 #   VEC_UNITS := dosage           the input array whose length is the unit of work
 #
-# A golden/ or rotten/ Makefile sets VEC_EXPECT := vectorized | scalar before
-# including this file. The traced program is the one `make test` checks: ./main
-# for C, the release build of src/main.rs for Rust, and the `build` output for
-# Go, each built for x86-64-v3 by its own Makefile.
+# Every Makefile that includes this sets VEC_EXPECT := vectorized | scalar.
+# The traced program is the one `make test` checks: ./main for C, the release
+# build of src/main.rs for Rust, and the `build` output for Go, each built for
+# x86-64-v3 by its own Makefile.
 #
 # This adds only the `vec` target, so it composes with shared/c/io.mk without
 # colliding on build, test, bench, or clean.
@@ -23,7 +23,6 @@
 
 VEC_ROOT   := $(abspath $(dir $(lastword $(MAKEFILE_LIST)))/..)
 VEC_LANG   ?= $(if $(wildcard Cargo.toml),rust,$(if $(wildcard go.mod),go,c))
-VEC_EXPECT ?= vectorized
 
 include ../vec.mk
 

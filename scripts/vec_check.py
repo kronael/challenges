@@ -24,7 +24,7 @@ budget mean the same thing in all three. Packed arithmetic, data movement
 between registers, the stack, and control flow count on neither side.
 
 The count is divided by the length of one array in the input, the challenge's
-unit of work. A function is vectorized when it retires fewer than `--budget`
+unit of work. A function is vectorized when it retires fewer than BUDGET
 scalar instructions per unit and at least PACKED_FLOOR packed ones. Any scalar
 pass over the input costs at least one per unit, a load or a floating-point
 add, however many vector loops run beside it, while setup, a remainder tail,
@@ -38,8 +38,10 @@ and attributes that change the target or the optimizer, Rust's
 graded build. While tracing, an AVX-512 instruction in the program's own code
 is refused for the same reason.
 
-A grade that takes longer than TIMEOUT seconds fails, and the traced program
-dies with the grader.
+The program runs with Go's asynchronous preemption and collector switched off,
+since both interrupt the traced thread with work that is not the solver's. A
+grade that takes longer than TIMEOUT seconds fails, and the traced program dies
+with the grader.
 """
 
 from __future__ import annotations
@@ -177,7 +179,6 @@ def split_operands(operands: str) -> list[str]:
 
 
 def decode(mnemonic: str, operands: str, first_byte: int) -> Insn:
-    """How one disassembled instruction counts toward the grade."""
     parts = split_operands(operands.partition("#")[0])
     vector = any(VECTOR_REGISTER.search(part) for part in parts)
     memory = (any("(" in part and not STACK.search(part) for part in parts)
@@ -202,9 +203,6 @@ def decode(mnemonic: str, operands: str, first_byte: int) -> Insn:
 
 
 def disassemble(code: bytes, address: int) -> dict[int, Insn]:
-    """Every instruction objdump decodes from `code`, read from the traced
-    process at `address`, an instruction boundary, except those that start in
-    the last LONGEST bytes, which the window may have cut short."""
     with tempfile.NamedTemporaryFile(suffix=".bin") as blob:
         blob.write(code)
         blob.flush()
@@ -237,8 +235,6 @@ def read_memory(pid: int, address: int, size: int) -> bytes:
 
 
 def find_symbol(binary: Path, name: str) -> tuple[int, bool]:
-    """The link-time address of `name` in `binary`, and whether the binary is
-    position-independent, so that the address is relative to its load base."""
     listed = subprocess.run(["nm", "--defined-only", str(binary)], capture_output=True, text=True)
     if listed.returncode != 0:
         sys.exit(f"vec_check: cannot read symbols from {binary}\n{listed.stderr}")
@@ -251,7 +247,6 @@ def find_symbol(binary: Path, name: str) -> tuple[int, bool]:
 
 
 def find_image(pid: int, binary: Path) -> tuple[int, int, int]:
-    """The load base of `binary` in the process, and the span of its mappings."""
     spans = []
     for line in Path(f"/proc/{pid}/maps").read_text().splitlines():
         fields = line.split()
@@ -265,10 +260,6 @@ def find_image(pid: int, binary: Path) -> tuple[int, int, int]:
 
 
 def launch(binary: Path, stdin: Path, stdout: int, stderr: int) -> int:
-    """Starts `binary` as a tracee, stopped before its first instruction.
-
-    Go's asynchronous preemption and its collector are switched off: both
-    interrupt the traced thread with work that is not the solver's."""
     env = {**os.environ, "GODEBUG": "asyncpreemptoff=1", "GOGC": "off"}
     pid = os.fork()
     if pid == 0:
@@ -292,8 +283,6 @@ def launch(binary: Path, stdin: Path, stdout: int, stderr: int) -> int:
 
 
 def enter(pid: int, entry: int) -> int:
-    """Runs the tracee to the first call of `entry`, and returns where that
-    call returns to."""
     regs = Regs()
     original = ptrace(PEEKTEXT, pid, entry) & WORD
     ptrace(POKETEXT, pid, entry, (original & ~0xFF) | 0xCC)
@@ -318,9 +307,6 @@ def enter(pid: int, entry: int) -> int:
 
 
 def trace(pid: int, entry: int, image: range, scalar_limit: float) -> Count:
-    """Single-steps the call at `entry` until it returns, or until its scalar
-    iterations have retired more than `scalar_limit` scalar instructions, which
-    already decides the verdict."""
     returns = enter(pid, entry)
     regs = Regs()
     table: dict[int, Insn] = {}
@@ -368,8 +354,6 @@ def strip_comments(source: str) -> str:
 
 
 def lint(workdir: Path) -> list[str]:
-    """Every construct in the sources under `workdir` that emits code the
-    compiler did not choose for the graded target."""
     if (workdir / "Cargo.toml").exists():
         sources = sorted((workdir / "src").rglob("*.rs"))
         banned = RUST_BANNED
@@ -396,9 +380,6 @@ def count_units(input_path: Path, key: str) -> int:
 
 
 def run(binary: Path, function: str, input_path: Path, scalar_limit: float) -> Count:
-    """Traces one call of `function` while `binary` reads `input_path`, and
-    checks the program's answer against the `.out` beside the input when the
-    call ran to completion."""
     address, relocated = find_symbol(binary, function)
     with tempfile.TemporaryFile() as out, tempfile.TemporaryFile() as err:
         pid = launch(binary, input_path, out.fileno(), err.fileno())
@@ -428,8 +409,6 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--input", type=Path, required=True)
     parser.add_argument("--units", required=True,
                         help="the input field whose length is the unit of work")
-    parser.add_argument("--budget", type=float, default=BUDGET,
-                        help="scalar work allowed per unit")
     parser.add_argument("--expect", choices=("vectorized", "scalar"), required=True)
     parser.add_argument("--sources", type=Path, default=Path.cwd())
     return parser.parse_args()
@@ -447,13 +426,13 @@ def main() -> None:
         f"vec_check: {args.binary.name} did not finish within {TIMEOUT} s under the tracer"))
     signal.alarm(TIMEOUT)
     units = max(count_units(args.input, args.units), 1)
-    count = run(args.binary.resolve(), args.function, args.input, args.budget * units)
+    count = run(args.binary.resolve(), args.function, args.input, BUDGET * units)
     scalar = count.scalar / units
     packed = count.packed / units
-    vectorized = count.returned and scalar < args.budget and packed >= PACKED_FLOOR
+    vectorized = count.returned and scalar < BUDGET and packed >= PACKED_FLOOR
     found = "vectorized" if vectorized else "scalar"
     shape = (f"{scalar:.2f} scalar, {packed:.2f} packed" if count.returned
-             else f"over {args.budget:.2f} scalar")
+             else f"over {BUDGET:.2f} scalar")
     ok = found == args.expect
     print(f"  {args.function}: {shape} per element of {args.units} ({units})"
           f" -> {found}{'' if ok else '  EXPECTED ' + args.expect}")

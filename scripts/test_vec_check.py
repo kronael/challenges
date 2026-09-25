@@ -243,7 +243,6 @@ fn sums() {
 
 
 def grade(workdir: Path, binary: Path, function: str, expect: str) -> subprocess.CompletedProcess[str]:
-    """Runs vec_check on `binary` against an input whose unit count is N."""
     (workdir / "input.json").write_text(json.dumps({"x": [0] * N}), encoding="utf-8")
     return subprocess.run(
         [sys.executable, vec_check.__file__, "--binary", str(binary), "--function", function,
