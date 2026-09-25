@@ -1,7 +1,7 @@
 # 67 — Medium — Tick Frame Audit
 
-**Task**: Given a fixed-width tick feed and its record layout, report how many
-records follow the layout and how many bytes sit where the layout does not
+**Task**: Given a fixed-width tick feed and its frame layout, report how many
+frames follow the layout and how many bytes sit where the layout does not
 allow them.
 
 **Difficulty**: medium
@@ -38,8 +38,8 @@ Report two numbers:
 fixture that `vec.mk` names and single-steps the call to `solve`: every
 instruction `solve` retires, in its own code, in the functions it calls, and in
 the library routines those call. It passes when `solve` retires fewer than one
-scalar instruction per byte of `stream`, averaged over the fixture, and some packed SIMD
-arithmetic. Scalar instructions are
+scalar instruction per byte of `stream`, averaged over the fixture, and some
+packed SIMD arithmetic. Scalar instructions are
 
 - scalar floating-point arithmetic, and loads and stores of one element or
   less, wherever they run;
@@ -64,7 +64,6 @@ has nothing to run here.
   be empty
 - `0 ≤ len(stream) ≤ 2^20`, and `len(stream)` is a multiple of `width`
 - every byte of `stream` is printable ASCII (`0x20`–`0x7E`) or `\n` (`0x0A`)
-- `clean` and `stray` both fit in a signed 32-bit integer
 
 ## Input
 
@@ -90,12 +89,12 @@ One line: `clean`, a single space, `stray`.
 {"width":32,"separators":[4,15,22],"stream":"AAPL|0000187.25|000300|00000017\nMSFT|0000411.10|001200|00000018\n"} → 2 0
 ```
 
-**Example 2** — a separator missing from the second frame; a pipe and a newline inside the third frame's payload
+**Example 2** — the second frame lacks a separator; the third has a stray pipe and newline
 ```
 {"width":32,"separators":[4,15,22],"stream":"AAPL|0000187.25|000300|00000017\nMSFT|0000411.10 001200|00000018\nGOOG|00|0174.50|000050|000\n0019\n"} → 1 3
 ```
 
-**Example 3** — the newline arrives one byte early, so the payload and the terminator are both wrong
+**Example 3** — the newline arrives a byte early, so the payload and the terminator are both wrong
 ```
 {"width":32,"separators":[4,15,22],"stream":"NVDA|0000121.75|000900|0000002\nX"} → 0 2
 ```
