@@ -29,8 +29,9 @@ Answer solve(const Input *in) {
 	// the permutation that packs the surviving lanes to the front is `m`
 	// applied to the identity 0..7: pdep spreads the bits to one per byte and
 	// pext compresses the identity bytes against them. The store writes all
-	// eight lanes; popcount says how many count, and the next block or the
-	// tail overwrites the rest.
+	// eight lanes and `k` advances by the popcount: the next store or the tail
+	// overwrites the extra lanes, and the answer ends at `k` before any that
+	// are left.
 	const __m256i limit = _mm256_set1_epi32(in->threshold);
 	size_t i = 0;
 	for (; i + 8 <= n; i += 8) {
