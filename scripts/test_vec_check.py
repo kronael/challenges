@@ -198,6 +198,28 @@ func solve(a, b, c []int32) {
 }
 """
 
+# The same loop behind a frame too large for the goroutine's stack, so solve's
+# prologue moves the stack and solve returns on a different stack than the one
+# it was entered on.
+GO_MOVED_STACK = """package main
+
+import "simd/archsimd"
+
+//go:noinline
+func solve(a, b, c []int32) {
+\tvar pad [1 << 14]int32
+\tpad[len(a)%len(pad)] = 1
+\ti := 0
+\tfor ; i+8 <= len(a); i += 8 {
+\t\tarchsimd.LoadInt32x8(a[i:]).Mul(archsimd.LoadInt32x8(b[i:])).Store(c[i:])
+\t}
+\tfor ; i < len(a); i++ {
+\t\tc[i] = a[i] * b[i]
+\t}
+\tc[0] += pad[len(b)%len(pad)]
+}
+"""
+
 # A cfg(target_feature) branch that is wrong only where AVX2 is enabled.
 RUST_CFG_SPLIT = """
 #[no_mangle]
@@ -294,18 +316,21 @@ class ClangTests(CTests):
 
 @unittest.skipUnless(shutil.which("go"), "go is not on PATH")
 class GoTests(unittest.TestCase):
+    def build(self, workdir: Path, source: str) -> Path:
+        (workdir / "go.mod").write_text(GO_MOD, encoding="utf-8")
+        (workdir / "main.go").write_text(GO_MAIN, encoding="utf-8")
+        (workdir / "solution.go").write_text(source, encoding="utf-8")
+        built = subprocess.run(
+            ["go", "build", "-o", "prog", "."], cwd=workdir, capture_output=True, text=True,
+            env={**os.environ, "GOEXPERIMENT": "simd", "GOAMD64": "v3"},
+        )
+        self.assertEqual(built.returncode, 0, built.stderr)
+        return workdir / "prog"
+
     def check(self, source: str, expect: str) -> subprocess.CompletedProcess[str]:
         with tempfile.TemporaryDirectory() as raw_dir:
             workdir = Path(raw_dir)
-            (workdir / "go.mod").write_text(GO_MOD, encoding="utf-8")
-            (workdir / "main.go").write_text(GO_MAIN, encoding="utf-8")
-            (workdir / "solution.go").write_text(source, encoding="utf-8")
-            built = subprocess.run(
-                ["go", "build", "-o", "prog", "."], cwd=workdir, capture_output=True, text=True,
-                env={**os.environ, "GOEXPERIMENT": "simd", "GOAMD64": "v3"},
-            )
-            self.assertEqual(built.returncode, 0, built.stderr)
-            return grade(workdir, workdir / "prog", "main.solve", expect)
+            return grade(workdir, self.build(workdir, source), "main.solve", expect)
 
     def assert_grade(self, source: str, expect: str) -> None:
         done = self.check(source, expect)
@@ -319,6 +344,14 @@ class GoTests(unittest.TestCase):
 
     def test_lane_multiply_in_a_helper_counts_for_solve(self) -> None:
         self.assert_grade(GO_HELPER, "vectorized")
+
+    def test_return_is_found_after_solve_moves_its_stack(self) -> None:
+        with tempfile.TemporaryDirectory() as raw_dir:
+            workdir = Path(raw_dir)
+            binary = self.build(workdir, GO_MOVED_STACK).resolve()
+            (workdir / "input.json").write_text("{}", encoding="utf-8")
+            count = vec_check.run(binary, "main.solve", workdir / "input.json", float("inf"))
+            self.assertTrue(count.returned)
 
     def test_assembly_file_is_refused(self) -> None:
         with tempfile.TemporaryDirectory() as raw_dir:

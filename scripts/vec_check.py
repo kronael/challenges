@@ -291,9 +291,9 @@ def launch(binary: Path, stdin: Path, stdout: int, stderr: int) -> int:
     return pid
 
 
-def enter(pid: int, entry: int) -> tuple[int, int]:
+def enter(pid: int, entry: int) -> int:
     """Runs the tracee to the first call of `entry`, and returns where that
-    call returns to and its stack pointer once it has."""
+    call returns to."""
     regs = Regs()
     original = ptrace(PEEKTEXT, pid, entry) & WORD
     ptrace(POKETEXT, pid, entry, (original & ~0xFF) | 0xCC)
@@ -314,14 +314,14 @@ def enter(pid: int, entry: int) -> tuple[int, int]:
     ptrace(POKETEXT, pid, entry, original)
     regs.rip = entry
     ptrace(SETREGS, pid, 0, ctypes.addressof(regs))
-    return ptrace(PEEKTEXT, pid, regs.rsp) & WORD, regs.rsp + 8
+    return ptrace(PEEKTEXT, pid, regs.rsp) & WORD
 
 
 def trace(pid: int, entry: int, image: range, scalar_limit: float) -> Count:
     """Single-steps the call at `entry` until it returns, or until its scalar
     iterations have retired more than `scalar_limit` scalar instructions, which
     already decides the verdict."""
-    returns, frame = enter(pid, entry)
+    returns = enter(pid, entry)
     regs = Regs()
     table: dict[int, Insn] = {}
     count = Count()
@@ -349,7 +349,7 @@ def trace(pid: int, entry: int, image: range, scalar_limit: float) -> Count:
             continue
         pending = 0
         ptrace(GETREGS, pid, 0, ctypes.addressof(regs))
-        returned = regs.rip == returns and regs.rsp == frame
+        returned = regs.rip == returns
         if returned or (insn.jump and regs.rip <= rip):
             count.scalar += 0 if vector else segment
             segment = 0
