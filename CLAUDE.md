@@ -146,29 +146,20 @@ When scaffolding a new I/O challenge: write the reference first in
   stdin/stdout. The test *is* a stress test written in the language (many
   threads, barrier-synced, assert the invariant).
 - **vec** (66–68): reads JSON like an io challenge and keeps the golden/rotten
-  pair, but the contract is the emitted machine code rather than the clock.
-  `golden/` and `rotten/` are C directories that include both
-  `shared/c/io.mk` (correctness against `cases/`) and `shared/vec.mk`, which
-  adds `make vec`. Golden and rotten run the SAME algorithm at the SAME
-  complexity and return the same answer; they differ in what the compiler can
-  emit for it (memory layout, control flow, or the order of floating-point
-  operations), and golden may use intrinsics. `make vec` runs the program
-  `make test` checks on the fixture the challenge's `vec.mk` names,
-  single-steps `solve` and everything it calls under ptrace
-  (`scripts/vec_check.py`), and passes when it retires fewer than one scalar
-  instruction per input element; golden must pass and rotten must fail. The
-  solver directories (`c/`, `rust/`, `go/`) are graded the same way; root
-  `make vec` checks only `golden/` and `rotten/`, with `cc` and, when it is on
-  PATH, `clang`. No Python and no seeded large cases, so `make bench` reports
-  that it has nothing to run.
-  Every Makefile builds for `x86-64-v3`, and `make test` and `make vec` use one
-  build: C pins `CFLAGS` to `-O3 -march=x86-64-v3`; Rust exports
-  `RUSTFLAGS=-C target-cpu=x86-64-v3` and builds and tests in release; Go
-  exports `GOAMD64=v3` and `GOEXPERIMENT=simd`, without which `simd/archsimd`
-  does not exist. Go's `main.go` locks the main goroutine to its thread and
-  `solution.go` keeps `solve` `//go:noinline`, so the tracer can follow the
-  call. `vec_check.py` refuses assembly, pragmas, target or optimize
-  attributes, `#[target_feature]`, `build.rs`, and cgo in the graded sources.
+  pair, but is graded on the emitted machine code as well as the answer.
+  `golden/` and `rotten/` are C: the SAME algorithm at the SAME complexity,
+  differing only in what the compiler can emit for it (golden may use
+  intrinsics). Every vec Makefile includes `shared/vec.mk`, whose `make vec`
+  traces the binary `make test` checks with `scripts/vec_check.py`; that
+  script's docstring is the grading rule. Golden must grade vectorized and
+  rotten scalar; root `make vec` checks only those two, under `cc` and also
+  `clang` when it is on PATH. Each directory builds once, for `x86-64-v3`: C
+  pins `CFLAGS` to `-O3 -march=x86-64-v3`, Rust builds and tests in release
+  with `-C target-cpu=x86-64-v3`, and Go exports `GOAMD64=v3` and
+  `GOEXPERIMENT=simd` (for `simd/archsimd`). Go's `main.go` locks the main
+  goroutine to its thread and `solve` stays `//go:noinline`, or the tracer
+  cannot follow the call. Tracing needs ptrace (Yama `ptrace_scope` 0 or 1),
+  not root. No Python and no seeded large cases.
 
 ## Layout
 
