@@ -127,10 +127,10 @@ VECTOR_MOVE = re.compile(
     r"|pinsr|pextr|zero)"
 )
 SCALAR_FLOAT = re.compile(
-    r"^v?((add|sub|mul|div|min|max|sqrt|rcp|rsqrt|round|cmp[a-z]*|u?comi"
+    r"^v?((add|sub|mul|div|min|max|sqrt|rcp|rsqrt|round|cmp[a-z_]*|u?comi"
     r"|f(n?madd|n?msub)\d*|getexp|getmant|scalef|rndscale|range|reduce"
     r"|fixupimm)s[sdh]"
-    r"|cvt(t?s[sdh]2u?si|u?si2s[sdh]|s[sdh]2s[sdh]))$"
+    r"|cvt(t?s[sdh]2u?si|u?si2s[sdh][lq]?|s[sdh]2s[sdh]))$"
 )
 ELEMENT_ACCESS = re.compile(
     r"^v?(movd|movq|movss|movsd|movsh|movhp[sd]|movlp[sd]|pinsr[bwdq]|pextr[bwdq]"

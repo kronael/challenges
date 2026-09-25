@@ -428,5 +428,21 @@ class LintTests(unittest.TestCase):
                          ["solution.go: cgo"])
 
 
+class DecodeTests(unittest.TestCase):
+    def test_scalar_float_in_objdump_spellings_is_scalar(self) -> None:
+        for mnemonic, operands in (
+            ("vcvtsi2ssl", "(%rdi),%xmm1,%xmm1"),
+            ("vcvtsi2sdq", "%rax,%xmm1,%xmm1"),
+            ("vcmpgt_oqss", "%xmm2,%xmm1,%xmm1"),
+            ("vcmpneq_oqsd", "(%rdi),%xmm1,%xmm1"),
+        ):
+            with self.subTest(mnemonic=mnemonic):
+                self.assertIs(vec_check.decode(mnemonic, operands, 0xC5).kind, vec_check.Kind.SCALAR)
+
+    def test_packed_compare_is_packed(self) -> None:
+        self.assertIs(vec_check.decode("vcmpgt_oqps", "%ymm2,%ymm1,%ymm1", 0xC5).kind,
+                      vec_check.Kind.PACKED)
+
+
 if __name__ == "__main__":
     unittest.main()
