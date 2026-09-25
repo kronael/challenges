@@ -91,11 +91,6 @@ decision) or BY-DESIGN (accepted variance).
 
 ## Status — 2026-09-25 — found while rebuilding the vec grader
 
-- **NOTICE-HINTS-PATH** (LOW, docs) — Record-only. `NOTICE` says solution
-  guidance "lives in each challenge's HINTS.md" and sends readers to "the
-  relevant HINTS.md" for citations, but every challenge now keeps that material
-  in `hints/`, one rung per file, with sources in the last file. **Fix:** name
-  `hints/` in both places.
 - **VEC-UNROLLED-STACK-LANES** (LOW, grading) — BY-DESIGN. `scripts/vec_check.py`
   does not count general-purpose arithmetic or stack accesses inside an
   iteration that loads a vector, because that is where Go spills and where every

@@ -8,7 +8,7 @@ The problem statements and reference implementations here are original, but many
 challenges are inspired by, or restate, well-known problems and algorithms whose
 authorship belongs upstream. Attribution is given here at the source-pool level;
 the exact per-challenge citation — including solution-bearing papers, textbook
-sections, and named algorithms — lives in each challenge's HINTS.md so it does
+sections, and named algorithms — lives in each challenge's hints/ so it does
 not spoil the problem in README.md. Every citation URL in this repo was checked
 to resolve at the time of writing.
 
@@ -23,7 +23,7 @@ Reference works:
   CLRS — Introduction to Algorithms (Cormen, Leiserson, Rivest, Stein)
   CP-Algorithms                     https://cp-algorithms.com/
 
-Concurrency and systems sources (challenges 29–34, 40, 43, 51):
+Concurrency and systems sources (challenges 29–34, 43, 51):
   D. Vyukov — intrusive MPSC queue           https://1024cores.net/
   Chase & Lev — work-stealing deque (SPAA 2005); Lê et al. (PPoPP 2013)
   M. M. Michael — hazard pointers (IEEE TPDS 2004)
@@ -39,7 +39,7 @@ Bioinformatics and computational sources (challenges 44–56):
   Felsenstein — phylogenetic pruning; Nussinov et al. (1978) — RNA loop matching
   Kuhn (1955) — assignment problem; Bentley & Ottmann (1979) — segment intersection
   Alekseyev & Pevzner; Yancopoulos et al.; Bandeira et al.; Chen et al.;
-  Ngoka & Gross — see the relevant HINTS.md for full citations and DOIs
+  Ngoka & Gross — see the relevant challenge's hints/ for full citations and DOIs
   Distributed-systems vector clocks: Fidge (1988), Mattern
 
 Development assisted by Claude Code (Anthropic).
