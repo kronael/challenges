@@ -9,9 +9,10 @@ of the running process.
 
 The grade counts scalar work, of two kinds:
 
-- scalar floating-point arithmetic, element-sized loads and stores that do not
-  address the stack, and moves of one lane out of a vector register into a
-  general-purpose one, wherever they run;
+- scalar floating-point arithmetic, compares, and conversions; loads and stores
+  that do not address the stack, through a general-purpose register of any
+  width or through a vector register one element at a time; and moves of one
+  lane out of a vector register into a general-purpose one, wherever they run;
 - arithmetic, logic, compares, shifts, bit manipulation, and conditional sets
   and moves on general-purpose registers, except in vector iterations.
 
@@ -20,8 +21,9 @@ iteration that loads several elements into a vector register in one instruction
 is a vector iteration. Its general-purpose bookkeeping, loop control, bounds
 checks, and mask arithmetic, is paid once per vector rather than once per
 element, and is what separates C, Rust, and Go most; leaving it out lets one
-budget mean the same thing in all three. Packed arithmetic, data movement
-between registers, the stack, and control flow count on neither side.
+budget mean the same thing in all three. Packed arithmetic, moves between
+registers, stack accesses, string instructions such as rep movsb, and control
+flow count on neither side.
 
 The count is divided by the length of one array in the input, the challenge's
 unit of work. A function is vectorized when it retires fewer than BUDGET
