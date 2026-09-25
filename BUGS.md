@@ -73,3 +73,41 @@
   64-bit at `52-hard-service-pairing/README.md:16`, but fixtures stay between
   `-15` and `197`. **Fix:** Add a small matrix whose minimum crosses signed
   32-bit.
+
+## V1 — vec_check credits a packed loop that is not the graded one (2026-09-22, open)
+
+`verdict()` calls a function vectorized when *any* of its loops has packed
+arithmetic and no scalar arithmetic. The `SCALAR` regex matches only scalar
+*floating-point* forms (`addss`/`addsd`/…), so in an integer challenge a loop
+the compiler left entirely in general-purpose registers scores `0p/0s` and is
+silently ignored rather than counted against the function. Any unrelated
+contiguous loop elsewhere in the body then supplies the verdict. Verified: a
+`solve` that aggregates over a pointer table (scalar) next to a contiguous
+scratch-fill loop reports `10p/0s 0p/0s -> vectorized` and passes
+`--expect vectorized`. A solver can pass 58's `make vec` without vectorizing
+the aggregation.
+
+- **Severity:** medium
+- **Scope:** vec challenge grading
+- **Affected:** every vec challenge whose hot loop is integer-only
+- **Source:** `scripts/vec_check.py:verdict`, `scripts/vec_check.py:SCALAR`
+- **Status:** open
+- **Fix:**
+
+## V2 — vec_check cannot compile a directory that uses the shared C harness (2026-09-22, open)
+
+`shared/vec.mk`'s header says it composes with `shared/c/io.mk`, but
+`assembly()` compiles the directory with `cc -std=c11 -O3 -march=x86-64-v3 -S`
+and no `-I`. An io challenge's `solution.h` has to include `json.h` and
+`harness.h` from `shared/c/`, so that compile fails with `fatal error:
+harness.h: No such file or directory` and `make vec` reports it as a compile
+failure. 58's four Makefiles work around it with
+`export C_INCLUDE_PATH := $(abspath ../../shared/c)`, which every later vec
+challenge now has to repeat.
+
+- **Severity:** low
+- **Scope:** vec challenge build
+- **Affected:** 58, and any vec challenge composing with `shared/c/io.mk`
+- **Source:** `scripts/vec_check.py:assembly`, `shared/vec.mk:24`
+- **Status:** open
+- **Fix:**
