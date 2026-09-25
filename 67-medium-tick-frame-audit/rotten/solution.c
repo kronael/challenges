@@ -41,33 +41,29 @@ Answer solve(const Input *in) {
 	// byte, and `pos` wraps back to 0 at the frame edge. Each of the two keeps
 	// the loop in scalar registers on its own: gcc 12 does not if-convert a
 	// switch ("control flow in loop"), and `pos` depends on the previous
-	// iteration's `pos` rather than on `i`, so two bytes' offsets can never be
-	// computed side by side ("unsupported use in stmt"). Same O(bytes) work and
-	// the same answer as the reference.
+	// iteration's `pos` rather than on `i`, so `expect[pos]` is not a
+	// unit-stride read ("not suitable for gather load"). Same O(bytes) work
+	// and the same answer as the reference.
 	long long clean = 0;
 	long long stray = 0;
 	size_t pos = 0;
 	int bad = 0;
 	for (size_t i = 0; i < in->stream_len; i++) {
+		uint8_t cls;
 		switch (in->stream[i]) {
 		case '|':
-			if (expect[pos] != SEPARATOR) {
-				stray++;
-				bad = 1;
-			}
+			cls = SEPARATOR;
 			break;
 		case '\n':
-			if (expect[pos] != TERMINATOR) {
-				stray++;
-				bad = 1;
-			}
+			cls = TERMINATOR;
 			break;
 		default:
-			if (expect[pos] != PAYLOAD) {
-				stray++;
-				bad = 1;
-			}
+			cls = PAYLOAD;
 			break;
+		}
+		if (cls != expect[pos]) {
+			stray++;
+			bad = 1;
 		}
 		if (++pos == w) {
 			clean += !bad;
