@@ -30,11 +30,11 @@ void input_free(Input *in) {
 }
 
 Answer solve(const Input *in) {
-	// One running total, added to in sample order. Floating-point addition is
-	// not associative, so without -ffast-math the compiler has to perform the
-	// adds in exactly this order: each waits on the sum the previous one
-	// produced, and gcc and clang both keep the loop in scalar registers at any
-	// -mtune. Same O(samples) work and the same answer as the reference.
+	// One running total, summed in sample order. Floating-point addition is not
+	// associative, so without -ffast-math the compiler must keep this order:
+	// each add waits on the one before, and gcc and clang both keep the loop in
+	// scalar registers at any -mtune. Same O(samples) work and the same answer
+	// as the reference.
 	double ac = 0.0;
 	long long kept = 0;
 	for (size_t i = 0; i < in->n; i++) {

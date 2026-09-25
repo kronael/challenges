@@ -42,9 +42,9 @@ Answer solve(const Input *in) {
 	// sample's mask is -1, so subtracting the mask adds one.
 	//
 	// Eight sums add the dosages in a different order than one running total.
-	// Every dosage is a multiple of 2^-12 and no sum passes 4 * 10^5 < 2^19, so
-	// every partial sum fits a double's 53 bits exactly, and the order cannot
-	// change the answer.
+	// Every partial sum is a multiple of 2^-12 no larger than 2 * 200000 < 2^19,
+	// so it needs at most 31 of a double's 53 bits: no add rounds, and the order
+	// cannot change the answer.
 	const __m256i dmin = _mm256_set1_epi32(in->min_depth - 1);
 	const __m256i qmin = _mm256_set1_epi32(in->min_quality - 1);
 	__m256d lo = _mm256_setzero_pd();
@@ -68,9 +68,6 @@ Answer solve(const Input *in) {
 	_mm256_storeu_pd(lane + 4, hi);
 	_mm256_storeu_si256((__m256i *)count, kept);
 	long long passing = 0;
-	for (int j = 0; j < 8; j++) {
-		passing += count[j];
-	}
 	for (; i < n; i++) {
 		if (depth[i] >= in->min_depth && quality[i] >= in->min_quality) {
 			lane[0] += dosage[i];
@@ -80,6 +77,7 @@ Answer solve(const Input *in) {
 	double ac = 0.0;
 	for (int j = 0; j < 8; j++) {
 		ac += lane[j];
+		passing += count[j];
 	}
 
 	Answer a = { ac, 2 * passing };
