@@ -1,3 +1,3 @@
 module changing_network_queries
 
-go 1.22
+go 1.27.1
