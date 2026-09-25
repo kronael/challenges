@@ -239,10 +239,11 @@ class CTests(unittest.TestCase):
             workdir = Path(raw_dir)
             (workdir / "main.c").write_text(driver, encoding="utf-8")
             (workdir / "solution.c").write_text(source, encoding="utf-8")
-            subprocess.run(
+            built = subprocess.run(
                 [self.cc, "-std=c11", "-O3", "-march=x86-64-v3", "-o", "prog", "main.c", "solution.c"],
-                cwd=workdir, check=True, capture_output=True,
+                cwd=workdir, capture_output=True, text=True,
             )
+            self.assertEqual(built.returncode, 0, built.stderr)
             return grade(workdir, workdir / "prog", "solve", expect)
 
     def assert_grade(self, driver: str, source: str, expect: str) -> None:
@@ -299,10 +300,11 @@ class GoTests(unittest.TestCase):
             (workdir / "go.mod").write_text(GO_MOD, encoding="utf-8")
             (workdir / "main.go").write_text(GO_MAIN, encoding="utf-8")
             (workdir / "solution.go").write_text(source, encoding="utf-8")
-            subprocess.run(
-                ["go", "build", "-o", "prog", "."], cwd=workdir, check=True, capture_output=True,
+            built = subprocess.run(
+                ["go", "build", "-o", "prog", "."], cwd=workdir, capture_output=True, text=True,
                 env={**os.environ, "GOEXPERIMENT": "simd", "GOAMD64": "v3"},
             )
+            self.assertEqual(built.returncode, 0, built.stderr)
             return grade(workdir, workdir / "prog", "main.solve", expect)
 
     def assert_grade(self, source: str, expect: str) -> None:
