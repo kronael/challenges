@@ -3,36 +3,29 @@ import sys
 
 
 def solve(capacity, ops):
-    # Naive: keep a flat HISTORY of every key touch, and to find the eviction
-    # victim, scan the whole history for each cached key to locate its most recent
-    # touch, taking the key whose latest touch is oldest. O(history) per eviction
-    # makes the whole run O(n^2) — correct, but TIMEOUTs on the large cases — the trap.
+    # Naive: stamp each key with the tick of its last use, then find the eviction
+    # victim by scanning every cached key for the smallest stamp. Correct, but that
+    # scan is O(capacity) per eviction, so a full cache makes the run O(n·capacity)
+    # — it TIMEOUTs on the large cases. That is the trap.
     store = {}  # key -> value
-    history = []  # every touched key, in order; history[-1] is the most recent
+    last_used = {}  # key -> tick of its most recent get/put
     out = []
-    for op in ops:
+    for tick, op in enumerate(ops):
         if op[0] == "get":
             key = op[1]
             if key in store:
-                history.append(key)
+                last_used[key] = tick
                 out.append(store[key])
             else:
                 out.append(-1)
         else:  # put
             key, val = op[1], op[2]
-            if key in store:
-                store[key] = val
-                history.append(key)
-            else:
-                store[key] = val
-                history.append(key)
-                if len(store) > capacity:
-                    last_seen = {}
-                    for i, k in enumerate(history):
-                        if k in store:
-                            last_seen[k] = i
-                    lru_key = min(last_seen, key=lambda k: last_seen[k])
-                    del store[lru_key]
+            store[key] = val
+            last_used[key] = tick
+            if len(store) > capacity:
+                victim = min(last_used, key=last_used.get)
+                del store[victim]
+                del last_used[victim]
     return out
 
 

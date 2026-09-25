@@ -36,4 +36,4 @@ make -C go
 make -C python
 ```
 
-Stuck? See `HINTS.md`.
+Stuck? See `hints/01.md`.

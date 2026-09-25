@@ -40,9 +40,9 @@ func TestCases(t *testing.T) {
 			if err != nil {
 				t.Fatalf("read .out for %s: %v", inp, err)
 			}
-			var want []int
+			var want []int64
 			for _, tok := range strings.Fields(string(raw)) {
-				v, err := strconv.Atoi(tok)
+				v, err := strconv.ParseInt(tok, 10, 64)
 				if err != nil {
 					t.Fatalf("parse .out for %s: %v", inp, err)
 				}

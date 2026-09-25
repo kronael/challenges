@@ -13,12 +13,6 @@ type input struct {
 	Arr []int `json:"arr"`
 }
 
-func solve(k int, arr []int) []int {
-	_ = k
-	_ = arr
-	return nil
-}
-
 func main() {
 	var in input
 	if err := json.NewDecoder(os.Stdin).Decode(&in); err != nil {

@@ -38,12 +38,6 @@ func (o *op) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func solve(capacity int, ops []op) []int {
-	_ = capacity
-	_ = ops
-	return nil
-}
-
 func main() {
 	var in input
 	if err := json.NewDecoder(os.Stdin).Decode(&in); err != nil {

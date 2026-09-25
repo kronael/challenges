@@ -41,9 +41,9 @@ func TestCases(t *testing.T) {
 				t.Fatal(err)
 			}
 			fields := strings.Fields(string(out))
-			want := make([]int, len(fields))
+			want := make([]int64, len(fields))
 			for i, field := range fields {
-				want[i], err = strconv.Atoi(field)
+				want[i], err = strconv.ParseInt(field, 10, 64)
 				if err != nil {
 					t.Fatal(err)
 				}

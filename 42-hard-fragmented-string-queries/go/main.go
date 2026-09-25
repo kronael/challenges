@@ -7,14 +7,8 @@ import (
 )
 
 type input struct {
-	Parts   []string `json:"parts"`
-	Queries [][]int  `json:"queries"`
-}
-
-func solve(parts []string, queries [][]int) string {
-	_ = parts
-	_ = queries
-	return ""
+	Parts   []string  `json:"parts"`
+	Queries [][]int64 `json:"queries"`
 }
 
 func main() {

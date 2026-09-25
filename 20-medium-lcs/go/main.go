@@ -11,10 +11,6 @@ type input struct {
 	T string `json:"t"`
 }
 
-func solve(s, t string) int {
-	panic("TODO")
-}
-
 func main() {
 	var in input
 	if err := json.NewDecoder(os.Stdin).Decode(&in); err != nil {

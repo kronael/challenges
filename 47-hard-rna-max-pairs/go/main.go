@@ -8,15 +8,8 @@ import (
 
 type input struct {
 	Rna         string `json:"rna"`
-	MinLoop     int    `json:"min_loop"`
+	MinLoop     int64  `json:"min_loop"`
 	AllowWobble bool   `json:"allow_wobble"`
-}
-
-func solve(rna string, minLoop int, allowWobble bool) int {
-	_ = rna
-	_ = minLoop
-	_ = allowWobble
-	panic("TODO")
 }
 
 func main() {

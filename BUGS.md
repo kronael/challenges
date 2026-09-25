@@ -1,78 +1,93 @@
 # Defect log
 
-## Status — 2026-08-11 — Go numeric-width sweep
+Review queue: **OPEN / DEFERRED / BY-DESIGN only.** Resolved bugs live in git
+history and `CHANGELOG.md`, not here.
 
-- **03-GO-DRAWDOWN-INT-RESULT** (HIGH, correctness) — The documented drawdown
-  is signed 64-bit, but `03-easy-max-drawdown/go/main.go:14` and
-  `go/solution_test.go:43` use `int`; valid i32 prices can produce
-  `4294967295`, which overflows on GOARCH=386. **Fix:** Return and parse `int64`,
-  widening operands before subtraction.
-- **04-GO-LOADS-INT-NARROWING** (HIGH, correctness) — Loads are signed 64-bit,
-  but `04-medium-edge-costs/go/main.go:13` parses them through `*int` and
-  `go/solution_test.go:50` expects `[]int`; GOARCH=386 rejects a valid load of
-  `2147483648`. **Fix:** Use nullable `int64` loads and `[]int64` results.
-- **07-GO-COINS-INT-NARROWING** (MED, correctness) — Denominations have no
-  upper bound, but `07-medium-coin-change/go/main.go:11` parses them as `int`;
-  GOARCH=386 rejects a valid denomination of `2147483648`. **Fix:** Either give
-  denominations a meaningful documented bound or widen their Go type.
-- **10-GO-WEIGHTS-INT-NARROWING** (HIGH, correctness) — Edge weights are
-  nonnegative and only bounded by the i64 distance contract, but
-  `10-medium-route-costs/go/main.go:11` parses all edge fields as `int`;
-  GOARCH=386 rejects a valid weight of `2147483648`. **Fix:** Use typed edges
-  with bounded `int` endpoints and `int64` weights.
-- **17-GO-VALUE-TOTAL-INT-NARROWING** (HIGH, correctness) — Results and
-  accumulated values are signed 64-bit, but
-  `17-medium-knapsack/go/main.go:11,19` and `go/solution_test.go:43` use `int`;
-  existing case 11 expects `6442450941`. **Fix:** Use `int64` for values,
-  results, accumulation, and expected-output parsing.
-- **35-GO-OP-VALUE-INT-NARROWING** (HIGH, correctness) — Initial values and
-  assignments are signed 64-bit, but `35-hard-dynamic-range-sums/go/main.go:13`
-  stores the mixed operation operand in `int`; GOARCH=386 rejects a valid
-  assignment of `2147483648`. **Fix:** Keep positions bounded and represent the
-  assignment payload as `int64`, matching challenge 26's scaffold pattern.
-- **42-GO-QUERY-ENDPOINT-INT-NARROWING** (MED, correctness) — Raw query
-  endpoints are clamped and have no bound, but
-  `42-hard-fragmented-string-queries/go/main.go:11` decodes them into `int`;
-  GOARCH=386 rejects `2147483648` before clamping. **Fix:** Parse endpoints as
-  `int64` and convert only after clamping to the bounded string length.
-- **43-GO-BOOK-QUANTITY-INT-NARROWING** (HIGH, correctness) — Individual
-  quantities fit i32, but final price-level totals need not; the `[]int` result
-  at `43-hard-order-book/go/main.go:23` and `Atoi` at
-  `go/solution_test.go:45` overflow for two valid maximum-size orders totaling
-  `4294967294`. **Fix:** Use `int64` for aggregate quantities, results, and
-  expected-output parsing.
-- **47-GO-MIN-LOOP-INT-NARROWING** (MED, correctness) — `min_loop` is
-  nonnegative but unbounded, while `47-hard-rna-max-pairs/go/main.go:11` uses
-  `int`; GOARCH=386 rejects `2147483648` although it has a well-defined zero
-  result. **Fix:** Add a meaningful upper bound or widen the parsed type.
-- **54-GO-MASS-INT-NARROWING** (MED, correctness) — Allowed masses are positive
-  integers without an upper bound, but
-  `54-hard-spectrum-peptide-recovery/go/main.go:12` uses `[]int`; GOARCH=386
-  rejects a valid unmatched mass of `2147483648`. **Fix:** Bound masses to the
-  parent-mass domain or use `int64` consistently with the C and Rust tracks.
-- **57-EVENT-ID-INT-NARROWING** (HIGH, correctness) — Event IDs have no bound;
-  Go uses `int` at `57-hard-causal-event-replay/go/main.go:12,22` and C uses
-  `int` at `c/solution.h:10`, while Rust and the C answer use 64-bit IDs.
-  GOARCH=386 rejects `2147483648`. **Fix:** Make IDs signed 64-bit end to end,
-  including output parsing.
-- **01-INT64-ELEMENT-BOUNDARY-UNTESTED** (LOW, test) — Values are signed
-  64-bit at `01-easy-max-subarray/README.md:13`, but every fixture element fits
-  i32; the existing large output tests accumulation only. **Fix:** Add a small
-  fixture with an element outside signed 32-bit.
-- **02-INT64-OUTPUT-BOUNDARY-UNTESTED** (LOW, test) — Inputs reach `10^18` as
-  allowed by `02-easy-mod-exp/README.md:15`, but no expected output exceeds
-  signed 32-bit. **Fix:** Add a case with a valid result above `2147483647`.
-- **28-INT64-EVENT-BOUNDARY-UNTESTED** (LOW, test) — Timestamps and IDs are i64
-  at `28-medium-news-feed-merge/README.md:17`, but all fixture values are at
-  most `500000`. **Fix:** Add a small ordering case outside signed 32-bit.
-- **49-INT64-SCORE-TOTAL-UNTESTED** (LOW, test) — Best totals may be signed
-  64-bit at `49-hard-gene-region-decoder/README.md:32`, but fixtures use scores
-  only from `-12` to `12` and short sequences. **Fix:** Add a case whose path
-  total crosses signed 32-bit.
-- **52-INT64-COST-TOTAL-UNTESTED** (LOW, test) — Minimum totals may be signed
-  64-bit at `52-hard-service-pairing/README.md:16`, but fixtures stay between
-  `-15` and `197`. **Fix:** Add a small matrix whose minimum crosses signed
-  32-bit.
+## Status — 2026-08-24 — defect-queue resolution pass (toward v0.1.5)
+
+Worked the full queue from the earlier audits. The correctness and consistency
+items were FIXED and pruned from this file — they live in the v0.1.5 commits and
+`CHANGELOG.md`. Fixes verified end to end (`make test`, `make cases`, `make sys`,
+`make sys-rotten`, per-language `go build`/`vet`, golden+rotten suites) and
+independently reverified by an Opus pass (README solution-neutrality, the 56
+collinear removal, the 22 golden value tests) and a Sonnet numbering/reference
+sweep (hint chains + case pairing).
+
+Pruned as FIXED this pass: the eleven Go int-narrowing scaffolds (03, 04, 07, 10,
+17, 35, 42, 43, 47, 54, 57 — plus 57's C `Event.id`), the five int64-boundary
+fixtures (01, 02, 28, 49, 52), the sys 29–34 Makefile standardization and
+`Cargo.lock` cleanup, the 22 golden value tests, the 37 Rust accessor removal,
+the CLAUDE.md 21/22 note, the template heading alignment, the ≤/superscript glyph
+fixes (53/55/56), the 55 offline-hint and 56 collinear rewordings, the 49–52
+README headers, the 07/10/45 hint-source/complexity touch-ups, and the 59/60/63
+benchmark-margin wording.
+
+What remains below is DEFERRED (needs a frozen-digest change or an owner naming
+decision) or BY-DESIGN (accepted variance).
+
+### Deferred — need a spec/digest decision or coordinated rename
+
+- **04-SLUG-TITLE-MISMATCH** (MED, docs) — DEFERRED. `04-medium-edge-costs`'s
+  README title and catalog row say "Vertex Load Assignment," and the problem
+  assigns loads to vertices over unit edges — the slug "edge-costs" matches
+  neither. **Fix:** a coordinated rename across the directory slug, README,
+  catalog row, and `scripts/large_cases.py` recipe context (owner picks the
+  canonical name first).
+- **59-RECIPE-NO-WORST-CASE-GUARANTEE** (LOW, bench) — DEFERRED. Both seeded
+  large recipes for `59-medium-price-undercut` are non-decreasing with a single
+  terminal drop, so a skip-ahead heuristic solves them in linear time;
+  `hints/03.md` admits this but nothing enforces it. **Fix:** a third recipe
+  whose shape defeats the heuristic (needs a digest refreeze).
+- **58-BENCH-REWARDS-SORT-ON-SEEDED-RECIPES** (LOW, bench) — BY-DESIGN. On
+  `58-medium-kth-worst-fill`'s two seeded recipes, a full `sorted()` beats the
+  intended selection. This is exactly why the README states a bare O(n)
+  time / O(1)-space follow-up rather than leaning on `make bench`, and
+  `hints/04.md` says so. **Fix (optional):** a recipe shaped to also punish a
+  full sort (digest refreeze).
+- **62-SMALL-FIXTURE-COVERAGE-GAP** (LOW, test) — DEFERRED. The largest tracked
+  small fixture in `62-hard-neutral-basket` is `n=17`; the `middle = 19/19`
+  split path is exercised only by `make bench`, because `n=20` already costs
+  ~4 s of `rotten`'s Python runtime in the small suite. **Fix:** owner's call on
+  the rotten-runtime trade-off.
+- **41-STRAY-RUFF-CACHE** (LOW, resource) — DEFERRED. `41-hard-ordered-set-queries/.ruff_cache/`
+  sits at the challenge root instead of inside a language dir. It is gitignored,
+  so it never reaches git and does not block a release. **Fix:** manual cleanup
+  — repo policy bars recursive removal, so it is left for the owner.
+
+### By design — accepted variance, no change
+
+- **60-TITLE-LEAKS-TERM** (LOW, design) — BY-DESIGN. `60-medium-venue-ancestor`'s
+  title/slug name the classic LCA problem while the body avoids "ancestor."
+  Defensible per CLAUDE.md ("names are part of the prompt"; "ancestor" names the
+  problem, not the method).
+- **60-HINT-PACING-RUNGS-COLLAPSED** (LOW, design) — BY-DESIGN. `hints/01.md`
+  poses and then answers its lockstep-walk question inside one file. It still
+  ends on a distinct cliffhanger (filling the depth array without deep
+  recursion), so the chain stays progressive.
+- **59-HINTS-APPROACH-ORDER-VARIANCE** (LOW, docs) — BY-DESIGN. 59 titles
+  `hints/02.md` "Approach" and rejects alternatives in `03.md`, where 58/60 fold
+  both together. A file-title labeling variance; the chain is progressive.
+- **58-HINT-CHAIN-RUNGS-COLLAPSED** (LOW, design) — BY-DESIGN. 58's hint 1 names
+  the selection method and `03.md` is the rejected-approaches file, so there is
+  no separate "Approach" rung. Design variance, not a factual error.
+- **62-HINT-01-STRONG-SPOILER** (LOW, design) — BY-DESIGN. `62-hard-neutral-basket`'s
+  hint 1 rules out brute force and a sum-indexed DP and hands the solver `2^19`,
+  but defers *what* there are `2^19` of to hint 2 — appropriate escalation for
+  an `n ≤ 38` problem with only two live options.
+
+## Status — 2026-08-24 — found during the numbering/reference sweep
+
+- **HINTS-MISSING-SOURCES-FILE** (LOW, docs) — Record-only. Fourteen challenges'
+  `hints/` end with a `# Complexity` file and have no `# Sources` file at all:
+  03, 04, 09, 13, 14, 15, 16, 23, 24, 25, 35, 38, 39, 43. CLAUDE.md says a hint
+  chain ends with a Sources file holding solution-bearing attribution. Several of
+  these are classic problems with citable sources (e.g. 24 LRU cache, 14 sieve,
+  25 running median); others may be original and legitimately source-less.
+  **Fix:** owner decides per challenge — add an accurate Sources file where a
+  real citation exists, or accept Complexity-last for genuinely source-less
+  problems. Do NOT fabricate citations. (Case-number bands like `58/13_i32_bounds.in`
+  and `04/12–20.in` were also reviewed and are intentional/harmless — every
+  `.in` is paired and each challenge has ≥8 small cases — so they are not logged.)
 
 ## V1 — vec_check credits a packed loop that is not the graded one (2026-09-22, open)
 
@@ -84,7 +99,7 @@ silently ignored rather than counted against the function. Any unrelated
 contiguous loop elsewhere in the body then supplies the verdict. Verified: a
 `solve` that aggregates over a pointer table (scalar) next to a contiguous
 scratch-fill loop reports `10p/0s 0p/0s -> vectorized` and passes
-`--expect vectorized`. A solver can pass 58's `make vec` without vectorizing
+`--expect vectorized`. A solver can pass 66's `make vec` without vectorizing
 the aggregation.
 
 - **Severity:** medium
@@ -101,13 +116,13 @@ the aggregation.
 and no `-I`. An io challenge's `solution.h` has to include `json.h` and
 `harness.h` from `shared/c/`, so that compile fails with `fatal error:
 harness.h: No such file or directory` and `make vec` reports it as a compile
-failure. 58's four Makefiles work around it with
+failure. 66's four Makefiles work around it with
 `export C_INCLUDE_PATH := $(abspath ../../shared/c)`, which every later vec
 challenge now has to repeat.
 
 - **Severity:** low
 - **Scope:** vec challenge build
-- **Affected:** 58, and any vec challenge composing with `shared/c/io.mk`
+- **Affected:** 66, and any vec challenge composing with `shared/c/io.mk`
 - **Source:** `scripts/vec_check.py:assembly`, `shared/vec.mk:24`
 - **Status:** open
 - **Fix:**

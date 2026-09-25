@@ -31,4 +31,4 @@ make -C go test
 make -C c test
 ```
 
-Stuck? See `HINTS.md`.
+Stuck? See `hints/01.md`.

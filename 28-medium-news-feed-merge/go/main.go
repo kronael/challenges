@@ -17,11 +17,6 @@ type input struct {
 	Feeds [][]event `json:"feeds"`
 }
 
-func solve(feeds [][]event) []int64 {
-	_ = feeds
-	return nil
-}
-
 func main() {
 	var in input
 	if err := json.NewDecoder(os.Stdin).Decode(&in); err != nil {

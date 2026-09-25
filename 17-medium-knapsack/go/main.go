@@ -7,19 +7,13 @@ import (
 )
 
 type item struct {
-	Weight int `json:"weight"`
-	Value  int `json:"value"`
+	Weight int   `json:"weight"`
+	Value  int64 `json:"value"`
 }
 
 type input struct {
 	Capacity int    `json:"capacity"`
 	Items    []item `json:"items"`
-}
-
-func solve(capacity int, items []item) int {
-	_ = capacity
-	_ = items
-	return 0
 }
 
 func main() {

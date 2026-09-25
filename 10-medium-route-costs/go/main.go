@@ -7,14 +7,8 @@ import (
 )
 
 type input struct {
-	N     int     `json:"n"`
-	Edges [][]int `json:"edges"`
-}
-
-func solve(n int, edges [][]int) []int64 {
-	_ = n
-	_ = edges
-	return nil
+	N     int       `json:"n"`
+	Edges [][]int64 `json:"edges"`
 }
 
 func main() {

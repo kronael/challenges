@@ -16,11 +16,6 @@ type input struct {
 	Jobs []Job `json:"jobs"`
 }
 
-func solve(jobs []Job) int64 {
-	_ = jobs
-	return 0
-}
-
 func main() {
 	var in input
 	if err := json.NewDecoder(os.Stdin).Decode(&in); err != nil {

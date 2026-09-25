@@ -55,4 +55,4 @@ make -C c
 make -C rust
 ```
 
-Stuck? See `HINTS.md`.
+Stuck? See `hints/01.md`.

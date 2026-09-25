@@ -13,14 +13,6 @@ type input struct {
 	Guides []string `json:"guides"`
 }
 
-func solve(d, length int, genome string, guides []string) []int {
-	_ = d
-	_ = length
-	_ = genome
-	_ = guides
-	return nil
-}
-
 func main() {
 	var in input
 	if err := json.NewDecoder(os.Stdin).Decode(&in); err != nil {

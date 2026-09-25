@@ -43,10 +43,6 @@ func (in *input) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func solve(ops []op) []int {
-	return nil
-}
-
 func main() {
 	var in input
 	if err := json.NewDecoder(os.Stdin).Decode(&in); err != nil {

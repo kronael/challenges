@@ -9,7 +9,7 @@ import (
 )
 
 type event struct {
-	ID      int   `json:"id"`
+	ID      int64 `json:"id"`
 	Process int   `json:"process"`
 	Clock   []int `json:"clock"`
 }
@@ -17,10 +17,6 @@ type event struct {
 type input struct {
 	Processes int     `json:"processes"`
 	Events    []event `json:"events"`
-}
-
-func solve(processes int, events []event) []int {
-	return nil
 }
 
 func main() {
@@ -32,7 +28,7 @@ func main() {
 	result := solve(in.Processes, in.Events)
 	parts := make([]string, len(result))
 	for i, value := range result {
-		parts[i] = strconv.Itoa(value)
+		parts[i] = strconv.FormatInt(value, 10)
 	}
 	fmt.Println(strings.Join(parts, " "))
 }

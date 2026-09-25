@@ -10,7 +10,7 @@ import (
 type op struct {
 	Kind string
 	A    int
-	B    int
+	B    int64
 }
 
 func (o *op) UnmarshalJSON(data []byte) error {
@@ -34,11 +34,6 @@ type input struct {
 	N      int     `json:"n"`
 	Values []int64 `json:"values"`
 	Ops    []op    `json:"ops"`
-}
-
-func solve(n int, values []int64, ops []op) []int64 {
-	_, _, _ = n, values, ops
-	return nil
 }
 
 func main() {

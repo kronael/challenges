@@ -46,6 +46,6 @@ make -C c
 make -C python
 ```
 
-Stuck? See `HINTS.md`.
+Stuck? See `hints/01.md`.
 
 Source: [CSES #1694 — Download Speed](https://cses.fi/problemset/task/1694)

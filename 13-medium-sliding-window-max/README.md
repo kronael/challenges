@@ -16,7 +16,8 @@ covers the final `k` readings. There are `n - k + 1` windows in all.
 The stream may be long, and the number of windows can be large. Your program
 must produce every requested maximum within the stated limits.
 
-Constraints: `n` up to 2·10⁵, `1 ≤ k ≤ n`, readings fit in i32.
+Constraints: `n` up to 2·10⁵, `1 ≤ k ≤ n`, readings fit in a signed 32-bit
+integer.
 
 ## Input
 
@@ -49,6 +50,6 @@ make -C c
 make -C python
 ```
 
-Stuck? See `HINTS.md`.
+Stuck? See `hints/01.md`.
 
 Source: https://leetcode.com/problems/sliding-window-maximum/

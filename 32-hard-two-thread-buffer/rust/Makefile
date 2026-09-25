@@ -18,10 +18,12 @@ test: build check
 	cargo test
 
 bench:
-	timeout -k 2 $(TIMEOUT) cargo run --release --bin bench
+	cargo build --release --bin bench
+	timeout -k 2 $(TIMEOUT) ./target/release/bench
 
 clean:
 	cargo clean
+	rm -f Cargo.lock
 
 help:
 	@echo "clean  — remove build artifacts"
@@ -29,5 +31,7 @@ help:
 	@echo "build  — cargo build (debug)"
 	@echo "fmt    — cargo fmt"
 	@echo "lint   — cargo clippy"
+	@echo "check  — fmt + lint"
 	@echo "test   — build + fmt + lint + cargo test (stress)"
 	@echo "bench  — run throughput benchmark (TIMEOUT=5)"
+	@echo "help   — show this message"

@@ -19,10 +19,6 @@ type input struct {
 	Operations []operation `json:"operations"`
 }
 
-func solve(n int, operations []operation) []int {
-	return nil
-}
-
 func main() {
 	var in input
 	if err := json.NewDecoder(os.Stdin).Decode(&in); err != nil {

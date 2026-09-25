@@ -40,7 +40,7 @@ func TestCases(t *testing.T) {
 			if err != nil {
 				t.Fatalf("read .out for %s: %v", inp, err)
 			}
-			want, err := strconv.Atoi(strings.TrimSpace(string(raw)))
+			want, err := strconv.ParseInt(strings.TrimSpace(string(raw)), 10, 64)
 			if err != nil {
 				t.Fatalf("parse .out for %s: %v", inp, err)
 			}

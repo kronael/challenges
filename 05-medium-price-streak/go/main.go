@@ -11,10 +11,6 @@ type input struct {
 	Seq []int `json:"seq"`
 }
 
-func solve(seq []int) int {
-	return 0
-}
-
 func main() {
 	var in input
 	if err := json.NewDecoder(os.Stdin).Decode(&in); err != nil {

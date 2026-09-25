@@ -1,5 +1,12 @@
 # 52 — Hard — Service Pairing
 
+**Task**: Assign every service to a distinct host at minimum total cost.
+
+**Difficulty**: hard
+**Time estimate**: ~90 min
+
+## Problem
+
 Assign every service to a different host while minimizing total cost.
 
 `costs[i][j]` is the cost of placing service `i` on host `j`. There are equally
@@ -21,9 +28,12 @@ Print the minimum total cost.
 
 ## Example
 
+**Example 1** — the cheapest pairing isn't the diagonal
 ```text
 {"costs":[[9,2,7],[6,4,3],[5,8,1]]} → 9
 ```
+Pairing service 0→host 1, 1→host 0, 2→host 2 costs 2+6+1 = 9; the diagonal
+pairing (service `i`→host `i`) costs 9+4+1 = 14.
 
 ## Run
 
@@ -34,4 +44,4 @@ make -C c
 make -C python
 ```
 
-Stuck? See `HINTS.md`.
+Stuck? See `hints/01.md`.

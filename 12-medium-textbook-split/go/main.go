@@ -11,12 +11,6 @@ type input struct {
 	Pages []int64 `json:"pages"`
 }
 
-func solve(k int, pages []int64) int64 {
-	_ = k
-	_ = pages
-	return 0
-}
-
 func main() {
 	var in input
 	if err := json.NewDecoder(os.Stdin).Decode(&in); err != nil {

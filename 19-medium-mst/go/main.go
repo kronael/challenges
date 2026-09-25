@@ -11,12 +11,6 @@ type input struct {
 	Edges [][]int `json:"edges"`
 }
 
-func solve(n int, edges [][]int) int64 {
-	_ = n
-	_ = edges
-	return 0
-}
-
 func main() {
 	var in input
 	if err := json.NewDecoder(os.Stdin).Decode(&in); err != nil {

@@ -41,6 +41,6 @@ make -C c
 make -C python
 ```
 
-Stuck? See `HINTS.md`.
+Stuck? See `hints/01.md`.
 
 Source: [CSES #2105 — Distinct Substrings](https://cses.fi/problemset/task/2105)

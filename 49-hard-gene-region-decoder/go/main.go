@@ -14,10 +14,6 @@ type input struct {
 	Emission   [][]int64 `json:"emission"`
 }
 
-func solve(sequence string, start []int64, transition, emission [][]int64) []int {
-	return nil
-}
-
 func main() {
 	var in input
 	if err := json.NewDecoder(os.Stdin).Decode(&in); err != nil {

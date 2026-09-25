@@ -11,11 +11,6 @@ type input struct {
 	Stream []int64 `json:"stream"`
 }
 
-func solve(stream []int64) []string {
-	_ = stream
-	return nil
-}
-
 func main() {
 	var in input
 	if err := json.NewDecoder(os.Stdin).Decode(&in); err != nil {

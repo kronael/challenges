@@ -11,13 +11,6 @@ type input struct {
 	Queries []string `json:"queries"`
 }
 
-func solve(words, queries []string) string {
-	// Join query results with ";", and words inside one result with " ".
-	_ = words
-	_ = queries
-	return ""
-}
-
 func main() {
 	var in input
 	if err := json.NewDecoder(os.Stdin).Decode(&in); err != nil {

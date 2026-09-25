@@ -13,12 +13,6 @@ type input struct {
 	Pattern string `json:"pattern"`
 }
 
-func solve(text, pattern string) []int {
-	_ = text
-	_ = pattern
-	return nil
-}
-
 func main() {
 	var in input
 	if err := json.NewDecoder(os.Stdin).Decode(&in); err != nil {

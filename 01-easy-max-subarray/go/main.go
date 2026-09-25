@@ -10,11 +10,6 @@ type input struct {
 	Arr []int64 `json:"arr"`
 }
 
-func solve(arr []int64) int64 {
-	_ = arr
-	return 0
-}
-
 func main() {
 	var in input
 	if err := json.NewDecoder(os.Stdin).Decode(&in); err != nil {

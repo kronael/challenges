@@ -39,7 +39,7 @@ The two order types differ only in how far they are willing to match:
   use `0`.)
 
 Constraints: up to `2·10⁵` orders; prices and quantities are positive integers
-fitting in i32 (a market order's price may be `0`).
+fitting in a signed 32-bit integer (a market order's price may be `0`).
 
 ## Input
 
@@ -95,6 +95,6 @@ make -C c
 make -C python
 ```
 
-Stuck? See `HINTS.md`.
+Stuck? See `hints/01.md`.
 
 Source: limit order book / price-time priority matching (continuous double auction)

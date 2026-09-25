@@ -5,5 +5,5 @@ fn main() {
     let mut buf = String::new();
     io::stdin().read_to_string(&mut buf).unwrap();
     let inp: Input = serde_json::from_str(&buf).unwrap();
-    println!("{}", solve(inp.size(), inp.limit()));
+    println!("{}", solve(inp.size, inp.limit));
 }

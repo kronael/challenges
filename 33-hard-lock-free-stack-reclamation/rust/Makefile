@@ -1,5 +1,5 @@
 .PHONY: all build fmt lint check test bench clean help
-TIMEOUT ?= 5s
+TIMEOUT ?= 5
 
 all: fmt build lint test
 
@@ -23,6 +23,7 @@ bench:
 
 clean:
 	cargo clean
+	rm -f Cargo.lock
 
 help:
 	@echo "clean  — remove build artifacts"
@@ -30,5 +31,7 @@ help:
 	@echo "build  — cargo build (debug)"
 	@echo "fmt    — cargo fmt"
 	@echo "lint   — cargo clippy"
+	@echo "check  — fmt + lint"
 	@echo "test   — build + fmt + lint + cargo test (stress)"
-	@echo "bench  — release bench binary under timeout (override TIMEOUT=30s)"
+	@echo "bench  — release bench binary under timeout (override TIMEOUT=30)"
+	@echo "help   — show this message"

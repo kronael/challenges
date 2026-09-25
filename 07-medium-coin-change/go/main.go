@@ -7,14 +7,8 @@ import (
 )
 
 type input struct {
-	Amount int   `json:"amount"`
-	Coins  []int `json:"coins"`
-}
-
-func solve(amount int, coins []int) int {
-	_ = amount
-	_ = coins
-	panic("TODO")
+	Amount int     `json:"amount"`
+	Coins  []int64 `json:"coins"`
 }
 
 func main() {

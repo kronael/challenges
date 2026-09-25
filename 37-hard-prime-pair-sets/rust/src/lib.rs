@@ -16,16 +16,6 @@ fn default_limit() -> u64 {
     10_000
 }
 
-impl Input {
-    pub fn size(&self) -> u64 {
-        self.size
-    }
-
-    pub fn limit(&self) -> u64 {
-        self.limit
-    }
-}
-
 pub fn solve(_size: u64, _limit: u64) -> i64 {
     todo!()
 }

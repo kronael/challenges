@@ -11,10 +11,6 @@ type input struct {
 	Limit *int `json:"limit"`
 }
 
-func solve(size, limit int) int {
-	return 0
-}
-
 func main() {
 	var in input
 	if err := json.NewDecoder(os.Stdin).Decode(&in); err != nil {

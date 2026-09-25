@@ -18,13 +18,6 @@ type input struct {
 	Orders []order `json:"orders"`
 }
 
-// solve runs the order book and returns
-// [numTrades, p1, q1, p2, q2, ..., bestBid, bidQty, bestAsk, askQty].
-func solve(orders []order) []int {
-	_ = orders
-	return nil
-}
-
 func main() {
 	var in input
 	if err := json.NewDecoder(os.Stdin).Decode(&in); err != nil {

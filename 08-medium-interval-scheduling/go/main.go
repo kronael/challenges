@@ -11,11 +11,6 @@ type input struct {
 	Intervals [][]int `json:"intervals"`
 }
 
-func solve(intervals [][]int) int {
-	_ = intervals
-	return 0
-}
-
 func main() {
 	var in input
 	if err := json.NewDecoder(os.Stdin).Decode(&in); err != nil {

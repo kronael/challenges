@@ -55,6 +55,6 @@ make -C c
 make -C python
 ```
 
-Stuck? See `HINTS.md`.
+Stuck? See `hints/01.md`.
 
 Source: Drawdown (economics) — https://en.wikipedia.org/wiki/Drawdown_(economics)

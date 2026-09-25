@@ -13,10 +13,6 @@ type input struct {
 	Transition [][]float64 `json:"transition"`
 }
 
-func solve(parent []int, sequences []*string, prior []float64, transition [][]float64) float64 {
-	return 0
-}
-
 func main() {
 	var in input
 	if err := json.NewDecoder(os.Stdin).Decode(&in); err != nil {
