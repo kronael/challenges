@@ -264,14 +264,13 @@ def find_image(pid: int, binary: Path) -> tuple[int, int, int]:
     return base, min(low for low, _, _ in spans), max(high for _, high, _ in spans)
 
 
-def launch(binary: Path, stdin: Path, stdout: int, stderr: int) -> int:
+def launch(binary: Path, stdin: Path, stdout: int) -> int:
     env = {**os.environ, "GODEBUG": "asyncpreemptoff=1", "GOGC": "off"}
     pid = os.fork()
     if pid == 0:
         try:
             os.dup2(os.open(stdin, os.O_RDONLY), 0)
             os.dup2(stdout, 1)
-            os.dup2(stderr, 2)
             libc.prctl(SET_PDEATHSIG, ctypes.c_ulong(signal.SIGKILL))
             if libc.ptrace(TRACEME, 0, None, None) == -1:
                 os._exit(REFUSED)
@@ -283,7 +282,7 @@ def launch(binary: Path, stdin: Path, stdout: int, stderr: int) -> int:
         sys.exit("vec_check: this system does not permit ptrace, which the grade needs:"
                  " kernel.yama.ptrace_scope must be 0 or 1 and no seccomp filter may block it")
     if not os.WIFSTOPPED(status):
-        sys.exit(f"vec_check: could not start {binary} under ptrace")
+        sys.exit(f"vec_check: could not start {binary}")
     return pid
 
 
@@ -296,8 +295,10 @@ def enter(pid: int, entry: int) -> int:
         ptrace(CONT, pid, 0, pending)
         _, status = os.waitpid(pid, 0)
         if not os.WIFSTOPPED(status):
-            sys.exit("vec_check: the program exited without calling the graded function;"
-                     " was it inlined into its caller?")
+            code = os.waitstatus_to_exitcode(status)
+            hint = "; was it inlined into its caller?" if code == 0 else ""
+            sys.exit(f"vec_check: the program exited with status {code}"
+                     f" without calling the graded function{hint}")
         pending = os.WSTOPSIG(status)
         if pending != signal.SIGTRAP:
             continue
@@ -337,7 +338,8 @@ def trace(pid: int, entry: int, morestack: int | None, image: range, scalar_limi
         ptrace(SINGLESTEP, pid, 0, pending)
         _, status = os.waitpid(pid, 0)
         if not os.WIFSTOPPED(status):
-            sys.exit("vec_check: the program exited inside the graded function")
+            code = os.waitstatus_to_exitcode(status)
+            sys.exit(f"vec_check: the program exited with status {code} inside the graded function")
         pending = os.WSTOPSIG(status)
         if pending != signal.SIGTRAP:
             continue
@@ -388,8 +390,8 @@ def count_units(input_path: Path, key: str) -> int:
 
 
 def run(binary: Path, function: str, input_path: Path, scalar_limit: float) -> Count:
-    with tempfile.TemporaryFile() as out, tempfile.TemporaryFile() as err:
-        pid = launch(binary, input_path, out.fileno(), err.fileno())
+    with tempfile.TemporaryFile() as out:
+        pid = launch(binary, input_path, out.fileno())
         base, low, high = find_image(pid, binary)
         functions = find_functions(binary, base)
         if function not in functions:
@@ -402,10 +404,10 @@ def run(binary: Path, function: str, input_path: Path, scalar_limit: float) -> C
             return count
         ptrace(DETACH, pid)
         _, status = os.waitpid(pid, 0)
+        code = os.waitstatus_to_exitcode(status)
+        if code != 0:
+            sys.exit(f"vec_check: {binary.name} exited with status {code}")
         out.seek(0)
-        err.seek(0)
-        if os.waitstatus_to_exitcode(status) != 0:
-            sys.exit(f"vec_check: {binary.name} failed\n{err.read().decode(errors='replace')}")
         expected = input_path.with_suffix(".out")
         if expected.exists() and out.read().decode() != expected.read_text(encoding="utf-8"):
             sys.exit(f"vec_check: {binary.name} printed the wrong answer for {input_path.name}")
