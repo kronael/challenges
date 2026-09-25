@@ -37,6 +37,9 @@ and attributes that change the target or the optimizer, Rust's
 `#[target_feature]`, and build scripts and cgo that compile code outside the
 graded build. While tracing, an AVX-512 instruction in the program's own code
 is refused for the same reason.
+
+A grade that takes longer than TIMEOUT seconds fails, and the traced program
+dies with the grader.
 """
 
 from __future__ import annotations
@@ -58,7 +61,7 @@ BUDGET = 1.0
 PACKED_FLOOR = 0.02
 WINDOW = 256
 LONGEST = 15
-STEPS_PER_UNIT = 400
+TIMEOUT = 60
 WORD = 2**64 - 1
 
 TRACEME = 0
@@ -69,6 +72,7 @@ SINGLESTEP = 9
 GETREGS = 12
 SETREGS = 13
 DETACH = 17
+SET_PDEATHSIG = 1
 
 libc = ctypes.CDLL(None, use_errno=True)
 libc.ptrace.restype = ctypes.c_long
@@ -271,6 +275,7 @@ def launch(binary: Path, stdin: Path, stdout: int, stderr: int) -> int:
             os.dup2(os.open(stdin, os.O_RDONLY), 0)
             os.dup2(stdout, 1)
             os.dup2(stderr, 2)
+            libc.prctl(SET_PDEATHSIG, ctypes.c_ulong(signal.SIGKILL))
             libc.ptrace(TRACEME, 0, None, None)
             os.execve(binary, [str(binary)], env)
         finally:
@@ -307,7 +312,7 @@ def enter(pid: int, entry: int) -> tuple[int, int]:
     return ptrace(PEEKTEXT, pid, regs.rsp) & WORD, regs.rsp + 8
 
 
-def trace(pid: int, entry: int, image: range, scalar_limit: float, step_limit: int) -> Count:
+def trace(pid: int, entry: int, image: range, scalar_limit: float) -> Count:
     """Single-steps the call at `entry` until it returns, or until its scalar
     iterations have retired more than `scalar_limit` scalar instructions, which
     already decides the verdict."""
@@ -319,7 +324,7 @@ def trace(pid: int, entry: int, image: range, scalar_limit: float, step_limit: i
     vector = False
     rip = entry
     pending = 0
-    for _ in range(step_limit):
+    while True:
         insn = table.get(rip)
         if insn is None:
             table.update(disassemble(read_memory(pid, rip, WINDOW), rip))
@@ -350,7 +355,6 @@ def trace(pid: int, entry: int, image: range, scalar_limit: float, step_limit: i
         if returned:
             count.returned = True
             return count
-    sys.exit(f"vec_check: the graded function did not return within {step_limit} instructions")
 
 
 def strip_comments(source: str) -> str:
@@ -386,7 +390,7 @@ def count_units(input_path: Path, key: str) -> int:
     return len(value.encode() if isinstance(value, str) else value)
 
 
-def run(binary: Path, function: str, input_path: Path, scalar_limit: float, step_limit: int) -> Count:
+def run(binary: Path, function: str, input_path: Path, scalar_limit: float) -> Count:
     """Traces one call of `function` while `binary` reads `input_path`, and
     checks the program's answer against the `.out` beside the input when the
     call ran to completion."""
@@ -395,7 +399,7 @@ def run(binary: Path, function: str, input_path: Path, scalar_limit: float, step
         pid = launch(binary, input_path, out.fileno(), err.fileno())
         base, low, high = find_image(pid, binary)
         entry = address + (base if relocated else 0)
-        count = trace(pid, entry, range(low, high), scalar_limit, step_limit)
+        count = trace(pid, entry, range(low, high), scalar_limit)
         if not count.returned:
             os.kill(pid, signal.SIGKILL)
             os.waitpid(pid, 0)
@@ -434,9 +438,11 @@ def main() -> None:
     if problems:
         sys.exit(1)
 
+    signal.signal(signal.SIGALRM, lambda *_: sys.exit(
+        f"vec_check: {args.binary.name} did not finish within {TIMEOUT} s under the tracer"))
+    signal.alarm(TIMEOUT)
     units = max(count_units(args.input, args.units), 1)
-    count = run(args.binary.resolve(), args.function, args.input,
-                args.budget * units, STEPS_PER_UNIT * units + 10**6)
+    count = run(args.binary.resolve(), args.function, args.input, args.budget * units)
     scalar = count.scalar / units
     packed = count.packed / units
     vectorized = count.returned and scalar < args.budget and packed >= PACKED_FLOOR
