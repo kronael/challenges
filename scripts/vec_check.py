@@ -18,20 +18,20 @@ The grade counts scalar work, of two kinds:
 
 The instruction stream is cut into iterations at every backward jump, and an
 iteration that loads several elements into a vector register in one instruction
-is a vector iteration. Its general-purpose bookkeeping, loop control, bounds
-checks, and mask arithmetic, is paid once per vector rather than once per
-element, and is what separates C, Rust, and Go most; leaving it out lets one
-budget mean the same thing in all three. Packed arithmetic, moves between
-registers, stack accesses, string instructions such as rep movsb, and control
-flow count on neither side.
+is a vector iteration. There, loop control, bounds checks, and mask arithmetic
+on general-purpose registers are paid once per vector rather than once per
+element. That bookkeeping is what separates C, Rust, and Go most; leaving it
+out lets one budget mean the same thing in all three. Packed arithmetic, moves
+between registers, stack accesses, string instructions such as rep movsb, and
+control flow count on neither side.
 
 The count is divided by the length of one array in the input, the challenge's
 unit of work. A function is vectorized when it retires fewer than BUDGET
 scalar instructions per unit and at least PACKED_FLOOR packed ones. Any scalar
-pass over the input costs at least one per unit, a load or a floating-point
-add, however many vector loops run beside it, while setup, a remainder tail,
-and a horizontal sum cost a fraction of one. A loop the input never runs costs
-nothing.
+pass over the input costs at least one per unit however many vector loops run
+beside it: a load or a floating-point add per element. Setup, a remainder
+tail, and a horizontal sum cost a fraction of one. A loop the input never runs
+costs nothing.
 
 Before tracing, the solver's sources are checked for the ways to emit code the
 compiler did not choose for x86-64-v3: inline or standalone assembly, pragmas
@@ -40,14 +40,13 @@ and attributes that change the target or the optimizer, Rust's
 graded build. While tracing, an AVX-512 instruction in the program's own code
 is refused for the same reason.
 
-Go's asynchronous preemption and collector are switched off, and the two ways
-Go's runtime moves to the thread's own stack, runtime.morestack to grow the
-goroutine's stack or preempt it and runtime.systemstack to grow the heap among
-other bookkeeping, run untraced until they resume the function that entered
-them. All of it is work that is not the solver's, and how much of it runs
-depends on timing and on the heap the program built before solve. A grade that
-takes longer than TIMEOUT seconds fails, and the traced program dies with the
-grader.
+Go's asynchronous preemption and collector are switched off. The two ways Go's
+runtime moves to the thread's own stack run untraced until they resume the
+function that entered them: runtime.morestack grows the goroutine's stack or
+preempts it, and runtime.systemstack grows the heap among other bookkeeping.
+All of it is work that is not the solver's, and how much of it runs depends on
+timing and on the heap the program built before solve. A grade that takes
+longer than TIMEOUT seconds fails, and the traced program dies with the grader.
 """
 
 from __future__ import annotations
@@ -430,10 +429,12 @@ def lint(workdir: Path) -> list[str]:
         outside = [path for path in [workdir / "build.rs"] if path.exists()]
     elif (workdir / "go.mod").exists():
         sources = sorted(
-            p for p in workdir.glob("*.go") if not p.name.endswith("_test.go")
+            path for path in workdir.glob("*.go") if not path.name.endswith("_test.go")
         )
         banned = GO_BANNED
-        outside = sorted(p for p in workdir.iterdir() if p.suffix in GO_OUTSIDE)
+        outside = sorted(
+            path for path in workdir.iterdir() if path.suffix in GO_OUTSIDE
+        )
     else:
         sources = sorted([*workdir.glob("*.c"), *workdir.glob("*.h")])
         banned = C_BANNED
