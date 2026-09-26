@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"runtime"
 	"strconv"
 	"strings"
 )
@@ -11,6 +12,12 @@ import (
 type input struct {
 	K   int   `json:"k"`
 	Arr []int `json:"arr"`
+}
+
+// init keeps the main goroutine, and so solve, on the thread the program
+// started on: `make vec` single-steps that one thread.
+func init() {
+	runtime.LockOSThread()
 }
 
 func main() {
