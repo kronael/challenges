@@ -123,11 +123,3 @@ decision) or BY-DESIGN (accepted variance).
   preprocessed C (`cc -E` with the build's flags, system headers dropped), and
   refuse include paths that leave the directory, recipe overrides, and cargo
   config files.
-- **VEC-RBP-COUNTS-AS-STACK** (LOW, grading) — Record-only, not observed in
-  66–68. `STACK` in `scripts/vec_check.py` treats every `%rbp`-based address as
-  the stack, but gcc, clang, and rustc at release settings omit the frame
-  pointer, so `%rbp` can hold a heap pointer whose loads and stores then go
-  uncounted. The loop's general-purpose arithmetic and any scalar
-  floating-point work still count. **Fix:** treat only `%rsp`-based addresses
-  as the stack, after checking what Go, which keeps frame pointers, then
-  counts.

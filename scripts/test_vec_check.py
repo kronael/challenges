@@ -1035,6 +1035,22 @@ class DecodeTests(unittest.TestCase):
             vec_check.Kind.PACKED,
         )
 
+    def test_only_rsp_addresses_the_stack(self) -> None:
+        for mnemonic, operands in (
+            ("mov", "0x0(%rbp,%rax,4),%edx"),
+            ("mov", "%edx,0x8(%rbp)"),
+            ("vmovss", "(%rbp),%xmm0"),
+        ):
+            with self.subTest(mnemonic=mnemonic, operands=operands):
+                self.assertIs(
+                    vec_check.decode(mnemonic, operands, 0x8B).kind,
+                    vec_check.Kind.SCALAR,
+                )
+        self.assertIs(
+            vec_check.decode("mov", "0x10(%rsp),%rax", 0x48).kind,
+            vec_check.Kind.OTHER,
+        )
+
     def test_packed_compare_is_packed(self) -> None:
         self.assertIs(
             vec_check.decode("vcmpgt_oqps", "%ymm2,%ymm1,%ymm1", 0xC5).kind,

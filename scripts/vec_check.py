@@ -24,7 +24,10 @@ per vector rather than once per element. That bookkeeping is what separates C,
 Rust, and Go most; leaving it out lets one budget mean the same thing in all
 three. Packed arithmetic, moves between registers, zeroing a vector register,
 stack accesses, string instructions such as rep movsb, and control flow count
-on neither side.
+on neither side. A stack access is one addressed from %rsp: gcc, clang, and
+rustc release builds use %rbp as a general register that can hold a heap
+pointer, and Go, which keeps %rbp as its frame pointer, addresses its frames
+from %rsp.
 
 The count is divided by the challenge's unit of work, read from the input: the
 length of one array or string, the value of one integer, or the product of
@@ -213,7 +216,7 @@ ELEMENT_ACCESS = re.compile(
     r"|extractps|pbroadcast[bwdq]|broadcasts[sdh]|movddup)$"
 )
 GENERAL_REGISTER = re.compile(r"%(r[a-z0-9]+|e[a-z]{2}|[a-d][lhx]|[sd]il?|[sb]pl?)$")
-STACK = re.compile(r"\(%[re](sp|bp)\b")
+STACK = re.compile(r"\(%[re]sp\b")
 NO_ACCESS = re.compile(r"^(lea|nop|prefetch|j|call|endbr|clflush|clwb)")
 STRING = re.compile(r"^(movs|stos|lods|cmps|scas)[bwlq]?$")
 ZEROING = re.compile(r"^v?(pxor|xorp[sd])$")
