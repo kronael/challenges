@@ -132,20 +132,6 @@ decision) or BY-DESIGN (accepted variance).
 
 ## vec level
 
-- **44-GCC12-LOOP-DISTRIBUTION-MISCOMPILE** (MED, toolchain) — Record-only,
-  reproduced 2026-09-26. gcc 12.2 (Debian 12.2.0-14) at `-O3` miscompiles a
-  row-by-row C `solve` for 44: hint 2's recurrence over rolling rows, where
-  `Y[i][j]` reads `M` and `X` at `[i][j-1]` from the same row. It answers 3 of
-  the 10 small cases wrong (`cases/05.in`: -20 for -24; `cases/10.in`: -31 for
-  -42), and `vec.in` and both large cases too, with or without
-  `-march=x86-64-v3` and with `-fno-tree-loop-vectorize`. It is right at `-O2`,
-  with `-fno-tree-loop-distribution`, under clang 21, and under UBSan and ASan
-  at `-O1`, which points at gcc splitting the row loop in three (hint 5 quotes
-  the report). `c/` builds every target at `-O3 -march=x86-64-v3`, so a correct
-  level-1 `solve` of that shape fails `make test` there under gcc 12.2.
-  **Fix:** owner's call — `-fno-tree-loop-distribution` in the vec C flags, a
-  note in 44's hints, or a newer gcc.
-
 ## Script tests
 
 - **BENCH-TEST-STARTUP-RACE** (LOW, test) — Record-only, seen 2026-09-26 at
