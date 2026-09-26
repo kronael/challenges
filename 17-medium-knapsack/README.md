@@ -90,8 +90,11 @@ make -C go vec
 ```
 
 `make vec` grades the same `x86-64-v3` program that `make test` and
-`make bench` check. The Go directory builds every target with
-`GOEXPERIMENT=simd`, so a Go `solve` may import `simd/archsimd`; its `go.mod`
-requires Go 1.27.1 or newer.
+`make bench` check. A `solve` may use x86 SIMD intrinsics: `<immintrin.h>` in
+C, `std::arch::x86_64` in Rust, and `simd/archsimd` in Go. In Rust, a call to
+one of them is `unsafe` outside a `#[target_feature]` function, and `make vec`
+refuses `#[target_feature]`, so a Rust `solve` makes those calls in an `unsafe`
+block. The Go directory builds every target with `GOEXPERIMENT=simd`, which
+`simd/archsimd` needs; its `go.mod` requires Go 1.27.1 or newer.
 
 Stuck on this level? See `hints/04.md`.

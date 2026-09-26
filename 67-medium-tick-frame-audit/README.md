@@ -120,8 +120,12 @@ All three solver directories build for `x86-64-v3`, the target `make vec`
 grades, and `make test` compiles with the same flags, so both need a machine
 with AVX2, BMI2, and FMA.
 
-The Go solver directory builds with `GOEXPERIMENT=simd`, so a Go `solve` may
-import `simd/archsimd`. Its `go.mod` requires Go 1.27.1 or newer.
+A `solve` may use x86 SIMD intrinsics: `<immintrin.h>` in C,
+`std::arch::x86_64` in Rust, and `simd/archsimd` in Go. In Rust, a call to one
+of them is `unsafe` outside a `#[target_feature]` function, and `make vec`
+refuses `#[target_feature]`, so a Rust `solve` makes those calls in an `unsafe`
+block. The Go solver directory builds with `GOEXPERIMENT=simd`, which
+`simd/archsimd` needs. Its `go.mod` requires Go 1.27.1 or newer.
 
 > No debug prints. Extra stdout breaks the test harness and signals you don't
 > have a mental model yet. Build the model, then write the code.
