@@ -22,11 +22,8 @@ void input_free(Input *in) {
 }
 
 Answer solve(const Input *in) {
-	// Two rows: each item reads `best`, the row before it, and writes `next`, so
-	// no cell the loop reads is one it has written, and every update is the same
-	// branch-free max over consecutive cells. gcc and clang both make the inner
-	// loop four 64-bit lanes wide: vpaddq, vpcmpgtq, and vpblendvb or vblendvpd.
-	// Budgets under the item's weight cannot take it and copy across unchanged.
+	// Each item reads the row best and writes next, so the vectorizer has no
+	// overlap to check. Budgets below the item's weight copy across.
 	const size_t cap = (size_t)in->capacity;
 	long long *best = (long long *)xcalloc(cap + 1, sizeof *best);
 	long long *next = (long long *)xmalloc((cap + 1) * sizeof *next);
