@@ -147,14 +147,3 @@ decision) or BY-DESIGN (accepted variance).
   floating-point work still count. **Fix:** treat only `%rsp`-based addresses
   as the stack, after checking what Go, which keeps frame pointers, then
   counts.
-
-## Script tests
-
-- **BENCH-TEST-STARTUP-RACE** (LOW, test) — Record-only, seen 2026-09-26 at
-  load average 12; both pass when rerun alone. The two `RunTests` cases in
-  `scripts/test_bench.py` run a child Python under `bench.run` with a 0.1 s
-  timeout, and the child must start, spawn its grandchild, and write
-  `child.pid` inside it. Under load `bench.run` kills the child first, and the
-  test errors with `FileNotFoundError` on `child.pid`. **Fix:** a timeout that
-  covers interpreter start-up, with the 2.8 s bound in
-  `test_timeout_does_not_wait_for_escaped_stderr_holder` raised to match.

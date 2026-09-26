@@ -34,7 +34,7 @@ import time
 from pathlib import Path
 
 child = subprocess.Popen(
-    [sys.executable, "-c", "import time; time.sleep(3)"],
+    [sys.executable, "-c", "import time; time.sleep(8)"],
     start_new_session=True,
 )
 Path(sys.argv[1]).write_text(str(child.pid), encoding="utf-8")
@@ -47,14 +47,14 @@ time.sleep(10)
                 temp_dir,
                 input_path,
                 output_path,
-                0.1,
+                2,
             )
             elapsed = time.monotonic() - started
             child_pid = int(pid_path.read_text(encoding="utf-8"))
             self.addCleanup(self.stop_process, child_pid)
 
             self.assertTrue(result.timed_out)
-            self.assertLess(elapsed, 2.8)
+            self.assertLess(elapsed, 5.5)
 
     def test_early_nonzero_exit_is_not_a_timeout(self) -> None:
         with tempfile.TemporaryDirectory(dir=bench.TMP) as raw_dir:
@@ -69,7 +69,7 @@ import sys
 from pathlib import Path
 
 child = subprocess.Popen(
-    [sys.executable, "-c", "import time; time.sleep(0.6)"],
+    [sys.executable, "-c", "import time; time.sleep(4)"],
     start_new_session=True,
 )
 Path(sys.argv[1]).write_text(str(child.pid), encoding="utf-8")
@@ -80,7 +80,7 @@ raise SystemExit(7)
                 temp_dir,
                 input_path,
                 output_path,
-                0.1,
+                2,
             )
             child_pid = int(pid_path.read_text(encoding="utf-8"))
             self.addCleanup(self.stop_process, child_pid)
