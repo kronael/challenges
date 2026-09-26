@@ -4,16 +4,17 @@
 #include "harness.h"
 #include "json.h"
 
+#include <stdint.h>
 #include <stdio.h>
 
 typedef struct {
 	int k;
-	long long *arr;
+	int32_t *arr;
 	size_t arr_len;
 } Input;
 
 typedef struct {
-	long long *v;
+	int32_t *v;
 	size_t n;
 } Answer;
 

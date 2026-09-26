@@ -6,9 +6,9 @@ void input_parse(const JsonValue *root, Input *in) {
 	in->k = (int)json_int(json_get(root, "k"));
 	const JsonValue *arr = json_get(root, "arr");
 	in->arr_len = json_len(arr);
-	in->arr = (long long *)xmalloc(in->arr_len * sizeof *in->arr);
+	in->arr = (int32_t *)xmalloc(in->arr_len * sizeof *in->arr);
 	for (size_t i = 0; i < in->arr_len; i++) {
-		in->arr[i] = json_int(json_at(arr, i));
+		in->arr[i] = (int32_t)json_int(json_at(arr, i));
 	}
 }
 
@@ -29,7 +29,7 @@ void answer_print(FILE *out, const Answer *a) {
 		if (i > 0) {
 			fputc(' ', out);
 		}
-		fprintf(out, "%lld", a->v[i]);
+		fprintf(out, "%d", a->v[i]);
 	}
 	fputc('\n', out);
 }
