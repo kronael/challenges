@@ -1,6 +1,6 @@
-# `make vec`: check this directory's x86-64-v3 build on every ../cases fixture,
-# then trace solve on VEC_INPUT with scripts/vec_check.py, whose docstring
-# states the grade.
+# `make vec`: check this directory's x86-64-v3 build on every ../cases fixture
+# and on VEC_INPUT, then trace solve on VEC_INPUT with scripts/vec_check.py,
+# whose docstring states the grade.
 #
 # The including Makefile sets VEC_EXPECT := vectorized | scalar. The
 # challenge's own vec.mk sets VEC_INPUT and VEC_UNITS, the unit of work: an
@@ -26,7 +26,7 @@ endif
 
 .PHONY: vec
 vec: $(VEC_BUILD)
-	@for f in ../cases/*.in; do \
+	@for f in ../cases/*.in $(VEC_INPUT); do \
 	  $(VEC_BIN) < "$$f" | cmp -s - "$${f%.in}.out" \
 	    || { echo "  $(VEC_BIN) printed the wrong answer for $$f"; exit 1; }; \
 	done
