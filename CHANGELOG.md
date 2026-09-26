@@ -46,10 +46,12 @@ All notable changes to this challenge bench are recorded here.
   longer outlives the grader.
 - `make vec` says when the system does not permit ptrace, instead of that the
   program could not start.
-- `make vec` no longer counts the Go runtime growing a goroutine's stack or
-  preempting it: `runtime.morestack` runs untraced. A Go solve that makes a
-  call per vector graded 6.7 to 8.7 scalar instructions per element across
-  identical runs, and now grades 0.13 every time.
+- Go grades are deterministic: `make vec` no longer counts the runtime growing
+  a goroutine's stack, preempting it, or growing the heap, since
+  `runtime.morestack` and `runtime.systemstack` run untraced. A Go solve that
+  makes a call per vector graded 6.7 to 8.7 scalar instructions per element
+  across identical runs and now grades 0.13 every time; one that allocates its
+  output graded 0.15 to 0.48 and now grades 0.02.
 - `make vec` counts a scalar int-to-float convert from memory and a scalar
   compare with an `_oq`-style predicate as scalar, not packed.
 - `make vec` passes the traced program's stderr through and names its exit
