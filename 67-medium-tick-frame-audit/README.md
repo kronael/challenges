@@ -30,7 +30,7 @@ Report two numbers:
 - `clean` — how many frames are clean
 - `stray` — how many stray bytes the whole stream holds
 
-## Two gates
+## Two levels
 
 `make test` checks the answer against `cases/`.
 
@@ -58,7 +58,7 @@ the first AVX-512 instruction the program itself runs. `solve` must run on one
 thread: `make vec` stops when it starts a thread, a process, or a goroutine. It
 needs Linux, `ptrace`, and `objdump`.
 
-Both gates must pass. There are no large cases and no timing gate: `make bench`
+Both levels must pass. There are no large cases and no level 2: `make bench`
 has nothing to run here.
 
 ## Constraints

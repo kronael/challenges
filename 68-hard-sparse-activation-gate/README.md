@@ -18,7 +18,7 @@ A score equal to the threshold is not kept.
 Report the kept scores in the order they appear in `scores`, one after
 another, and nothing else.
 
-## Two gates
+## Two levels
 
 `make test` checks the answer against `cases/`.
 
@@ -46,7 +46,7 @@ the first AVX-512 instruction the program itself runs. `solve` must run on one
 thread: `make vec` stops when it starts a thread, a process, or a goroutine. It
 needs Linux, `ptrace`, and `objdump`.
 
-Both gates must pass. There are no large cases and no timing gate: `make bench`
+Both levels must pass. There are no large cases and no level 2: `make bench`
 has nothing to run here.
 
 ## Constraints
