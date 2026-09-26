@@ -153,10 +153,12 @@ the four solver dirs.
 Three levels: `make test` (correct), `make bench` (fast), `make vec`
 (vectorized; C, Rust, and Go only). io 13, 17, 44, and 46 have all three. A
 challenge with `make vec` has a root `vec.mk` naming the traced fixture, a C
-`golden/`, and solver Makefiles that include `shared/vec.mk`. Every target of
-those solver directories builds for `x86-64-v3`, so `make test`, `make bench`,
-and `make vec` check one program. How it grades:
-`shared/vec.mk`'s header and the `scripts/vec_check.py` docstring.
+`golden/`, and solver Makefiles that include `shared/vec.mk`. The fixture is a
+tracked root `vec.in`/`vec.out` pair in 13, 17, 44, and 46, and one of the
+`cases/` pairs in 66–68. Every target of those solver directories builds for
+`x86-64-v3`, so `make test`, `make bench`, and `make vec` check one program.
+How it grades: `shared/vec.mk`'s header and the `scripts/vec_check.py`
+docstring.
 
 ## Layout
 
@@ -168,6 +170,8 @@ NN-level-slug/
   README.md              problem statement, constraints, I/O, examples
   hints/                 01.md, 02.md, … — one spoiler per file, sources last
   cases/                 tracked small NN.in / NN.out fixtures (io only)
+  vec.mk                 make vec's traced fixture and unit of work (vec level only)
+  vec.in · vec.out       traced fixture outside cases/ (13, 17, 44, 46)
   golden/  main.py · test_solution.py · Makefile · pyproject.toml   (fast reference; C if vec level)
   rotten/  main.py · test_solution.py · Makefile · pyproject.toml   (naive trap: passes test, fails bench)
   python/  main.py · test_solution.py · Makefile
