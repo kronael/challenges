@@ -1,19 +1,15 @@
-.PHONY: all test bench regen help
-all: test
+# -O3 -march=x86-64-v3 is the target `make vec` grades, and `make vec` traces the
+# ./main this builds, so the fixture suite and the grade check one build.
+CFLAGS := -std=c11 -O3 -march=x86-64-v3 -g -Wall -Wextra
 
-test:
-	uv run --with pytest pytest -v
+VEC_EXPECT := vectorized
 
-bench:
-	uv run python ../../scripts/bench.py --timeout "$${TIMEOUT:-10}" -- uv run python main.py
+include ../../shared/c/io.mk
+include ../../shared/vec.mk
 
-regen:
-	@for f in ../cases/[0-9]*.in; do \
-	  uv run python main.py < "$$f" > "$${f%.in}.out"; \
+.PHONY: regen
+regen: build
+	@for f in ../cases/[0-9]*.in ../vec.in; do \
+	  ./main < "$$f" > "$${f%.in}.out"; \
 	  echo "  $$(basename $$f) → done"; \
 	done
-
-help:
-	@echo "test   — verify golden passes all cases"
-	@echo "bench  — check output and time golden on large cases (the target to beat)"
-	@echo "regen  — regenerate .out files from golden"
