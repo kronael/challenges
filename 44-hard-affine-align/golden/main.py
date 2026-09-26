@@ -59,10 +59,10 @@ def solve(s, t):
             if prev_y[j - 1] > best_prev:
                 best_prev = prev_y[j - 1]
             cur_m[j] = best_prev + row[ti[j - 1]]
-            open_x = prev_m[j] - GAP_OPEN
+            open_x = max(prev_m[j], prev_y[j]) - GAP_OPEN
             ext_x = prev_x[j] - GAP_EXTEND
             cur_x[j] = open_x if open_x > ext_x else ext_x
-            open_y = cur_m[j - 1] - GAP_OPEN
+            open_y = max(cur_m[j - 1], cur_x[j - 1]) - GAP_OPEN
             ext_y = cur_y[j - 1] - GAP_EXTEND
             cur_y[j] = open_y if open_y > ext_y else ext_y
         prev_m, prev_x, prev_y = cur_m, cur_x, cur_y
