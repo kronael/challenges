@@ -25,8 +25,9 @@ out lets one budget mean the same thing in all three. Packed arithmetic, moves
 between registers, stack accesses, string instructions such as rep movsb, and
 control flow count on neither side.
 
-The count is divided by the length of one array in the input, the challenge's
-unit of work. A function is vectorized when it retires fewer than BUDGET
+The count is divided by the challenge's unit of work, read from the input: the
+length of one array or string, the value of one integer, or the product of
+several, written a*b. A function is vectorized when it retires fewer than BUDGET
 scalar instructions per unit and at least PACKED_FLOOR packed ones. Any scalar
 pass over the input costs at least one per unit however many vector loops run
 beside it: a load or a floating-point add per element. Setup, a remainder
@@ -55,6 +56,7 @@ import argparse
 import ctypes
 import enum
 import json
+import math
 import os
 import re
 import signal
@@ -450,9 +452,15 @@ def lint(workdir: Path) -> list[str]:
     return problems
 
 
-def count_units(input_path: Path, key: str) -> int:
-    value = json.loads(input_path.read_text(encoding="utf-8"))[key]
+def size(value: int | str | list[object]) -> int:
+    if isinstance(value, int):
+        return value
     return len(value.encode() if isinstance(value, str) else value)
+
+
+def count_units(input_path: Path, units: str) -> int:
+    fields = json.loads(input_path.read_text(encoding="utf-8"))
+    return math.prod(size(fields[key]) for key in units.split("*"))
 
 
 def run(binary: Path, function: str, input_path: Path, scalar_limit: float) -> Count:
@@ -493,7 +501,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--units",
         required=True,
-        help="the input field whose length is the unit of work",
+        help="the unit of work: an input field's length or integer value, or a*b",
     )
     parser.add_argument("--expect", choices=("vectorized", "scalar"), required=True)
     parser.add_argument("--sources", type=Path, default=Path.cwd())

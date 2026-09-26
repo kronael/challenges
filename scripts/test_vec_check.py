@@ -551,6 +551,26 @@ class LintTests(unittest.TestCase):
         )
 
 
+class UnitTests(unittest.TestCase):
+    def count(self, fields: dict[str, object], units: str) -> int:
+        with tempfile.TemporaryDirectory() as raw_dir:
+            path = Path(raw_dir) / "input.json"
+            path.write_text(json.dumps(fields), encoding="utf-8")
+            return vec_check.count_units(path, units)
+
+    def test_array_counts_its_elements_and_string_its_bytes(self) -> None:
+        self.assertEqual(self.count({"x": [5, 6, 7]}, "x"), 3)
+        self.assertEqual(self.count({"s": "ACGT"}, "s"), 4)
+
+    def test_integer_counts_its_value(self) -> None:
+        self.assertEqual(self.count({"capacity": 2000}, "capacity"), 2000)
+
+    def test_product_multiplies_every_factor(self) -> None:
+        fields = {"items": [{}, {}, {}], "capacity": 2000, "s": "AR", "t": "NDC"}
+        self.assertEqual(self.count(fields, "items*capacity"), 6000)
+        self.assertEqual(self.count(fields, "s*t"), 6)
+
+
 class DecodeTests(unittest.TestCase):
     def test_scalar_float_in_objdump_spellings_is_scalar(self) -> None:
         for mnemonic, operands in (
