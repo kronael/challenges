@@ -12,7 +12,7 @@ VEC_EXPECT := vectorized
 all: fmt build lint test
 
 build:
-	go build -o /tmp/$(MOD_NAME)-build .
+	go build -o $(MOD_NAME) .
 
 fmt:
 	gofmt -w .
@@ -26,7 +26,7 @@ test: build check
 	go test -v ./...
 
 clean:
-	rm -f $(MOD_NAME) $(MOD_NAME).exe /tmp/$(MOD_NAME)-build
+	rm -f $(MOD_NAME) $(MOD_NAME).exe
 
 help:
 	@echo "clean  — remove built binaries"

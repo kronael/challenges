@@ -1,7 +1,6 @@
 .PHONY: all build fmt lint check test bench clean help
 TIMEOUT  ?= 5
 MOD_NAME := $(shell awk '/^module/{print $$2}' go.mod)
-BIN      := /tmp/$(MOD_NAME)-bench
 
 # simd/archsimd exists only under GOEXPERIMENT=simd, and GOAMD64=v3 is the
 # x86-64-v3 target `make vec` grades. Every target builds with both, so
@@ -14,7 +13,7 @@ VEC_EXPECT := vectorized
 all: fmt build lint test
 
 build:
-	go build -o /tmp/$(MOD_NAME)-build .
+	go build -o $(MOD_NAME) .
 
 fmt:
 	gofmt -w .
@@ -28,11 +27,10 @@ test: build check
 	go test -v ./...
 
 bench: build
-	go build -o $(BIN) .
-	python3 ../../scripts/bench.py --timeout "$(TIMEOUT)" -- $(BIN)
+	python3 ../../scripts/bench.py --timeout "$(TIMEOUT)" -- ./$(MOD_NAME)
 
 clean:
-	rm -f $(MOD_NAME) $(MOD_NAME).exe /tmp/$(MOD_NAME)-build /tmp/$(MOD_NAME)-bench
+	rm -f $(MOD_NAME) $(MOD_NAME).exe
 
 help:
 	@echo "clean  — remove built binaries"

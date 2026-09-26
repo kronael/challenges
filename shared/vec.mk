@@ -13,7 +13,7 @@ ifneq ($(wildcard Cargo.toml),)
 VEC_BIN  := target/release/$(BIN_NAME)
 VEC_FUNC := solve
 else ifneq ($(wildcard go.mod),)
-VEC_BIN  := /tmp/$(MOD_NAME)-build
+VEC_BIN  := ./$(MOD_NAME)
 VEC_FUNC := main.solve
 else
 VEC_BIN  := ./main

@@ -336,12 +336,37 @@ pub fn solve(x: &[i32]) -> i64 {
     }
 }
 """
+RUST_CARGO = '[package]\nname = "probe"\nversion = "0.1.0"\nedition = "2021"\n'
 RUST_TEST = """
 #[test]
 fn sums() {
     assert_eq!(probe::solve(&[1, 2, 3]), 6);
 }
 """
+
+
+def lay_out(root: Path, language: str, files: dict[str, str]) -> Path:
+    """Lay out a vec challenge under root beside links to shared/ and scripts/,
+    with 68's Makefile for language, and return its solver directory. files maps
+    paths in the challenge to their text; cases/01.in, N zeros in x, is the
+    fixture make vec traces."""
+    challenge = root / "99-medium-probe"
+    workdir = challenge / language
+    workdir.mkdir(parents=True)
+    for name in ("shared", "scripts"):
+        (root / name).symlink_to(ROOT / name)
+    (challenge / "vec.mk").write_text(
+        "VEC_INPUT := ../cases/01.in\nVEC_UNITS := x\n", encoding="utf-8"
+    )
+    files = {"cases/01.in": json.dumps({"x": [0] * N}), **files}
+    for name, text in files.items():
+        (challenge / name).parent.mkdir(parents=True, exist_ok=True)
+        (challenge / name).write_text(text, encoding="utf-8")
+    shutil.copy(
+        ROOT / f"68-hard-sparse-activation-gate/{language}/Makefile",
+        workdir / "Makefile",
+    )
+    return workdir
 
 
 def grade(
@@ -510,6 +535,24 @@ class GoTests(unittest.TestCase):
         self.assertEqual(done.returncode, 1)
         self.assertIn("solve started a thread", done.stderr)
 
+    def test_build_and_grade_stay_in_the_solver_directory(self) -> None:
+        with tempfile.TemporaryDirectory() as raw_dir:
+            workdir = lay_out(
+                Path(raw_dir),
+                "go",
+                {
+                    "go/go.mod": GO_MOD,
+                    "go/main.go": GO_MAIN,
+                    "go/solution.go": GO_LANES,
+                    "cases/01.out": "0\n",
+                },
+            )
+            done = subprocess.run(
+                ["make", "vec"], cwd=workdir, capture_output=True, text=True
+            )
+            self.assertEqual(done.returncode, 0, done.stdout + done.stderr)
+            self.assertTrue((workdir / "probe").is_file())
+
     def test_assembly_file_is_refused(self) -> None:
         with tempfile.TemporaryDirectory() as raw_dir:
             workdir = Path(raw_dir)
@@ -527,23 +570,14 @@ class RustBuildTests(unittest.TestCase):
         """A branch taken only under AVX2 must fail `make test`, because the
         grade traces a build with AVX2 enabled."""
         with tempfile.TemporaryDirectory() as raw_dir:
-            challenge = Path(raw_dir) / "99-medium-probe"
-            crate = challenge / "rust"
-            (crate / "src").mkdir(parents=True)
-            (crate / "tests").mkdir()
-            (Path(raw_dir) / "shared").symlink_to(ROOT / "shared")
-            (challenge / "vec.mk").write_text(
-                "VEC_INPUT := none\nVEC_UNITS := x\n", encoding="utf-8"
-            )
-            (crate / "Cargo.toml").write_text(
-                '[package]\nname = "probe"\nversion = "0.1.0"\nedition = "2021"\n',
-                encoding="utf-8",
-            )
-            (crate / "src/lib.rs").write_text(RUST_CFG_SPLIT, encoding="utf-8")
-            (crate / "tests/sums.rs").write_text(RUST_TEST, encoding="utf-8")
-            shutil.copy(
-                ROOT / "68-hard-sparse-activation-gate/rust/Makefile",
-                crate / "Makefile",
+            crate = lay_out(
+                Path(raw_dir),
+                "rust",
+                {
+                    "rust/Cargo.toml": RUST_CARGO,
+                    "rust/src/lib.rs": RUST_CFG_SPLIT,
+                    "rust/tests/sums.rs": RUST_TEST,
+                },
             )
             done = subprocess.run(
                 ["make", "test"], cwd=crate, capture_output=True, text=True
