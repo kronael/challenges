@@ -34,7 +34,7 @@ Answer solve(const Input *in) {
 		}
 	}
 
-	Answer a = { kept, k };
+	Answer a = {kept, k};
 	return a;
 }
 

@@ -20,7 +20,7 @@ void input_free(Input *in) {
 
 Answer solve(const Input *in) {
 	(void)in;
-	Answer a = { NULL, 0 };
+	Answer a = {NULL, 0};
 	return a;
 }
 
