@@ -2,9 +2,9 @@
 TIMEOUT  ?= 5
 BIN_NAME := $(shell grep '^name' Cargo.toml | head -1 | sed 's/.*= *"\(.*\)"/\1/')
 
-# Every target builds in release for x86-64-v3, the target `make vec` grades,
-# so `make test`, `make bench`, and `make vec` check one program.
-export RUSTFLAGS := -C target-cpu=x86-64-v3
+# Every target builds in release with the flags shared/vec.mk sets, the
+# flags `make vec` grades, so `make test`, `make bench`, and `make vec` check
+# one program.
 
 VEC_EXPECT := vectorized
 

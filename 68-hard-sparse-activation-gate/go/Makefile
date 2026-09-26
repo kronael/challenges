@@ -2,10 +2,8 @@
 MOD_NAME := $(shell awk '/^module/{print $$2}' go.mod)
 
 # simd/archsimd exists only under GOEXPERIMENT=simd, and GOAMD64=v3 is the
-# x86-64-v3 target `make vec` grades. `go test` and `go build` both see the two,
-# and `make vec` traces the binary `build` writes.
-export GOEXPERIMENT := simd
-export GOAMD64 := v3
+# x86-64-v3 target `make vec` grades. shared/vec.mk sets both, so `go test` and
+# `go build` both see the two, and `make vec` traces the binary `build` writes.
 
 VEC_EXPECT := vectorized
 

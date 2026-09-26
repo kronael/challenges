@@ -2,23 +2,42 @@
 # VEC_INPUT, then trace solve on VEC_INPUT with scripts/vec_check.py, whose
 # docstring states the grade.
 #
-# The including Makefile builds every target for x86-64-v3 and sets
-# VEC_EXPECT := vectorized | scalar. The challenge's own vec.mk sets VEC_INPUT
-# and VEC_UNITS, the unit of work: an input field's length or integer value, or
-# a product a*b.
+# This file sets the flags every target of the including Makefile builds with,
+# so `make test`, `make bench`, and `make vec` check one program: x86-64-v3,
+# with simd/archsimd for Go, line tables for Rust, and -O3 for C, where io.mk's
+# -O2 pins -fvect-cost-model=very-cheap, which declines any loop whose trip
+# count is not a known multiple of the vector width. override outranks the
+# including Makefile and the command line, so a flag a solver adds there does
+# not reach the build the grade traces.
+#
+# The including Makefile sets VEC_EXPECT := vectorized | scalar. The challenge's
+# own vec.mk sets VEC_INPUT and VEC_UNITS, the unit of work: an input field's
+# length or integer value, or a product a*b, and may set VEC_CFLAGS, flags its C
+# build adds.
 
 include ../vec.mk
 
 ifneq ($(wildcard Cargo.toml),)
 VEC_BIN  := target/release/$(BIN_NAME)
 VEC_FUNC := solve
-export CARGO_PROFILE_RELEASE_DEBUG := line-tables-only
+override RUSTFLAGS := -C target-cpu=x86-64-v3
+override CARGO_PROFILE_RELEASE_DEBUG := line-tables-only
+export RUSTFLAGS CARGO_PROFILE_RELEASE_DEBUG
+unexport CARGO_ENCODED_RUSTFLAGS
 else ifneq ($(wildcard go.mod),)
 VEC_BIN  := ./$(MOD_NAME)
 VEC_FUNC := main.solve
+override GOAMD64 := v3
+override GOEXPERIMENT := simd
+override GOFLAGS :=
+export GOAMD64 GOEXPERIMENT GOFLAGS
 else
 VEC_BIN  := ./main
 VEC_FUNC := solve
+override CC := $(firstword $(CC))
+override CFLAGS := -std=c11 -O3 -march=x86-64-v3 -g -Wall -Wextra $(VEC_CFLAGS)
+override CPPFLAGS :=
+override LDLIBS :=
 
 help::
 	@echo "vec    — trace solve on one fixture and check its work runs in packed lanes"

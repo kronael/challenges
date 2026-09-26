@@ -388,6 +388,26 @@ pub fn solve(x: &[i32]) -> i64 {
     }
 }
 """
+# Stays scalar: each add waits on the last, unless the vectorizer is told to
+# reorder them.
+RUST_SUM = """
+#[no_mangle]
+pub fn solve(x: &[f64]) -> f64 {
+    let mut s = 0.0;
+    for &v in x {
+        s += v;
+    }
+    s
+}
+"""
+RUST_SUM_MAIN = (
+    """
+fn main() {
+    println!("{}", probe::solve(&vec![0.0; %d]));
+}
+"""
+    % N
+)
 RUST_CARGO = '[package]\nname = "probe"\nversion = "0.1.0"\nedition = "2021"\n'
 RUST_TEST = """
 #[test]
@@ -521,9 +541,7 @@ class CTests(unittest.TestCase):
             workdir = Path(raw_dir)
             binary = self.build(workdir, SCALE_MAIN, FIRST_CALL).resolve()
             (workdir / "input.json").write_text("{}", encoding="utf-8")
-            count = vec_check.run(
-                binary, "solve", workdir / "input.json", float("inf")
-            )
+            count = vec_check.run(binary, "solve", workdir / "input.json", float("inf"))
             self.assertLess(count.scalar, 50)
 
     def test_trace_stops_at_the_step_limit_whatever_the_clock(self) -> None:
@@ -552,7 +570,9 @@ class CTests(unittest.TestCase):
 
 
 class CMakeTests(unittest.TestCase):
-    def vec(self, source: str, makefile: str = "") -> subprocess.CompletedProcess[str]:
+    def vec(
+        self, source: str, makefile: str = "", *args: str
+    ) -> subprocess.CompletedProcess[str]:
         with tempfile.TemporaryDirectory() as raw_dir:
             workdir = lay_out(
                 Path(raw_dir),
@@ -566,17 +586,30 @@ class CMakeTests(unittest.TestCase):
             with (workdir / "Makefile").open("a", encoding="utf-8") as extra:
                 extra.write(makefile)
             return subprocess.run(
-                ["make", "vec"], cwd=workdir, capture_output=True, text=True
+                ["make", "vec", *args], cwd=workdir, capture_output=True, text=True
             )
 
     def test_a_scalar_verdict_names_the_lines_that_ran_scalar(self) -> None:
         done = self.vec(C_SUM)
         self.assertEqual(done.returncode, 2, done.stdout + done.stderr)
         self.assertIn("-> scalar  EXPECTED vectorized", done.stdout)
-        loop = (C_SCAFFOLD + C_SUM).splitlines().index(
-            "    for (size_t i = 0; i < in->n; i++) s += in->x[i];"
+        loop = (
+            (C_SCAFFOLD + C_SUM)
+            .splitlines()
+            .index("    for (size_t i = 0; i < in->n; i++) s += in->x[i];")
         )
         self.assertRegex(done.stdout, rf"\n +[\d,]+  solution\.c:{loop + 1} solve\n")
+
+    def test_flags_a_solver_adds_do_not_reach_the_grade(self) -> None:
+        for makefile, args in (
+            ("CFLAGS += -ffast-math\n", []),
+            ("CC := cc -ffast-math\n", []),
+            ("", ["CFLAGS=-std=c11 -O3 -march=x86-64-v3 -g -ffast-math"]),
+        ):
+            with self.subTest(makefile=makefile, args=args):
+                done = self.vec(C_SUM, makefile, *args)
+                self.assertEqual(done.returncode, 2, done.stdout + done.stderr)
+                self.assertIn("-> scalar  EXPECTED vectorized", done.stdout)
 
     def test_a_crash_is_reported_as_a_crash(self) -> None:
         done = self.vec(C_CRASH)
@@ -693,6 +726,29 @@ class RustBuildTests(unittest.TestCase):
             )
             self.assertNotEqual(done.returncode, 0, done.stdout + done.stderr)
             self.assertIn("left: 7", done.stdout + done.stderr)
+
+    def test_rustflags_a_solver_adds_do_not_reach_the_grade(self) -> None:
+        with tempfile.TemporaryDirectory() as raw_dir:
+            crate = lay_out(
+                Path(raw_dir),
+                "rust",
+                {
+                    "rust/Cargo.toml": RUST_CARGO,
+                    "rust/src/lib.rs": RUST_SUM,
+                    "rust/src/main.rs": RUST_SUM_MAIN,
+                    "cases/01.out": "0\n",
+                },
+            )
+            with (crate / "Makefile").open("a", encoding="utf-8") as extra:
+                extra.write(
+                    "export RUSTFLAGS := -C target-cpu=x86-64-v3"
+                    " -C llvm-args=-force-vector-width=4\n"
+                )
+            done = subprocess.run(
+                ["make", "vec"], cwd=crate, capture_output=True, text=True
+            )
+            self.assertEqual(done.returncode, 2, done.stdout + done.stderr)
+            self.assertIn("-> scalar  EXPECTED vectorized", done.stdout)
 
 
 class HelpTests(unittest.TestCase):

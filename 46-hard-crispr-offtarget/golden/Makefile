@@ -1,6 +1,5 @@
-# -O3 -march=x86-64-v3 is the target `make vec` grades, and `make vec` traces the
+# shared/vec.mk sets the flags `make vec` grades, and `make vec` traces the
 # ./main this builds, so the fixture suite and the grade check one build.
-CFLAGS := -std=c11 -O3 -march=x86-64-v3 -g -Wall -Wextra
 
 VEC_EXPECT := vectorized
 

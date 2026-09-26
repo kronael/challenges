@@ -3,10 +3,8 @@ TIMEOUT  ?= 5
 MOD_NAME := $(shell awk '/^module/{print $$2}' go.mod)
 
 # simd/archsimd exists only under GOEXPERIMENT=simd, and GOAMD64=v3 is the
-# x86-64-v3 target `make vec` grades. Every target builds with both, so
-# `make test`, `make bench`, and `make vec` check one program.
-export GOEXPERIMENT := simd
-export GOAMD64 := v3
+# x86-64-v3 target `make vec` grades. shared/vec.mk sets both for every
+# target, so `make test`, `make bench`, and `make vec` check one program.
 
 VEC_EXPECT := vectorized
 

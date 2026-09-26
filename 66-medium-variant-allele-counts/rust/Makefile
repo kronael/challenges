@@ -1,10 +1,10 @@
 .PHONY: all build fmt lint check test clean help
 BIN_NAME := $(shell grep '^name' Cargo.toml | head -1 | sed 's/.*= *"\(.*\)"/\1/')
 
-# `make test` and `make vec` check one build: both compile in release for
-# x86-64-v3, the target `make vec` grades, so code behind cfg(target_feature)
-# cannot differ between what the tests check and what the grade traces.
-export RUSTFLAGS := -C target-cpu=x86-64-v3
+# `make test` and `make vec` check one build: shared/vec.mk compiles both in
+# release for x86-64-v3, the target `make vec` grades, so code behind
+# cfg(target_feature) cannot differ between what the tests check and what the
+# grade traces.
 
 VEC_EXPECT := vectorized
 
