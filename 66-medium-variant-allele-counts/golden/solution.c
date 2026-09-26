@@ -54,10 +54,13 @@ Answer solve(const Input *in) {
 	for (; i + 8 <= n; i += 8) {
 		const __m256i d = _mm256_loadu_si256((const __m256i *)(depth + i));
 		const __m256i q = _mm256_loadu_si256((const __m256i *)(quality + i));
-		const __m256i keep = _mm256_and_si256(_mm256_cmpgt_epi32(d, dmin), _mm256_cmpgt_epi32(q, qmin));
+		const __m256i keep =
+		    _mm256_and_si256(_mm256_cmpgt_epi32(d, dmin), _mm256_cmpgt_epi32(q, qmin));
 		kept = _mm256_sub_epi32(kept, keep);
-		const __m256d keep_lo = _mm256_castsi256_pd(_mm256_cvtepi32_epi64(_mm256_castsi256_si128(keep)));
-		const __m256d keep_hi = _mm256_castsi256_pd(_mm256_cvtepi32_epi64(_mm256_extracti128_si256(keep, 1)));
+		const __m256d keep_lo =
+		    _mm256_castsi256_pd(_mm256_cvtepi32_epi64(_mm256_castsi256_si128(keep)));
+		const __m256d keep_hi =
+		    _mm256_castsi256_pd(_mm256_cvtepi32_epi64(_mm256_extracti128_si256(keep, 1)));
 		lo = _mm256_add_pd(lo, _mm256_and_pd(keep_lo, _mm256_loadu_pd(dosage + i)));
 		hi = _mm256_add_pd(hi, _mm256_and_pd(keep_hi, _mm256_loadu_pd(dosage + i + 4)));
 	}
