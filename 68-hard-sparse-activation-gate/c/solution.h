@@ -8,7 +8,7 @@
 #include <stdio.h>
 
 typedef struct {
-	int32_t *score; // one entry per activation, in batch order
+	int32_t *scores; // one entry per activation, in batch order
 	size_t n;
 	int32_t threshold;
 } Input;
