@@ -42,10 +42,10 @@ All notable changes to this challenge bench are recorded here.
   function.
 - `make vec` gives up after 60 seconds. It used to single-step a `solve` that
   never returned for 400 instructions per input element before failing, and
-  wait for ever on a program that hung outside `solve`. The traced program no
+  wait forever on a program that hung outside `solve`. The traced program no
   longer outlives the grader.
-- `make vec` says when the system does not permit ptrace, instead of that the
-  program could not start.
+- `make vec` says when the system does not permit ptrace, instead of saying
+  that the program could not start.
 - Go grades are deterministic: `make vec` no longer counts the runtime growing
   a goroutine's stack, preempting it, or growing the heap, since
   `runtime.morestack` and `runtime.systemstack` run untraced. A Go solve that
