@@ -151,6 +151,40 @@ long solve(const int *restrict x, int *restrict out, long n, int t) {
 }
 """
 
+# A C solver directory that make builds with shared/c/: it reads x and prints
+# the sum solve returns.
+C_HEADER = """
+#include "harness.h"
+#include "json.h"
+#include <stdio.h>
+typedef struct { double *x; size_t n; } Input;
+typedef struct { double sum; } Answer;
+void input_parse(const JsonValue *root, Input *in);
+void input_free(Input *in);
+Answer solve(const Input *in);
+void answer_print(FILE *out, const Answer *a);
+void answer_free(Answer *a);
+"""
+C_SCAFFOLD = """
+#include "solution.h"
+#include <stdlib.h>
+void input_parse(const JsonValue *root, Input *in) {
+    const JsonValue *x = json_get(root, "x");
+    in->n = json_len(x);
+    in->x = xmalloc(in->n * sizeof *in->x);
+    for (size_t i = 0; i < in->n; i++) in->x[i] = json_num(json_at(x, i));
+}
+void input_free(Input *in) { free(in->x); }
+void answer_print(FILE *out, const Answer *a) { fprintf(out, "%.1f\\n", a->sum); }
+void answer_free(Answer *a) { (void)a; }
+"""
+
+C_CRASH = """
+Answer solve(const Input *in) {
+    return (Answer){in->x[0] + *(volatile double *)0};
+}
+"""
+
 GO_MOD = "module probe\n\ngo 1.27.1\n"
 GO_MAIN = (
     """package main
@@ -473,6 +507,30 @@ class CTests(unittest.TestCase):
             self.assertNotEqual(
                 grade(workdir, workdir / "prog", "solve", "scalar").returncode, 0
             )
+
+
+class CMakeTests(unittest.TestCase):
+    def vec(self, source: str, makefile: str = "") -> subprocess.CompletedProcess[str]:
+        with tempfile.TemporaryDirectory() as raw_dir:
+            workdir = lay_out(
+                Path(raw_dir),
+                "c",
+                {
+                    "c/solution.h": C_HEADER,
+                    "c/solution.c": C_SCAFFOLD + source,
+                    "cases/01.out": "0.0\n",
+                },
+            )
+            with (workdir / "Makefile").open("a", encoding="utf-8") as extra:
+                extra.write(makefile)
+            return subprocess.run(
+                ["make", "vec"], cwd=workdir, capture_output=True, text=True
+            )
+
+    def test_a_crash_is_reported_as_a_crash(self) -> None:
+        done = self.vec(C_CRASH)
+        self.assertEqual(done.returncode, 2, done.stdout + done.stderr)
+        self.assertIn("./main crashed with SIGSEGV on ../cases/01.in", done.stdout)
 
 
 @unittest.skipUnless(shutil.which("clang"), "clang is not on PATH")

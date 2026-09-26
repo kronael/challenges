@@ -24,8 +24,14 @@ endif
 vec: build
 	@out=$$(mktemp); trap 'rm -f "$$out"' EXIT; \
 	for f in ../cases/*.in $(VEC_INPUT); do \
-	  timeout -k 2 10 $(VEC_BIN) < "$$f" > "$$out" \
-	    || { echo "  $(VEC_BIN) failed or ran past 10 s on $$f"; exit 1; }; \
+	  timeout -k 2 10 $(VEC_BIN) < "$$f" > "$$out"; code=$$?; \
+	  if [ $$code -eq 124 ] || [ $$code -eq 137 ]; then \
+	    echo "  $(VEC_BIN) ran past 10 s on $$f"; exit 1; \
+	  elif [ $$code -gt 128 ]; then \
+	    echo "  $(VEC_BIN) crashed with SIG$$(kill -l $$code) on $$f"; exit 1; \
+	  elif [ $$code -ne 0 ]; then \
+	    echo "  $(VEC_BIN) exited with status $$code on $$f"; exit 1; \
+	  fi; \
 	  cmp -s "$$out" "$${f%.in}.out" \
 	    || { echo "  $(VEC_BIN) printed the wrong answer for $$f"; exit 1; }; \
 	done
