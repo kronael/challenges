@@ -74,6 +74,17 @@ decision) or BY-DESIGN (accepted variance).
   hint 1 rules out brute force and a sum-indexed DP and hands the solver `2^19`,
   but defers *what* there are `2^19` of to hint 2 — appropriate escalation for
   an `n ≤ 38` problem with only two live options.
+- **VEC-UNROLLED-STACK-LANES** (LOW, grading) — BY-DESIGN. `scripts/vec_check.py`
+  does not count general-purpose arithmetic or stack accesses inside an
+  iteration that loads a vector, because that is where Go spills and where every
+  language keeps its per-vector loop control, bounds checks, and mask
+  arithmetic. A `solve` that loads a vector, stores it to a local array, and
+  then handles each lane with scalar code unrolled inside that same iteration
+  therefore grades vectorized. It takes deliberate construction; no natural
+  shape of 66–68 does it, and every separate scalar pass, every scalar
+  floating-point add, and every heap load or store still counts. **Fix
+  (optional):** tell apart stack slots that hold spilled vectors, which needs
+  data flow the tracer does not track.
 
 ## Status — 2026-08-24 — found during the numbering/reference sweep
 
@@ -89,17 +100,17 @@ decision) or BY-DESIGN (accepted variance).
   and `04/12–20.in` were also reviewed and are intentional/harmless — every
   `.in` is paired and each challenge has ≥8 small cases — so they are not logged.)
 
-## Status — 2026-09-25 — found while rebuilding the vec grader
+## vec grader
 
 - **VEC-OTHER-THREADS-UNTRACED** (MED, grading) — Record-only, confirmed
-  2026-09-25. `scripts/vec_check.py` single-steps only the thread that calls
-  `solve`. A C `solve` that runs one packed pass and hands the scalar selection
-  to a `pthread_create` worker it then joins grades `0.01 scalar, 0.50 packed
-  -> vectorized`. A Go `solve` can do the same with `go f()` and no new thread,
-  since goroutines run on threads the runtime already has. **Fix (needs
-  sign-off, it adds a rule to the grade):** refuse a `solve` that makes a
-  clone, clone3, fork, or vfork syscall (read `orig_rax` after stepping a
-  `syscall`) or enters `runtime.newproc`.
+  2026-09-25; needs sign-off, because the fix adds a rule to the grade.
+  `scripts/vec_check.py` single-steps only the thread that calls `solve`. A C
+  `solve` that runs one packed pass and hands the scalar selection to a
+  `pthread_create` worker it then joins grades `0.01 scalar, 0.50 packed ->
+  vectorized`. A Go `solve` can do the same with `go f()` and no new thread,
+  since goroutines run on threads the runtime already has. **Fix:** refuse a
+  `solve` that makes a clone, clone3, fork, or vfork syscall (read `orig_rax`
+  after stepping a `syscall`) or enters `runtime.newproc`.
 - **VEC-LINT-SHALLOW** (LOW, hardening) — Record-only. `lint()` in
   `scripts/vec_check.py` regex-scans only the top-level sources. It misses
   `use core::arch::asm as emit; emit!(…)`,
@@ -118,14 +129,3 @@ decision) or BY-DESIGN (accepted variance).
   floating-point work still count. **Fix:** treat only `%rsp`-based addresses
   as the stack, after checking what Go, which keeps frame pointers, then
   counts.
-- **VEC-UNROLLED-STACK-LANES** (LOW, grading) — BY-DESIGN. `scripts/vec_check.py`
-  does not count general-purpose arithmetic or stack accesses inside an
-  iteration that loads a vector, because that is where Go spills and where every
-  language keeps its per-vector loop control, bounds checks, and mask
-  arithmetic. A `solve` that loads a vector, stores it to a local array, and
-  then handles each lane with scalar code unrolled inside that same iteration
-  therefore grades vectorized. It takes deliberate construction; no natural
-  shape of 66–68 does it, and every separate scalar pass, every scalar
-  floating-point add, and every heap load or store still counts. **Fix
-  (optional):** tell apart stack slots that hold spilled vectors, which needs
-  data flow the tracer does not track.
