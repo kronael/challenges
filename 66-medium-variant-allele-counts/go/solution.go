@@ -4,11 +4,6 @@ package main
 // and returns; keep the directive.
 //
 //go:noinline
-func solve(dosage []float64, depth []int32, quality []int32, minDepth int32, minQuality int32) (float64, int64) {
-	_ = dosage
-	_ = depth
-	_ = quality
-	_ = minDepth
-	_ = minQuality
+func solve(dosage []float64, depth, quality []int32, minDepth, minQuality int32) (float64, int64) {
 	return 0, 0
 }
