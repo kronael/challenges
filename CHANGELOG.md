@@ -2,7 +2,19 @@
 
 All notable changes to this challenge bench are recorded here.
 
-## [Unreleased]
+## [v0.1.7] — 2026-09-26
+
+> challenges v0.1.7 — three levels: correct, fast, vectorized
+>
+> Four existing challenges gain a third level: after passing `make test` and
+> `make bench`, `make vec` checks that `solve` really runs in SIMD lanes.
+>
+> • 13, 17, 44, 46 get `make vec` in C, Rust, and Go; 66–68 stay vec-only
+> • `make vec` refuses threads, crashes, and hangs, and checks every answer
+> • Bigger large cases, so a naive loop at `-O3` still times out
+> • 44's reference fixed: it scored some gap-after-gap alignments wrong
+>
+> Full notes below.
 
 ### Added
 
@@ -37,6 +49,8 @@ All notable changes to this challenge bench are recorded here.
 - `make vec`'s answer check fails a build that exits nonzero or runs past
   10 s, where it passed or hung.
 - C solver builds rebuild when their Makefile changes, such as a new flag.
+- 44's `c/` builds without gcc's loop distribution, which at `-O3` in gcc 12.2
+  gave wrong answers for a correct row-by-row `solve`.
 - 44's golden opened a gap only after a match, so it missed alignments that put
   a gap in `t` right after a gap in `s`; `W`×11 against `D`×11 scored -44
   instead of -42.
