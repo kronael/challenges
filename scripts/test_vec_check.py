@@ -73,6 +73,15 @@ void solve(const float *restrict a, const float *restrict b, float *restrict c, 
 }
 """
 
+# The same multiply, then the first call the program makes to strlen.
+FIRST_CALL = """
+#include <string.h>
+void solve(const float *restrict a, const float *restrict b, float *restrict c, long n) {
+    for (long i = 0; i < n; i++) c[i] = a[i] * b[i];
+    c[0] = (float)strlen((const char *)(c + 1));
+}
+"""
+
 SELECT = """
 long solve(const int *restrict x, int *restrict out, long n, int t) {
     long k = 0;
@@ -432,30 +441,34 @@ def grade(
 class CTests(unittest.TestCase):
     cc = "cc"
 
+    def build(self, workdir: Path, driver: str, source: str) -> Path:
+        (workdir / "main.c").write_text(driver, encoding="utf-8")
+        (workdir / "solution.c").write_text(source, encoding="utf-8")
+        built = subprocess.run(
+            [
+                self.cc,
+                "-std=c11",
+                "-O3",
+                "-march=x86-64-v3",
+                "-o",
+                "prog",
+                "main.c",
+                "solution.c",
+            ],
+            cwd=workdir,
+            capture_output=True,
+            text=True,
+        )
+        self.assertEqual(built.returncode, 0, built.stderr)
+        return workdir / "prog"
+
     def check(
         self, driver: str, source: str, expect: str
     ) -> subprocess.CompletedProcess[str]:
         with tempfile.TemporaryDirectory() as raw_dir:
             workdir = Path(raw_dir)
-            (workdir / "main.c").write_text(driver, encoding="utf-8")
-            (workdir / "solution.c").write_text(source, encoding="utf-8")
-            built = subprocess.run(
-                [
-                    self.cc,
-                    "-std=c11",
-                    "-O3",
-                    "-march=x86-64-v3",
-                    "-o",
-                    "prog",
-                    "main.c",
-                    "solution.c",
-                ],
-                cwd=workdir,
-                capture_output=True,
-                text=True,
-            )
-            self.assertEqual(built.returncode, 0, built.stderr)
-            return grade(workdir, workdir / "prog", "solve", expect)
+            binary = self.build(workdir, driver, source)
+            return grade(workdir, binary, "solve", expect)
 
     def assert_grade(self, driver: str, source: str, expect: str) -> None:
         done = self.check(driver, source, expect)
@@ -494,6 +507,16 @@ class CTests(unittest.TestCase):
         done = self.check(SELECT_MAIN, THREAD, "vectorized")
         self.assertEqual(done.returncode, 1)
         self.assertIn("solve started a thread", done.stderr)
+
+    def test_first_call_into_libc_is_not_charged_for_binding(self) -> None:
+        with tempfile.TemporaryDirectory() as raw_dir:
+            workdir = Path(raw_dir)
+            binary = self.build(workdir, SCALE_MAIN, FIRST_CALL).resolve()
+            (workdir / "input.json").write_text("{}", encoding="utf-8")
+            count = vec_check.run(
+                binary, "solve", workdir / "input.json", float("inf")
+            )
+            self.assertLess(count.scalar, 50)
 
     def test_missing_symbol_fails(self) -> None:
         with tempfile.TemporaryDirectory() as raw_dir:

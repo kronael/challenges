@@ -44,6 +44,10 @@ is traced, so a traced instruction that starts a thread or a process, a clone,
 clone3, fork, or vfork system call, or a goroutine, a call to Go's
 runtime.newproc, is refused as well.
 
+The dynamic linker binds every library function when the program starts, not
+at its first call, so solve is not charged for looking up a function that main
+happened not to call before it.
+
 Go's asynchronous preemption and collector are switched off. The two ways Go's
 runtime moves to the thread's own stack run untraced until they resume the
 function that entered them: runtime.morestack grows the goroutine's stack or
@@ -326,7 +330,12 @@ def find_image(pid: int, binary: Path) -> tuple[int, int, int]:
 
 
 def launch(binary: Path, stdin: Path, stdout: int) -> int:
-    env = {**os.environ, "GODEBUG": "asyncpreemptoff=1", "GOGC": "off"}
+    env = {
+        **os.environ,
+        "GODEBUG": "asyncpreemptoff=1",
+        "GOGC": "off",
+        "LD_BIND_NOW": "1",
+    }
     pid = os.fork()
     if pid == 0:
         try:
