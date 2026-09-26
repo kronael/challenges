@@ -138,6 +138,6 @@ help:
 	@echo "rotten  — every io rotten passes small tests and generated cases time out"
 	@echo "sys     — every sys (29-34) golden C stress test passes"
 	@echo "sys-rotten — every sys rotten passes sanity and fails controlled stress"
-	@echo "vec     — every vec golden vectorizes and every vec rotten stays scalar (cc, and clang if on PATH)"
+	@echo "vec     — every vec golden vectorizes and every vec rotten stays scalar, under cc, then clang if on PATH"
 	@echo "clean   — remove compiled artifacts from every challenge"
 	@echo "Override GOLDEN_TIMEOUT (def 15s) / ROTTEN_TIMEOUT (def 5s)."
