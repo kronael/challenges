@@ -13,9 +13,6 @@ moving one position at a time. For each position, report the maximum reading
 visible in the window. The first window covers readings `0..k-1`; the last
 covers the final `k` readings. There are `n - k + 1` windows in all.
 
-The stream may be long, and the number of windows can be large. Your program
-must produce every requested maximum within the stated limits.
-
 Constraints: `n` up to 10⁶, `1 ≤ k ≤ n`, readings fit in a signed 32-bit
 integer.
 
