@@ -22,8 +22,11 @@ endif
 
 .PHONY: vec
 vec: build
-	@for f in ../cases/*.in $(VEC_INPUT); do \
-	  $(VEC_BIN) < "$$f" | cmp -s - "$${f%.in}.out" \
+	@out=$$(mktemp); trap 'rm -f "$$out"' EXIT; \
+	for f in ../cases/*.in $(VEC_INPUT); do \
+	  timeout -k 2 10 $(VEC_BIN) < "$$f" > "$$out" \
+	    || { echo "  $(VEC_BIN) failed or ran past 10 s on $$f"; exit 1; }; \
+	  cmp -s "$$out" "$${f%.in}.out" \
 	    || { echo "  $(VEC_BIN) printed the wrong answer for $$f"; exit 1; }; \
 	done
 	@python3 ../../scripts/vec_check.py --binary $(VEC_BIN) --function $(VEC_FUNC) \
