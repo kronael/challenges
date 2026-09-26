@@ -226,6 +226,25 @@ func solve(a, b, c []int32) {
 }
 """
 
+# The same loop into a 4 MiB scratch slice, which grows the heap.
+GO_HEAP_GROWTH = """package main
+
+import "simd/archsimd"
+
+//go:noinline
+func solve(a, b, c []int32) {
+\tscratch := make([]int32, 1<<20)
+\ti := 0
+\tfor ; i+8 <= len(a); i += 8 {
+\t\tarchsimd.LoadInt32x8(a[i:]).Mul(archsimd.LoadInt32x8(b[i:])).Store(scratch[i:])
+\t}
+\tfor ; i < len(a); i++ {
+\t\tscratch[i] = a[i] * b[i]
+\t}
+\tcopy(c, scratch)
+}
+"""
+
 # The same loop behind a frame too large for the goroutine's stack, so solve's
 # prologue moves the stack and solve returns on a different stack than the one
 # it was entered on.
@@ -374,6 +393,9 @@ class GoTests(unittest.TestCase):
 
     def test_scheduler_preempting_solve_does_not_count(self) -> None:
         self.assert_grade(GO_CALLS, "vectorized")
+
+    def test_heap_growth_does_not_count(self) -> None:
+        self.assert_grade(GO_HEAP_GROWTH, "vectorized")
 
     def test_return_is_found_after_solve_moves_its_stack(self) -> None:
         with tempfile.TemporaryDirectory() as raw_dir:

@@ -40,12 +40,14 @@ and attributes that change the target or the optimizer, Rust's
 graded build. While tracing, an AVX-512 instruction in the program's own code
 is refused for the same reason.
 
-Go's asynchronous preemption and collector are switched off, and Go's
-runtime.morestack, where a goroutine's stack grows and where the scheduler
-preempts it, runs untraced until it resumes the function that called it: all
-three interrupt the traced thread with work that is not the solver's. A grade
-that takes longer than TIMEOUT seconds fails, and the traced program dies with
-the grader.
+Go's asynchronous preemption and collector are switched off, and the two ways
+Go's runtime moves to the thread's own stack, runtime.morestack to grow the
+goroutine's stack or preempt it and runtime.systemstack to grow the heap among
+other bookkeeping, run untraced until they resume the function that entered
+them. All of it is work that is not the solver's, and how much of it runs
+depends on timing and on the heap the program built before solve. A grade that
+takes longer than TIMEOUT seconds fails, and the traced program dies with the
+grader.
 """
 
 from __future__ import annotations
@@ -68,7 +70,7 @@ PACKED_FLOOR = 0.02
 WINDOW = 256
 LONGEST = 15
 TIMEOUT = 60
-MORESTACK = "runtime.morestack.abi0"
+DETOURS = ("runtime.morestack.abi0", "runtime.systemstack.abi0")
 WORD = 2**64 - 1
 REFUSED = 126
 
@@ -314,7 +316,7 @@ def enter(pid: int, entry: int) -> int:
     return ptrace(PEEKTEXT, pid, regs.rsp) & WORD
 
 
-def trace(pid: int, entry: int, morestack: int | None, image: range, scalar_limit: float) -> Count:
+def trace(pid: int, entry: int, detours: set[int], image: range, scalar_limit: float) -> Count:
     returns = enter(pid, entry)
     regs = Regs()
     table: dict[int, Insn] = {}
@@ -324,7 +326,7 @@ def trace(pid: int, entry: int, morestack: int | None, image: range, scalar_limi
     rip = entry
     pending = 0
     while True:
-        if rip == morestack:
+        if rip in detours:
             rip = ptrace(PEEKTEXT, pid, regs.rsp) & WORD
             enter(pid, rip)
         insn = table.get(rip)
@@ -398,8 +400,8 @@ def run(binary: Path, function: str, input_path: Path, scalar_limit: float) -> C
         functions = find_functions(binary, base)
         if function not in functions:
             sys.exit(f"vec_check: {binary} defines no function {function}")
-        count = trace(pid, functions[function], functions.get(MORESTACK), range(low, high),
-                      scalar_limit)
+        detours = {functions[name] for name in DETOURS if name in functions}
+        count = trace(pid, functions[function], detours, range(low, high), scalar_limit)
         if not count.returned:
             os.kill(pid, signal.SIGKILL)
             os.waitpid(pid, 0)
