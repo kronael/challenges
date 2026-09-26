@@ -70,16 +70,21 @@ decision) or BY-DESIGN (accepted variance).
   but defers *what* there are `2^19` of to hint 2 — appropriate escalation for
   an `n ≤ 38` problem with only two live options.
 - **VEC-UNROLLED-STACK-LANES** (LOW, grading) — BY-DESIGN. `scripts/vec_check.py`
-  does not count general-purpose arithmetic or stack accesses inside an
-  iteration that loads a vector, because that is where Go spills and where every
-  language keeps its per-vector loop control, bounds checks, and mask
-  arithmetic. A `solve` that loads a vector, stores it to a local array, and
-  then handles each lane with scalar code unrolled inside that same iteration
-  therefore grades vectorized. It takes deliberate construction; no natural
-  shape of 66–68 does it, and every separate scalar pass, every scalar
-  floating-point add, and every heap load or store still counts. **Fix
-  (optional):** tell apart stack slots that hold spilled vectors, which needs
-  data flow the tracer does not track.
+  counts no stack access, and no general-purpose arithmetic inside a vector
+  iteration, one that runs a packed instruction or loads several elements into
+  a vector register, because that is where Go spills and where every language
+  keeps its per-vector loop control, bounds checks, and mask arithmetic. A
+  `solve` that copies a block to a local array, runs one packed instruction on
+  it, and handles each lane with scalar code unrolled inside that same
+  iteration therefore grades vectorized. A heap load or store counts only when
+  it moves one element: a vector block move, such as a 32-byte `memcpy`,
+  counts on neither side. So 68's C that copies 8 scores to the stack, compares
+  them with one `_mm256_cmpgt_epi32`, stores each lane at a running index from
+  the mask bits, and copies the block out grades `0.01 scalar, 0.25 packed ->
+  vectorized` (2026-09-26); without the packed compare it has 0.00 packed and
+  grades scalar. Every separate scalar pass and every scalar floating-point add
+  still counts. **Fix (optional):** tell apart stack slots that hold spilled
+  vectors, which needs data flow the tracer does not track.
 
 ## Status — 2026-08-24 — found during the numbering/reference sweep
 
