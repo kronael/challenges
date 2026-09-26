@@ -39,6 +39,10 @@ var idx = func() map[byte]int {
 	return m
 }()
 
+// solve stays a call of its own so that `make vec` can find where it starts
+// and returns; keep the directive.
+//
+//go:noinline
 func solve(s, t string) int {
 	_, _ = s, t
 	return 0
