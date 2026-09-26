@@ -15,6 +15,10 @@ build: main
 main: $(C_IO_MAKEFILE) $(C_IO_DIR)/main.c solution.c $(C_IO_HEADERS)
 	$(CC) $(CPPFLAGS) $(C_IO_CPPFLAGS) $(CFLAGS) -o $@ $(C_IO_DIR)/main.c solution.c $(LDLIBS)
 
+main-vec: $(C_IO_MAKEFILE) $(C_IO_DIR)/main.c solution.c $(C_IO_HEADERS)
+	$(CC) $(CPPFLAGS) $(C_IO_CPPFLAGS) -std=c11 -O3 -march=x86-64-v3 -g -Wall -Wextra \
+	  -o $@ $(C_IO_DIR)/main.c solution.c $(LDLIBS)
+
 run_tests: $(C_IO_MAKEFILE) $(C_IO_DIR)/test.c solution.c $(C_IO_HEADERS)
 	$(CC) $(CPPFLAGS) $(C_IO_CPPFLAGS) $(CFLAGS) -o $@ $(C_IO_DIR)/test.c solution.c $(LDLIBS)
 
@@ -36,7 +40,7 @@ bench: build
 	python3 ../../scripts/bench.py --timeout "$(TIMEOUT)" -- ./main
 
 clean:
-	rm -f main run_tests
+	rm -f main main-vec run_tests
 
 help:
 	@echo "all    — fmt build lint test (default)"
