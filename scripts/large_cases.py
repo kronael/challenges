@@ -15,7 +15,7 @@ DNA = "ACGT"
 LOWER = "abcdefghijklmnopqrstuvwxyz"
 PROTEIN = "ARNDCQEGHILKMFPSTWYV"
 RNA = "ACGU"
-EXPECTED_DIGEST = "9ee185e3dd32fba741a742d9ec02b15b7f885dc9f07a5fcef84b6f49ab38c71e"
+EXPECTED_DIGEST = "26453978fce682edefc239954a377c7d9c8c5690b5b8da336a84311ebe38e736"
 
 
 class Rng:
@@ -732,7 +732,7 @@ def build_59(name: str, rng: Rng) -> dict[str, Any]:
         for _ in range(n - 1):
             price += rng.integer(1, 4_000)
             prices.append(price)
-    else:
+    elif name == "10_large_equal_plateaus":
         # 250 plateaus of 1_000 equal settlements that never step down: an
         # undercut needs a strictly lower price, and only the closing session
         # has one, so equal neighbours must not be mistaken for undercuts.
@@ -740,6 +740,19 @@ def build_59(name: str, rng: Rng) -> dict[str, Any]:
         while len(prices) < n - 1:
             prices.extend([price] * min(1_000, n - 1 - len(prices)))
             price += rng.integer(0, 40)
+    else:
+        # A climb from -1_000_000_000 that never steps down and stays below -1,
+        # broken about one session in eight by a one-day spike above the next
+        # step of the climb. Only the spikes are ever undercut, within a few
+        # sessions; the closing session sits above the whole climb, so every
+        # other day of the series is never undercut.
+        price = -1_000_000_000
+        for _ in range(n - 1):
+            if rng.integer(0, 7) == 0:
+                prices.append(price + rng.integer(4_001, 1_000_000))
+            else:
+                price += rng.integer(0, 4_000)
+                prices.append(price)
     prices.append(-1)
     return {"n": n, "prices": prices}
 
@@ -1104,7 +1117,11 @@ NAMES = {
         "09_large_percentile_ranks",
         "10_large_duplicate_plateaus",
     ),
-    "59-medium-price-undercut": ("09_large_rising_ramp", "10_large_equal_plateaus"),
+    "59-medium-price-undercut": (
+        "09_large_rising_ramp",
+        "10_large_equal_plateaus",
+        "59_large_spiked_climb",
+    ),
     "60-medium-venue-ancestor": ("09_large_forked_chains", "10_large_shuffled_fan"),
     "61-hard-critical-venue-links": (
         "09_large_cycle_chain",

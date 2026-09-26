@@ -33,11 +33,6 @@ decision) or BY-DESIGN (accepted variance).
   neither. **Fix:** a coordinated rename across the directory slug, README,
   catalog row, and `scripts/large_cases.py` recipe context (owner picks the
   canonical name first).
-- **59-RECIPE-NO-WORST-CASE-GUARANTEE** (LOW, bench) — DEFERRED. Both seeded
-  large recipes for `59-medium-price-undercut` are non-decreasing with a single
-  terminal drop, so a skip-ahead heuristic solves them in linear time;
-  `hints/03.md` admits this but nothing enforces it. **Fix:** a third recipe
-  whose shape defeats the heuristic (needs a digest refreeze).
 - **58-BENCH-REWARDS-SORT-ON-SEEDED-RECIPES** (LOW, bench) — BY-DESIGN. On
   `58-medium-kth-worst-fill`'s two seeded recipes, a full `sorted()` beats the
   intended selection. This is exactly why the README states a bare O(n)
