@@ -33,8 +33,11 @@ instruction per 50 scores. Scalar instructions are
 - scalar floating-point arithmetic, compares, and conversions; loads and stores
   of 64 bits or less that do not address the stack; and moves of one lane from
   a vector register into a general-purpose one, wherever they run;
-- arithmetic, compares, and bit operations on general-purpose registers, except
-  in loop iterations that load several elements into a vector register at once.
+- arithmetic, compares, bit operations, and conditional sets and moves on
+  general-purpose registers, except in loop iterations that load several
+  elements into a vector register at once.
+
+String instructions such as `rep movsb` do not count.
 
 A `solve` that gets every case right but does its work on the scores one at
 a time in scalar registers fails `make vec`.
