@@ -20,7 +20,9 @@ SCALE_MAIN = """
 #include <stdlib.h>
 void solve(const float *restrict a, const float *restrict b, float *restrict c, long n);
 int main(void) {
-    float *a = malloc(%(n)d * sizeof *a), *b = malloc(%(n)d * sizeof *b), *c = malloc(%(n)d * sizeof *c);
+    float *a = malloc(%(n)d * sizeof *a);
+    float *b = malloc(%(n)d * sizeof *b);
+    float *c = malloc(%(n)d * sizeof *c);
     for (long i = 0; i < %(n)d; i++) { a[i] = (float)(i %% 7); b[i] = 2.0f; }
     solve(a, b, c, %(n)d);
     return c[%(n)d - 1] == c[%(n)d - 1] ? 0 : 1;
@@ -33,7 +35,10 @@ long solve(const int *restrict x, int *restrict out, long n, int t);
 int main(void) {
     int *x = malloc(%(n)d * sizeof *x), *out = malloc((%(n)d + 8) * sizeof *out);
     unsigned s = 1;
-    for (long i = 0; i < %(n)d; i++) { s = s * 1103515245u + 12345u; x[i] = (int)((s >> 8) %% 1000); }
+    for (long i = 0; i < %(n)d; i++) {
+        s = s * 1103515245u + 12345u;
+        x[i] = (int)((s >> 8) %% 1000);
+    }
     return solve(x, out, %(n)d, 500) > 0 ? 0 : 1;
 }
 """ % {"n": N}
@@ -58,7 +63,8 @@ void solve(const float *restrict a, const float *restrict b, float *restrict c, 
 
 # The packed loop lives in a helper that gcc clones as scale_by.constprop.0.
 HELPER = """
-static __attribute__((noinline)) void scale_by(float *restrict c, const float *restrict a, long n, float k) {
+static __attribute__((noinline)) void
+scale_by(float *restrict c, const float *restrict a, long n, float k) {
     for (long i = 0; i < n; i++) c[i] = a[i] * k;
 }
 void solve(const float *restrict a, const float *restrict b, float *restrict c, long n) {
@@ -125,7 +131,8 @@ long solve(const int *restrict x, int *restrict out, long n, int t) {
 """
 
 GO_MOD = "module probe\n\ngo 1.27.1\n"
-GO_MAIN = """package main
+GO_MAIN = (
+    """package main
 
 import (
 \t"fmt"
@@ -146,7 +153,9 @@ func main() {
 \tsolve(a, b, c)
 \tfmt.Println(c[n-1])
 }
-""" % N
+"""
+    % N
+)
 
 # Vectorizes: the loop body is written in simd/archsimd's eight-lane types.
 GO_LANES = """package main
@@ -289,27 +298,56 @@ fn sums() {
 """
 
 
-def grade(workdir: Path, binary: Path, function: str, expect: str) -> subprocess.CompletedProcess[str]:
+def grade(
+    workdir: Path, binary: Path, function: str, expect: str
+) -> subprocess.CompletedProcess[str]:
     (workdir / "input.json").write_text(json.dumps({"x": [0] * N}), encoding="utf-8")
     return subprocess.run(
-        [sys.executable, vec_check.__file__, "--binary", str(binary), "--function", function,
-         "--input", str(workdir / "input.json"), "--units", "x", "--expect", expect,
-         "--sources", str(workdir)],
-        capture_output=True, text=True,
+        [
+            sys.executable,
+            vec_check.__file__,
+            "--binary",
+            str(binary),
+            "--function",
+            function,
+            "--input",
+            str(workdir / "input.json"),
+            "--units",
+            "x",
+            "--expect",
+            expect,
+            "--sources",
+            str(workdir),
+        ],
+        capture_output=True,
+        text=True,
     )
 
 
 class CTests(unittest.TestCase):
     cc = "cc"
 
-    def check(self, driver: str, source: str, expect: str) -> subprocess.CompletedProcess[str]:
+    def check(
+        self, driver: str, source: str, expect: str
+    ) -> subprocess.CompletedProcess[str]:
         with tempfile.TemporaryDirectory() as raw_dir:
             workdir = Path(raw_dir)
             (workdir / "main.c").write_text(driver, encoding="utf-8")
             (workdir / "solution.c").write_text(source, encoding="utf-8")
             built = subprocess.run(
-                [self.cc, "-std=c11", "-O3", "-march=x86-64-v3", "-o", "prog", "main.c", "solution.c"],
-                cwd=workdir, capture_output=True, text=True,
+                [
+                    self.cc,
+                    "-std=c11",
+                    "-O3",
+                    "-march=x86-64-v3",
+                    "-o",
+                    "prog",
+                    "main.c",
+                    "solution.c",
+                ],
+                cwd=workdir,
+                capture_output=True,
+                text=True,
             )
             self.assertEqual(built.returncode, 0, built.stderr)
             return grade(workdir, workdir / "prog", "solve", expect)
@@ -350,9 +388,15 @@ class CTests(unittest.TestCase):
     def test_missing_symbol_fails(self) -> None:
         with tempfile.TemporaryDirectory() as raw_dir:
             workdir = Path(raw_dir)
-            (workdir / "main.c").write_text("int main(void) { return 0; }\n", encoding="utf-8")
-            subprocess.run([self.cc, "-O2", "-o", "prog", "main.c"], cwd=workdir, check=True)
-            self.assertNotEqual(grade(workdir, workdir / "prog", "solve", "scalar").returncode, 0)
+            (workdir / "main.c").write_text(
+                "int main(void) { return 0; }\n", encoding="utf-8"
+            )
+            subprocess.run(
+                [self.cc, "-O2", "-o", "prog", "main.c"], cwd=workdir, check=True
+            )
+            self.assertNotEqual(
+                grade(workdir, workdir / "prog", "solve", "scalar").returncode, 0
+            )
 
 
 @unittest.skipUnless(shutil.which("clang"), "clang is not on PATH")
@@ -367,7 +411,10 @@ class GoTests(unittest.TestCase):
         (workdir / "main.go").write_text(GO_MAIN, encoding="utf-8")
         (workdir / "solution.go").write_text(source, encoding="utf-8")
         built = subprocess.run(
-            ["go", "build", "-o", "prog", "."], cwd=workdir, capture_output=True, text=True,
+            ["go", "build", "-o", "prog", "."],
+            cwd=workdir,
+            capture_output=True,
+            text=True,
             env={**os.environ, "GOEXPERIMENT": "simd", "GOAMD64": "v3"},
         )
         self.assertEqual(built.returncode, 0, built.stderr)
@@ -402,7 +449,9 @@ class GoTests(unittest.TestCase):
             workdir = Path(raw_dir)
             binary = self.build(workdir, GO_MOVED_STACK).resolve()
             (workdir / "input.json").write_text("{}", encoding="utf-8")
-            count = vec_check.run(binary, "main.solve", workdir / "input.json", float("inf"))
+            count = vec_check.run(
+                binary, "main.solve", workdir / "input.json", float("inf")
+            )
             self.assertTrue(count.returned)
 
     def test_assembly_file_is_refused(self) -> None:
@@ -410,7 +459,10 @@ class GoTests(unittest.TestCase):
             workdir = Path(raw_dir)
             (workdir / "go.mod").write_text(GO_MOD, encoding="utf-8")
             (workdir / "solve_amd64.s").write_text("", encoding="utf-8")
-            self.assertEqual(vec_check.lint(workdir), ["solve_amd64.s: compiled outside the graded build"])
+            self.assertEqual(
+                vec_check.lint(workdir),
+                ["solve_amd64.s: compiled outside the graded build"],
+            )
 
 
 @unittest.skipUnless(shutil.which("cargo"), "cargo is not on PATH")
@@ -424,13 +476,22 @@ class RustBuildTests(unittest.TestCase):
             (crate / "src").mkdir(parents=True)
             (crate / "tests").mkdir()
             (Path(raw_dir) / "shared").symlink_to(ROOT / "shared")
-            (challenge / "vec.mk").write_text("VEC_INPUT := none\nVEC_UNITS := x\n", encoding="utf-8")
+            (challenge / "vec.mk").write_text(
+                "VEC_INPUT := none\nVEC_UNITS := x\n", encoding="utf-8"
+            )
             (crate / "Cargo.toml").write_text(
-                '[package]\nname = "probe"\nversion = "0.1.0"\nedition = "2021"\n', encoding="utf-8")
+                '[package]\nname = "probe"\nversion = "0.1.0"\nedition = "2021"\n',
+                encoding="utf-8",
+            )
             (crate / "src/lib.rs").write_text(RUST_CFG_SPLIT, encoding="utf-8")
             (crate / "tests/sums.rs").write_text(RUST_TEST, encoding="utf-8")
-            shutil.copy(ROOT / "68-hard-sparse-activation-gate/rust/Makefile", crate / "Makefile")
-            done = subprocess.run(["make", "test"], cwd=crate, capture_output=True, text=True)
+            shutil.copy(
+                ROOT / "68-hard-sparse-activation-gate/rust/Makefile",
+                crate / "Makefile",
+            )
+            done = subprocess.run(
+                ["make", "test"], cwd=crate, capture_output=True, text=True
+            )
             self.assertNotEqual(done.returncode, 0, done.stdout + done.stderr)
             self.assertIn("left: 7", done.stdout + done.stderr)
 
@@ -457,28 +518,37 @@ class LintTests(unittest.TestCase):
                 self.assertTrue(self.lint({"solution.c": source}))
 
     def test_c_allows_intrinsics_and_comments_that_name_the_constructs(self) -> None:
-        source = ('#include <immintrin.h>\n/* no asm, no #pragma here */\n'
-                  '__attribute__((noinline)) int f(void) { return _mm_popcnt_u32(3); }\n')
+        source = (
+            "#include <immintrin.h>\n/* no asm, no #pragma here */\n"
+            "__attribute__((noinline)) int f(void) { return _mm_popcnt_u32(3); }\n"
+        )
         self.assertEqual(self.lint({"solution.c": source}), [])
 
     def test_rust_refuses_assembly_target_features_and_build_scripts(self) -> None:
         for files in (
-            {"src/lib.rs": "pub fn f() { unsafe { std::arch::asm!(\"nop\") } }\n"},
-            {"src/lib.rs": "#[target_feature(enable = \"avx512f\")]\npub unsafe fn f() {}\n"},
+            {"src/lib.rs": 'pub fn f() { unsafe { std::arch::asm!("nop") } }\n'},
+            {
+                "src/lib.rs": '#[target_feature(enable = "avx512f")]\n'
+                "pub unsafe fn f() {}\n"
+            },
             {"src/lib.rs": "pub fn f() {}\n", "build.rs": "fn main() {}\n"},
         ):
             with self.subTest(files=files):
                 self.assertEqual(len(self.lint({"Cargo.toml": "", **files})), 1)
 
     def test_rust_allows_cfg_target_feature_and_intrinsics(self) -> None:
-        source = ("use std::arch::x86_64::_popcnt32;\n"
-                  "#[cfg(target_feature = \"avx2\")]\npub fn f() -> i32 { unsafe { _popcnt32(3) } }\n")
+        source = (
+            "use std::arch::x86_64::_popcnt32;\n"
+            '#[cfg(target_feature = "avx2")]\n'
+            "pub fn f() -> i32 { unsafe { _popcnt32(3) } }\n"
+        )
         self.assertEqual(self.lint({"Cargo.toml": "", "src/lib.rs": source}), [])
 
     def test_go_refuses_cgo(self) -> None:
         source = 'package main\n\nimport "C"\n\nfunc solve() {}\n'
-        self.assertEqual(self.lint({"go.mod": GO_MOD, "solution.go": source}),
-                         ["solution.go: cgo"])
+        self.assertEqual(
+            self.lint({"go.mod": GO_MOD, "solution.go": source}), ["solution.go: cgo"]
+        )
 
 
 class DecodeTests(unittest.TestCase):
@@ -490,11 +560,16 @@ class DecodeTests(unittest.TestCase):
             ("vcmpneq_oqsd", "(%rdi),%xmm1,%xmm1"),
         ):
             with self.subTest(mnemonic=mnemonic):
-                self.assertIs(vec_check.decode(mnemonic, operands, 0xC5).kind, vec_check.Kind.SCALAR)
+                self.assertIs(
+                    vec_check.decode(mnemonic, operands, 0xC5).kind,
+                    vec_check.Kind.SCALAR,
+                )
 
     def test_packed_compare_is_packed(self) -> None:
-        self.assertIs(vec_check.decode("vcmpgt_oqps", "%ymm2,%ymm1,%ymm1", 0xC5).kind,
-                      vec_check.Kind.PACKED)
+        self.assertIs(
+            vec_check.decode("vcmpgt_oqps", "%ymm2,%ymm1,%ymm1", 0xC5).kind,
+            vec_check.Kind.PACKED,
+        )
 
 
 if __name__ == "__main__":

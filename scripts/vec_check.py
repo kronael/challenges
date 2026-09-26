@@ -90,9 +90,13 @@ libc.ptrace.argtypes = (ctypes.c_long, ctypes.c_long, ctypes.c_void_p, ctypes.c_
 
 
 class Regs(ctypes.Structure):
-    _fields_ = [(name, ctypes.c_ulonglong) for name in (
-        "r15 r14 r13 r12 rbp rbx r11 r10 r9 r8 rax rcx rdx rsi rdi orig_rax "
-        "rip cs eflags rsp ss fs_base gs_base ds es fs gs").split()]
+    _fields_ = [
+        (name, ctypes.c_ulonglong)
+        for name in (
+            "r15 r14 r13 r12 rbp rbx r11 r10 r9 r8 rax rcx rdx rsi rdi orig_rax "
+            "rip cs eflags rsp ss fs_base gs_base ds es fs gs"
+        ).split()
+    ]
 
 
 class Kind(enum.Enum):
@@ -117,8 +121,24 @@ class Count:
     returned: bool = False
 
 
-PREFIXES = {"lock", "rep", "repz", "repe", "repnz", "repne", "notrack", "bnd",
-            "data16", "addr32", "cs", "ds", "es", "fs", "gs", "ss"}
+PREFIXES = {
+    "lock",
+    "rep",
+    "repz",
+    "repe",
+    "repnz",
+    "repne",
+    "notrack",
+    "bnd",
+    "data16",
+    "addr32",
+    "cs",
+    "ds",
+    "es",
+    "fs",
+    "gs",
+    "ss",
+}
 LEGACY_PREFIX_BYTES = {0x26, 0x2E, 0x36, 0x3E, 0x64, 0x65, 0x67}
 VECTOR_REGISTER = re.compile(r"%[xyz]mm\d")
 GPR_ARITHMETIC = re.compile(
@@ -151,11 +171,17 @@ STRING = re.compile(r"^(movs|stos|lods|cmps|scas)[bwlq]?$")
 C_BANNED = [
     (re.compile(r"\b(asm|__asm__|__asm)\b"), "inline assembly"),
     (re.compile(r"^\s*#\s*pragma\b|\b_Pragma\s*\(", re.MULTILINE), "a #pragma"),
-    (re.compile(r"\b_*(target|optimize|target_clones)_*\s*\("), "a target or optimize attribute"),
+    (
+        re.compile(r"\b_*(target|optimize|target_clones)_*\s*\("),
+        "a target or optimize attribute",
+    ),
 ]
 RUST_BANNED = [
     (re.compile(r"\b(asm|global_asm|naked_asm)!"), "inline assembly"),
-    (re.compile(r"#!?\[\s*(unsafe\s*\(\s*)?(target_feature|naked)\b"), "#[target_feature] or #[naked]"),
+    (
+        re.compile(r"#!?\[\s*(unsafe\s*\(\s*)?(target_feature|naked)\b"),
+        "#[target_feature] or #[naked]",
+    ),
 ]
 GO_BANNED = [
     (re.compile(r'^\s*import\s*(\(\s*)?"C"', re.MULTILINE), "cgo"),
@@ -188,8 +214,9 @@ def split_operands(operands: str) -> list[str]:
 def decode(mnemonic: str, operands: str, first_byte: int) -> Insn:
     parts = split_operands(operands.partition("#")[0])
     vector = any(VECTOR_REGISTER.search(part) for part in parts)
-    memory = (any("(" in part and not STACK.search(part) for part in parts)
-              and not NO_ACCESS.match(mnemonic))
+    memory = any(
+        "(" in part and not STACK.search(part) for part in parts
+    ) and not NO_ACCESS.match(mnemonic)
     extracts = bool(parts) and GENERAL_REGISTER.match(parts[-1]) is not None
     if STRING.match(mnemonic):
         kind = Kind.OTHER
@@ -206,7 +233,9 @@ def decode(mnemonic: str, operands: str, first_byte: int) -> Insn:
         kind = Kind.OTHER
     loads = any("(" in part for part in parts[:-1])
     vector_load = vector and loads and kind is not Kind.SCALAR
-    return Insn(kind, mnemonic.startswith(("j", "loop")), vector_load, first_byte == 0x62)
+    return Insn(
+        kind, mnemonic.startswith(("j", "loop")), vector_load, first_byte == 0x62
+    )
 
 
 def disassemble(code: bytes, address: int) -> dict[int, Insn]:
@@ -214,9 +243,20 @@ def disassemble(code: bytes, address: int) -> dict[int, Insn]:
         blob.write(code)
         blob.flush()
         done = subprocess.run(
-            ["objdump", "-D", "-b", "binary", "-m", "i386:x86-64", "--insn-width=16",
-             f"--adjust-vma={address:#x}", blob.name],
-            capture_output=True, text=True, check=True,
+            [
+                "objdump",
+                "-D",
+                "-b",
+                "binary",
+                "-m",
+                "i386:x86-64",
+                "--insn-width=16",
+                f"--adjust-vma={address:#x}",
+                blob.name,
+            ],
+            capture_output=True,
+            text=True,
+            check=True,
         )
     found: dict[int, Insn] = {}
     for line in done.stdout.splitlines():
@@ -232,17 +272,23 @@ def disassemble(code: bytes, address: int) -> dict[int, Insn]:
         while len(tokens) > 1 and tokens[0] in PREFIXES:
             tokens = tokens[1].split(None, 1)
         if tokens:
-            found[start] = decode(tokens[0], tokens[1] if len(tokens) > 1 else "", first)
+            found[start] = decode(
+                tokens[0], tokens[1] if len(tokens) > 1 else "", first
+            )
     return found
 
 
 def read_memory(pid: int, address: int, size: int) -> bytes:
-    return b"".join((ptrace(PEEKTEXT, pid, address + offset) & WORD).to_bytes(8, "little")
-                    for offset in range(0, size, 8))
+    return b"".join(
+        (ptrace(PEEKTEXT, pid, address + offset) & WORD).to_bytes(8, "little")
+        for offset in range(0, size, 8)
+    )
 
 
 def find_functions(binary: Path, base: int) -> dict[str, int]:
-    listed = subprocess.run(["nm", "--defined-only", str(binary)], capture_output=True, text=True)
+    listed = subprocess.run(
+        ["nm", "--defined-only", str(binary)], capture_output=True, text=True
+    )
     if listed.returncode != 0:
         sys.exit(f"vec_check: cannot read symbols from {binary}\n{listed.stderr}")
     relocated = int.from_bytes(binary.read_bytes()[16:18], "little") == 3
@@ -283,8 +329,11 @@ def launch(binary: Path, stdin: Path, stdout: int) -> int:
             os._exit(127)
     _, status = os.waitpid(pid, 0)
     if os.WIFEXITED(status) and os.WEXITSTATUS(status) == REFUSED:
-        sys.exit("vec_check: this system does not permit ptrace, which the grade needs:"
-                 " kernel.yama.ptrace_scope must be 0 or 1 and no seccomp filter may block it")
+        sys.exit(
+            "vec_check: this system does not permit ptrace, which the grade needs:"
+            " kernel.yama.ptrace_scope must be 0 or 1"
+            " and no seccomp filter may block it"
+        )
     if not os.WIFSTOPPED(status):
         sys.exit(f"vec_check: could not start {binary}")
     return pid
@@ -301,8 +350,10 @@ def enter(pid: int, entry: int) -> int:
         if not os.WIFSTOPPED(status):
             code = os.waitstatus_to_exitcode(status)
             hint = "; was it inlined into its caller?" if code == 0 else ""
-            sys.exit(f"vec_check: the program exited with status {code}"
-                     f" without calling the graded function{hint}")
+            sys.exit(
+                f"vec_check: the program exited with status {code}"
+                f" without calling the graded function{hint}"
+            )
         pending = os.WSTOPSIG(status)
         if pending != signal.SIGTRAP:
             continue
@@ -316,7 +367,9 @@ def enter(pid: int, entry: int) -> int:
     return ptrace(PEEKTEXT, pid, regs.rsp) & WORD
 
 
-def trace(pid: int, entry: int, detours: set[int], image: range, scalar_limit: float) -> Count:
+def trace(
+    pid: int, entry: int, detours: set[int], image: range, scalar_limit: float
+) -> Count:
     returns = enter(pid, entry)
     regs = Regs()
     table: dict[int, Insn] = {}
@@ -343,7 +396,10 @@ def trace(pid: int, entry: int, detours: set[int], image: range, scalar_limit: f
         _, status = os.waitpid(pid, 0)
         if not os.WIFSTOPPED(status):
             code = os.waitstatus_to_exitcode(status)
-            sys.exit(f"vec_check: the program exited with status {code} inside the graded function")
+            sys.exit(
+                f"vec_check: the program exited with status {code}"
+                " inside the graded function"
+            )
         pending = os.WSTOPSIG(status)
         if pending != signal.SIGTRAP:
             continue
@@ -373,7 +429,9 @@ def lint(workdir: Path) -> list[str]:
         banned = RUST_BANNED
         outside = [path for path in [workdir / "build.rs"] if path.exists()]
     elif (workdir / "go.mod").exists():
-        sources = sorted(p for p in workdir.glob("*.go") if not p.name.endswith("_test.go"))
+        sources = sorted(
+            p for p in workdir.glob("*.go") if not p.name.endswith("_test.go")
+        )
         banned = GO_BANNED
         outside = sorted(p for p in workdir.iterdir() if p.suffix in GO_OUTSIDE)
     else:
@@ -383,8 +441,11 @@ def lint(workdir: Path) -> list[str]:
     problems = [f"{path.name}: compiled outside the graded build" for path in outside]
     for path in sources:
         text = strip_comments(path.read_text(encoding="utf-8"))
-        problems += [f"{path.relative_to(workdir)}: {what}"
-                     for pattern, what in banned if pattern.search(text)]
+        problems += [
+            f"{path.relative_to(workdir)}: {what}"
+            for pattern, what in banned
+            if pattern.search(text)
+        ]
     return problems
 
 
@@ -413,8 +474,13 @@ def run(binary: Path, function: str, input_path: Path, scalar_limit: float) -> C
             sys.exit(f"vec_check: {binary.name} exited with status {code}")
         out.seek(0)
         expected = input_path.with_suffix(".out")
-        if expected.exists() and out.read().decode() != expected.read_text(encoding="utf-8"):
-            sys.exit(f"vec_check: {binary.name} printed the wrong answer for {input_path.name}")
+        if not expected.exists():
+            return count
+        if out.read().decode() != expected.read_text(encoding="utf-8"):
+            sys.exit(
+                f"vec_check: {binary.name} printed the wrong answer"
+                f" for {input_path.name}"
+            )
     return count
 
 
@@ -423,8 +489,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--binary", type=Path, required=True)
     parser.add_argument("--function", required=True)
     parser.add_argument("--input", type=Path, required=True)
-    parser.add_argument("--units", required=True,
-                        help="the input field whose length is the unit of work")
+    parser.add_argument(
+        "--units",
+        required=True,
+        help="the input field whose length is the unit of work",
+    )
     parser.add_argument("--expect", choices=("vectorized", "scalar"), required=True)
     parser.add_argument("--sources", type=Path, default=Path.cwd())
     return parser.parse_args()
@@ -438,8 +507,13 @@ def main() -> None:
     if problems:
         sys.exit(1)
 
-    signal.signal(signal.SIGALRM, lambda *_: sys.exit(
-        f"vec_check: {args.binary.name} did not finish within {TIMEOUT} s under the tracer"))
+    signal.signal(
+        signal.SIGALRM,
+        lambda *_: sys.exit(
+            f"vec_check: {args.binary.name} did not finish within {TIMEOUT} s"
+            " under the tracer"
+        ),
+    )
     signal.alarm(TIMEOUT)
     units = max(count_units(args.input, args.units), 1)
     count = run(args.binary.resolve(), args.function, args.input, BUDGET * units)
@@ -447,11 +521,16 @@ def main() -> None:
     packed = count.packed / units
     vectorized = count.returned and scalar < BUDGET and packed >= PACKED_FLOOR
     found = "vectorized" if vectorized else "scalar"
-    shape = (f"{scalar:.2f} scalar, {packed:.2f} packed" if count.returned
-             else f"over {BUDGET:.2f} scalar")
+    shape = (
+        f"{scalar:.2f} scalar, {packed:.2f} packed"
+        if count.returned
+        else f"over {BUDGET:.2f} scalar"
+    )
     ok = found == args.expect
-    print(f"  {args.function}: {shape} per element of {args.units} ({units})"
-          f" -> {found}{'' if ok else '  EXPECTED ' + args.expect}")
+    print(
+        f"  {args.function}: {shape} per element of {args.units} ({units})"
+        f" -> {found}{'' if ok else '  EXPECTED ' + args.expect}"
+    )
     sys.exit(0 if ok else 1)
 
 
