@@ -7,8 +7,7 @@ All notable changes to this challenge bench are recorded here.
 ### Added
 
 - **vec level** for io challenges 13, 17, 44, and 46: `make vec` in their C,
-  Rust, and Go solver directories, after `make test` and `make bench`. Each
-  grades its own `x86-64-v3` build and keeps its other builds as they were.
+  Rust, and Go solver directories, after `make test` and `make bench`.
   Their READMEs gain a Level 3 section and their hints level-3 rungs.
 - `make vec` first checks the traced build's answer on every case and on the
   traced fixture.
@@ -20,6 +19,12 @@ All notable changes to this challenge bench are recorded here.
 - 13, 17, 44, and 46's `golden/` is the vectorized C reference and the
   `make bench` oracle; `rotten/` stays Python. The root `make test`,
   `make golden`, and `make vec` cover C goldens.
+- Every target of a vec challenge's C, Rust, and Go solver directories builds
+  for `x86-64-v3`, so `make test`, `make bench`, and `make vec` check one program.
+- 13's Go `solve` takes the readings as `[]int32`.
+- Larger large cases, which a naive loop at `-O3 -march=x86-64-v3` cleared in
+  under 5 s: 13 has `n = 10⁶` (limit raised from 2·10⁵), 44 up to 2500 residues
+  (limit raised from 2000), and `46_large_many` guides of 20 bases.
 - The README explains the three levels once; the catalog lists each
   challenge's levels.
 - The root Makefile keeps each check's output in memory, not in `/tmp` files

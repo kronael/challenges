@@ -153,7 +153,9 @@ the four solver dirs.
 Three levels: `make test` (correct), `make bench` (fast), `make vec`
 (vectorized; C, Rust, and Go only). io 13, 17, 44, and 46 have all three. A
 challenge with `make vec` has a root `vec.mk` naming the traced fixture, a C
-`golden/`, and solver Makefiles that include `shared/vec.mk`. How it grades:
+`golden/`, and solver Makefiles that include `shared/vec.mk`. Every target of
+those solver directories builds for `x86-64-v3`, so `make test`, `make bench`,
+and `make vec` check one program. How it grades:
 `shared/vec.mk`'s header and the `scripts/vec_check.py` docstring.
 
 ## Layout
