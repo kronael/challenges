@@ -37,7 +37,7 @@ Constraints: genome length up to `10⁶`; `L` in `8 … 20`; up to `2·10³` gui
 ## Output
 
 Space-separated integers, one per guide, in input order: the candidate-site
-count for each guide.
+count for each guide. When there are no guides, the line is empty.
 
 ## Examples
 
