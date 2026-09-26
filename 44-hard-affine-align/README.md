@@ -73,7 +73,7 @@ A single integer: the maximum global alignment score.
 
 ## Examples
 
-**Example 1** — from the source problem
+**Example 1** — the input above
 ```
 {"s":"PRTEINS","t":"PRTWPSEIN"} → 8
 ```
