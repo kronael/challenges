@@ -88,9 +88,9 @@ decision) or BY-DESIGN (accepted variance).
 
 ## Status — 2026-08-24 — found during the numbering/reference sweep
 
-- **HINTS-MISSING-SOURCES-FILE** (LOW, docs) — Record-only. Fourteen challenges'
+- **HINTS-MISSING-SOURCES-FILE** (LOW, docs) — Record-only. Thirteen challenges'
   `hints/` end with a `# Complexity` file and have no `# Sources` file at all:
-  03, 04, 09, 13, 14, 15, 16, 23, 24, 25, 35, 38, 39, 43. CLAUDE.md says a hint
+  03, 04, 09, 14, 15, 16, 23, 24, 25, 35, 38, 39, 43. CLAUDE.md says a hint
   chain ends with a Sources file holding solution-bearing attribution. Several of
   these are classic problems with citable sources (e.g. 24 LRU cache, 14 sieve,
   25 running median); others may be original and legitimately source-less.
@@ -130,8 +130,6 @@ decision) or BY-DESIGN (accepted variance).
   floating-point work still count. **Fix:** treat only `%rsp`-based addresses
   as the stack, after checking what Go, which keeps frame pointers, then
   counts.
-
-## vec level
 
 ## Script tests
 
