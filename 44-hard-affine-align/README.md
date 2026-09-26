@@ -142,4 +142,4 @@ refuses `#[target_feature]`, so a Rust `solve` makes those calls in an `unsafe`
 block. The Go directory builds every target with `GOEXPERIMENT=simd`, which
 `simd/archsimd` needs; its `go.mod` requires Go 1.27.1 or newer.
 
-Stuck on this level? See `hints/05.md`.
+Stuck on this level? See `hints/06.md`.
