@@ -106,9 +106,9 @@ answer on every case in `cases/`, it runs the program on the fixture that
 `vec.mk` names and single-steps the call to `solve`: every instruction `solve`
 retires, in its own code, in the functions it calls, and in the library
 routines those call, except the Go runtime's stack growth, heap growth, and
-preemption. It passes when `solve` retires fewer than one scalar instruction
-per residue pair, averaged over the fixture, and at least one packed SIMD
-instruction per 50 residue pairs. Scalar instructions are
+preemption. It passes when, on that fixture, `solve` retires fewer than
+`|s|·|t|` scalar instructions and at least `|s|·|t| / 50` packed SIMD
+instructions. Scalar instructions are
 
 - scalar floating-point arithmetic, compares, and conversions; loads and stores
   of 64 bits or less that do not address the stack; and moves of one lane from
@@ -118,12 +118,6 @@ instruction per 50 residue pairs. Scalar instructions are
   elements into a vector register at once.
 
 String instructions such as `rep movsb` do not count.
-
-A residue pair is one residue of `s` taken with one residue of `t`: an input
-has `|s|·|t|` of them.
-
-A `solve` that gets every case right but does its work on the residue pairs one
-at a time in scalar registers fails `make vec`.
 
 `make vec` grades the code the compiler chose for `x86-64-v3`, so it refuses
 inline or standalone assembly, a `#pragma`, a `target` or `optimize` attribute,

@@ -77,9 +77,6 @@ instruction per 50 readings. Scalar instructions are
 
 String instructions such as `rep movsb` do not count.
 
-A `solve` that gets every case right but does its work on the readings one
-at a time in scalar registers fails `make vec`.
-
 `make vec` grades the code the compiler chose for `x86-64-v3`, so it refuses
 inline or standalone assembly, a `#pragma`, a `target` or `optimize` attribute,
 Rust's `#[target_feature]`, `#[naked]`, and `build.rs`, and cgo, and it stops at
