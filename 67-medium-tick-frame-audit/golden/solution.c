@@ -50,7 +50,8 @@ Answer solve(const Input *in) {
 		const uint8_t *rec = in->stream + f * w;
 		uint32_t mism = 0;
 		for (size_t j = 0; j < w; j++) {
-			const uint8_t cls = (rec[j] == '|') * SEPARATOR + (rec[j] == '\n') * TERMINATOR;
+			const uint8_t cls =
+			    (rec[j] == '|') * SEPARATOR + (rec[j] == '\n') * TERMINATOR;
 			mism += cls != expect[j];
 		}
 		stray += mism;
