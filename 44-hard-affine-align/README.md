@@ -93,8 +93,11 @@ make -C python
 ```
 
 The C, Rust, and Go directories build every target for `x86-64-v3`, with the
-flags `shared/vec.mk` sets: C at `-O3 -march=x86-64-v3`, Rust in release with
-`-C target-cpu=x86-64-v3`, and Go with `GOAMD64=v3`. Every target there needs a machine with AVX2, BMI2, and FMA.
+flags `shared/vec.mk` sets: C at `-O3 -march=x86-64-v3`, plus
+`-fno-tree-loop-distribution`, which this challenge's `vec.mk` adds where the
+compiler accepts it because gcc 12.2's loop distribution miscompiles a correct
+`solve`; Rust in release with `-C target-cpu=x86-64-v3`; and Go with
+`GOAMD64=v3`. Every target there needs a machine with AVX2, BMI2, and FMA.
 
 Stuck? See `hints/01.md`.
 
