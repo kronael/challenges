@@ -73,6 +73,15 @@ void solve(const float *restrict a, const float *restrict b, float *restrict c, 
 }
 """
 
+# A packed loop that loads nothing: gcc counts the indices in a vector register.
+INDICES = """
+void solve(const float *restrict a, const float *restrict b, float *restrict c, long n) {
+    (void)a;
+    (void)b;
+    for (int i = 0; i < (int)n; i++) c[i] = (float)i;
+}
+"""
+
 # The same multiply, then the first call the program makes to strlen.
 FIRST_CALL = """
 #include <string.h>
@@ -544,6 +553,16 @@ class CTests(unittest.TestCase):
             count = vec_check.run(binary, "solve", workdir / "input.json", float("inf"))
             self.assertLess(count.scalar, 50)
 
+    def test_packed_loop_that_loads_nothing_pays_its_control_per_vector(
+        self,
+    ) -> None:
+        with tempfile.TemporaryDirectory() as raw_dir:
+            workdir = Path(raw_dir)
+            binary = self.build(workdir, SCALE_MAIN, INDICES).resolve()
+            (workdir / "input.json").write_text("{}", encoding="utf-8")
+            count = vec_check.run(binary, "solve", workdir / "input.json", float("inf"))
+            self.assertLess(count.scalar, N / 64)
+
     def test_trace_stops_at_the_step_limit_whatever_the_clock(self) -> None:
         with tempfile.TemporaryDirectory() as raw_dir:
             workdir = Path(raw_dir)
@@ -868,6 +887,21 @@ class DecodeTests(unittest.TestCase):
                     vec_check.decode(mnemonic, operands, 0xC5).kind,
                     vec_check.Kind.SCALAR,
                 )
+
+    def test_zeroing_a_vector_register_is_not_packed_work(self) -> None:
+        for mnemonic, operands in (
+            ("vpxor", "%xmm0,%xmm0,%xmm0"),
+            ("vxorps", "%ymm1,%ymm1,%ymm1"),
+            ("xorps", "%xmm15,%xmm15"),
+        ):
+            with self.subTest(mnemonic=mnemonic):
+                insn = vec_check.decode(mnemonic, operands, 0xC5)
+                self.assertIs(insn.kind, vec_check.Kind.OTHER)
+                self.assertFalse(insn.vector_work)
+        self.assertIs(
+            vec_check.decode("vpxor", "%xmm1,%xmm0,%xmm0", 0xC5).kind,
+            vec_check.Kind.PACKED,
+        )
 
     def test_packed_compare_is_packed(self) -> None:
         self.assertIs(

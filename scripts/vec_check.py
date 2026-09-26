@@ -17,13 +17,14 @@ The grade counts scalar work, of two kinds:
   and moves on general-purpose registers, except in vector iterations.
 
 The instruction stream is cut into iterations at every backward jump, and an
-iteration that loads several elements into a vector register in one instruction
-is a vector iteration. There, loop control, bounds checks, and mask arithmetic
-on general-purpose registers are paid once per vector rather than once per
-element. That bookkeeping is what separates C, Rust, and Go most; leaving it
-out lets one budget mean the same thing in all three. Packed arithmetic, moves
-between registers, stack accesses, string instructions such as rep movsb, and
-control flow count on neither side.
+iteration that runs a packed instruction, or loads several elements into a
+vector register in one instruction, is a vector iteration. There, loop control,
+bounds checks, and mask arithmetic on general-purpose registers are paid once
+per vector rather than once per element. That bookkeeping is what separates C,
+Rust, and Go most; leaving it out lets one budget mean the same thing in all
+three. Packed arithmetic, moves between registers, zeroing a vector register,
+stack accesses, string instructions such as rep movsb, and control flow count
+on neither side.
 
 The count is divided by the challenge's unit of work, read from the input: the
 length of one array or string, the value of one integer, or the product of
@@ -130,7 +131,7 @@ class Kind(enum.Enum):
 class Insn:
     kind: Kind
     jump: bool
-    vector_load: bool
+    vector_work: bool
     evex: bool
     syscall: bool
 
@@ -191,6 +192,7 @@ GENERAL_REGISTER = re.compile(r"%(r[a-z0-9]+|e[a-z]{2}|[a-d][lhx]|[sd]il?|[sb]pl
 STACK = re.compile(r"\(%[re](sp|bp)\b")
 NO_ACCESS = re.compile(r"^(lea|nop|prefetch|j|call|endbr|clflush|clwb)")
 STRING = re.compile(r"^(movs|stos|lods|cmps|scas)[bwlq]?$")
+ZEROING = re.compile(r"^v?(pxor|xorp[sd])$")
 
 C_BANNED = [
     (re.compile(r"\b(asm|__asm__|__asm)\b"), "inline assembly"),
@@ -242,7 +244,7 @@ def decode(mnemonic: str, operands: str, first_byte: int) -> Insn:
         "(" in part and not STACK.search(part) for part in parts
     ) and not NO_ACCESS.match(mnemonic)
     extracts = bool(parts) and GENERAL_REGISTER.match(parts[-1]) is not None
-    if STRING.match(mnemonic):
+    if STRING.match(mnemonic) or (ZEROING.match(mnemonic) and len(set(parts)) == 1):
         kind = Kind.OTHER
     elif vector and VECTOR_MOVE.match(mnemonic):
         element = ELEMENT_ACCESS.match(mnemonic) and (memory or extracts)
@@ -260,7 +262,7 @@ def decode(mnemonic: str, operands: str, first_byte: int) -> Insn:
     return Insn(
         kind,
         mnemonic.startswith(("j", "loop")),
-        vector_load,
+        vector_load or kind is Kind.PACKED,
         first_byte == 0x62,
         mnemonic == "syscall",
     )
@@ -501,7 +503,7 @@ def trace(
             count.scalar += 1
             count.hot[rip] += 1
         count.packed += insn.kind is Kind.PACKED
-        vector |= insn.vector_load
+        vector |= insn.vector_work
         count.steps += 1
         if count.steps > step_limit:
             return count
