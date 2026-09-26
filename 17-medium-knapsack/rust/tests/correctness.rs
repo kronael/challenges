@@ -22,6 +22,11 @@ fn cases() {
             .parse()
             .unwrap();
         let p: Input = serde_json::from_str(&src).unwrap();
-        assert_eq!(solve(p.capacity, &p.items), want, "{:?}", inp.file_name().unwrap());
+        assert_eq!(
+            solve(p.capacity, &p.items),
+            want,
+            "{:?}",
+            inp.file_name().unwrap()
+        );
     }
 }
