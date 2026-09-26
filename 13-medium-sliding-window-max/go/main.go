@@ -10,8 +10,8 @@ import (
 )
 
 type input struct {
-	K   int   `json:"k"`
-	Arr []int `json:"arr"`
+	K   int     `json:"k"`
+	Arr []int32 `json:"arr"`
 }
 
 // init keeps the main goroutine, and so solve, on the thread the program
@@ -29,7 +29,7 @@ func main() {
 	out := solve(in.K, in.Arr)
 	parts := make([]string, len(out))
 	for i, v := range out {
-		parts[i] = strconv.Itoa(v)
+		parts[i] = strconv.Itoa(int(v))
 	}
 	fmt.Println(strings.Join(parts, " "))
 }

@@ -4,7 +4,7 @@ package main
 // and returns; keep the directive.
 //
 //go:noinline
-func solve(k int, arr []int) []int {
+func solve(k int, arr []int32) []int32 {
 	_ = k
 	_ = arr
 	return nil

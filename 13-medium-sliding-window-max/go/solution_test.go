@@ -40,13 +40,13 @@ func TestCases(t *testing.T) {
 			if err != nil {
 				t.Fatalf("read .out for %s: %v", inp, err)
 			}
-			var want []int
+			var want []int32
 			for _, tok := range strings.Fields(string(raw)) {
-				v, err := strconv.Atoi(tok)
+				v, err := strconv.ParseInt(tok, 10, 32)
 				if err != nil {
 					t.Fatalf("parse .out for %s: %v", inp, err)
 				}
-				want = append(want, v)
+				want = append(want, int32(v))
 			}
 
 			got := solve(in.K, in.Arr)
