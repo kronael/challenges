@@ -188,6 +188,15 @@ void answer_print(FILE *out, const Answer *a) { fprintf(out, "%.1f\\n", a->sum);
 void answer_free(Answer *a) { (void)a; }
 """
 
+# Stays scalar: each add waits on the last.
+C_SUM = """
+Answer solve(const Input *in) {
+    double s = 0;
+    for (size_t i = 0; i < in->n; i++) s += in->x[i];
+    return (Answer){s};
+}
+"""
+
 C_CRASH = """
 Answer solve(const Input *in) {
     return (Answer){in->x[0] + *(volatile double *)0};
@@ -559,6 +568,15 @@ class CMakeTests(unittest.TestCase):
             return subprocess.run(
                 ["make", "vec"], cwd=workdir, capture_output=True, text=True
             )
+
+    def test_a_scalar_verdict_names_the_lines_that_ran_scalar(self) -> None:
+        done = self.vec(C_SUM)
+        self.assertEqual(done.returncode, 2, done.stdout + done.stderr)
+        self.assertIn("-> scalar  EXPECTED vectorized", done.stdout)
+        loop = (C_SCAFFOLD + C_SUM).splitlines().index(
+            "    for (size_t i = 0; i < in->n; i++) s += in->x[i];"
+        )
+        self.assertRegex(done.stdout, rf"\n +[\d,]+  solution\.c:{loop + 1} solve\n")
 
     def test_a_crash_is_reported_as_a_crash(self) -> None:
         done = self.vec(C_CRASH)

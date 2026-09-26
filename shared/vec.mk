@@ -12,6 +12,7 @@ include ../vec.mk
 ifneq ($(wildcard Cargo.toml),)
 VEC_BIN  := target/release/$(BIN_NAME)
 VEC_FUNC := solve
+export CARGO_PROFILE_RELEASE_DEBUG := line-tables-only
 else ifneq ($(wildcard go.mod),)
 VEC_BIN  := ./$(MOD_NAME)
 VEC_FUNC := main.solve

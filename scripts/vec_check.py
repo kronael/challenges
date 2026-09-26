@@ -32,7 +32,8 @@ scalar instructions per unit and at least PACKED_FLOOR packed ones. Any scalar
 pass over the input costs at least one per unit however many vector loops run
 beside it: a load or a floating-point add per element. Setup, a remainder
 tail, and a horizontal sum cost a fraction of one. A loop the input never runs
-costs nothing.
+costs nothing. A grade that fails lists the source lines, or the libraries,
+where most of the counted scalar instructions ran.
 
 Before tracing, the solver's sources are checked for the ways to emit code the
 compiler did not choose for x86-64-v3: inline or standalone assembly, pragmas
@@ -65,6 +66,7 @@ and the traced program dies with the grader.
 from __future__ import annotations
 
 import argparse
+import bisect
 import ctypes
 import enum
 import json
@@ -75,7 +77,8 @@ import signal
 import subprocess
 import sys
 import tempfile
-from dataclasses import dataclass
+from collections import Counter
+from dataclasses import dataclass, field
 from pathlib import Path
 
 BUDGET = 1.0
@@ -84,6 +87,7 @@ WINDOW = 256
 LONGEST = 15
 STEPS = 16_000_000
 HANG = 60
+PLACES = 5
 DETOURS = ("runtime.morestack.abi0", "runtime.systemstack.abi0")
 SPAWNS = ("runtime.newproc",)
 SPAWN_SYSCALLS = {56, 57, 58, 435}  # clone, fork, vfork, clone3
@@ -137,6 +141,8 @@ class Count:
     packed: int = 0
     steps: int = 0
     returned: bool = False
+    hot: Counter[int] = field(default_factory=Counter)
+    places: Counter[str] = field(default_factory=Counter)
 
 
 PREFIXES = {
@@ -314,33 +320,87 @@ def read_memory(pid: int, address: int, size: int) -> bytes:
     )
 
 
-def find_functions(binary: Path, base: int) -> dict[str, int]:
+def load_offset(binary: Path, base: int) -> int:
+    relocated = int.from_bytes(binary.read_bytes()[16:18], "little") == 3
+    return base if relocated else 0
+
+
+def find_functions(binary: Path, offset: int) -> dict[str, int]:
     listed = subprocess.run(
-        ["nm", "--defined-only", str(binary)], capture_output=True, text=True
+        ["nm", "--defined-only", "--demangle", str(binary)],
+        capture_output=True,
+        text=True,
     )
     if listed.returncode != 0:
         sys.exit(f"vec_check: cannot read symbols from {binary}\n{listed.stderr}")
-    relocated = int.from_bytes(binary.read_bytes()[16:18], "little") == 3
-    offset = base if relocated else 0
     functions = {}
     for line in listed.stdout.splitlines():
-        fields = line.split()
+        fields = line.split(maxsplit=2)
         if len(fields) == 3 and fields[1] in "tTwW":
             functions[fields[2]] = int(fields[0], 16) + offset
     return functions
 
 
-def find_image(pid: int, binary: Path) -> tuple[int, int, int]:
-    spans = []
+def read_maps(pid: int) -> list[tuple[int, int, int, str]]:
+    maps = []
     for line in Path(f"/proc/{pid}/maps").read_text().splitlines():
         fields = line.split()
-        if len(fields) >= 6 and fields[5] == str(binary):
+        if len(fields) >= 6:
             low, high = fields[0].split("-")
-            spans.append((int(low, 16), int(high, 16), int(fields[2], 16)))
+            maps.append((int(low, 16), int(high, 16), int(fields[2], 16), fields[5]))
+    return maps
+
+
+def find_image(pid: int, binary: Path) -> tuple[int, int, int]:
+    spans = [
+        (low, high, offset)
+        for low, high, offset, path in read_maps(pid)
+        if path == str(binary)
+    ]
     if not spans:
         sys.exit(f"vec_check: {binary} is not mapped into its own process")
     base = min(low - offset for low, _, offset in spans)
     return base, min(low for low, _, _ in spans), max(high for _, high, _ in spans)
+
+
+def read_lines(binary: Path) -> tuple[list[int], list[str | None]]:
+    decoded = subprocess.run(
+        ["objdump", "--dwarf=decodedline", str(binary)],
+        capture_output=True,
+        text=True,
+    )
+    rows: dict[int, str | None] = {}
+    for line in decoded.stdout.splitlines():
+        fields = line.split()
+        if len(fields) < 3 or not fields[2].startswith("0x"):
+            continue
+        if fields[1].isdigit():
+            rows[int(fields[2], 16)] = f"{fields[0]}:{fields[1]}"
+        else:
+            rows.setdefault(int(fields[2], 16), None)
+    starts = sorted(rows)
+    return starts, [rows[start] for start in starts]
+
+
+def locate(
+    pid: int, binary: Path, offset: int, functions: dict[str, int], hot: Counter[int]
+) -> Counter[str]:
+    maps = read_maps(pid)
+    starts, lines = read_lines(binary)
+    names = {address: name for name, address in functions.items()}
+    entries = sorted(names)
+    places: Counter[str] = Counter()
+    for address, times in hot.items():
+        path = next((path for low, high, _, path in maps if low <= address < high), "")
+        if path != str(binary):
+            places[Path(path).name or "unmapped code"] += times
+            continue
+        entry = bisect.bisect_right(entries, address) - 1
+        function = names[entries[entry]] if entry >= 0 else f"{address - offset:#x}"
+        row = bisect.bisect_right(starts, address - offset) - 1
+        line = lines[row] if row >= 0 else None
+        places[f"{line} {function}" if line else function] += times
+    return places
 
 
 def launch(binary: Path, stdin: Path, stdout: int) -> int:
@@ -414,7 +474,7 @@ def trace(
     regs = Regs()
     table: dict[int, Insn] = {}
     count = Count()
-    segment = 0
+    segment: list[int] = []
     vector = False
     rip = entry
     pending = 0
@@ -435,8 +495,11 @@ def trace(
                 "vec_check: solve started a thread;"
                 " make vec grades single-threaded work only"
             )
-        segment += insn.kind is Kind.INTEGER
-        count.scalar += insn.kind is Kind.SCALAR
+        if insn.kind is Kind.INTEGER:
+            segment.append(rip)
+        elif insn.kind is Kind.SCALAR:
+            count.scalar += 1
+            count.hot[rip] += 1
         count.packed += insn.kind is Kind.PACKED
         vector |= insn.vector_load
         count.steps += 1
@@ -457,8 +520,10 @@ def trace(
         ptrace(GETREGS, pid, 0, ctypes.addressof(regs))
         returned = regs.rip == returns
         if returned or (insn.jump and regs.rip <= rip):
-            count.scalar += 0 if vector else segment
-            segment = 0
+            if not vector:
+                count.scalar += len(segment)
+                count.hot.update(segment)
+            segment = []
             vector = False
             if count.scalar > scalar_limit:
                 return count
@@ -522,7 +587,8 @@ def run(
     with tempfile.TemporaryFile() as out:
         pid = launch(binary, input_path, out.fileno())
         base, low, high = find_image(pid, binary)
-        functions = find_functions(binary, base)
+        offset = load_offset(binary, base)
+        functions = find_functions(binary, offset)
         if function not in functions:
             sys.exit(f"vec_check: {binary} defines no function {function}")
         detours = {functions[name] for name in DETOURS if name in functions}
@@ -536,6 +602,7 @@ def run(
             scalar_limit,
             step_limit,
         )
+        count.places = locate(pid, binary, offset, functions, count.hot)
         if not count.returned:
             os.kill(pid, signal.SIGKILL)
             wait(pid)
@@ -608,6 +675,11 @@ def main() -> None:
         f"  {args.function}: {shape} per element of {args.units} ({units})"
         f" -> {found}{'' if ok else '  EXPECTED ' + args.expect}"
     )
+    if not ok and count.places:
+        first = "" if count.returned else "first "
+        print(f"  where its {first}{count.scalar:,} scalar instructions ran:")
+        for place, times in count.places.most_common(PLACES):
+            print(f"  {times:>10,}  {place}")
     sys.exit(0 if ok else 1)
 
 
