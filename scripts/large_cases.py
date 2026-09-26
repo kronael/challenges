@@ -15,7 +15,7 @@ DNA = "ACGT"
 LOWER = "abcdefghijklmnopqrstuvwxyz"
 PROTEIN = "ARNDCQEGHILKMFPSTWYV"
 RNA = "ACGU"
-EXPECTED_DIGEST = "d6592d33ee68c34f8c107c9f7d26aa5f36d7b11033d050ef6e42226a0857b75e"
+EXPECTED_DIGEST = "9ee185e3dd32fba741a742d9ec02b15b7f885dc9f07a5fcef84b6f49ab38c71e"
 
 
 class Rng:
@@ -184,12 +184,12 @@ def build_12(name: str, rng: Rng) -> dict[str, Any]:
 
 
 def build_13(name: str, rng: Rng) -> dict[str, Any]:
-    n = 200_000
+    n = 1_000_000
     if name == "09_large_random":
         arr = [rng.integer(-1_000_000_000, 1_000_000_000) for _ in range(n)]
     else:
         arr = list(range(n, 0, -1))
-    return {"k": 50_000, "arr": arr}
+    return {"k": 500_000, "arr": arr}
 
 
 def build_14(name: str, rng: Rng) -> dict[str, Any]:
@@ -492,12 +492,12 @@ def build_43(name: str, rng: Rng) -> dict[str, Any]:
 
 def build_44(name: str, rng: Rng) -> dict[str, Any]:
     if name == "09_large_random":
-        return {"s": rng.text(PROTEIN, 1_800), "t": rng.text(PROTEIN, 1_700)}
-    source = list(rng.text(PROTEIN, 2_000))
+        return {"s": rng.text(PROTEIN, 2_500), "t": rng.text(PROTEIN, 2_400)}
+    source = list(rng.text(PROTEIN, 2_500))
     target = source.copy()
     for i in range(0, len(target), 50):
         target[i] = PROTEIN[(PROTEIN.index(target[i]) + 1) % len(PROTEIN)]
-    return {"s": "".join(source[20:1_980]), "t": "".join(target)}
+    return {"s": "".join(source[20:2_480]), "t": "".join(target)}
 
 
 def build_45(name: str, rng: Rng) -> dict[str, Any]:
@@ -510,7 +510,7 @@ def build_45(name: str, rng: Rng) -> dict[str, Any]:
 
 def build_46(name: str, rng: Rng) -> dict[str, Any]:
     if name == "46_large_many":
-        length = 16
+        length = 20
         genome = rng.text(DNA, 1_000_000)
         guides = [rng.text(DNA, length) for _ in range(2_000)]
         return {"d": 2, "len": length, "genome": genome, "guides": guides}

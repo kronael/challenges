@@ -30,7 +30,7 @@ Report the maximum achievable alignment score over all valid global alignments.
 
 Both strings use the 20 standard amino acids `ARNDCQEGHILKMFPSTWYV`.
 
-Constraints: `1 ≤ |s|, |t| ≤ 2000`; both strings over the 20 standard amino
+Constraints: `1 ≤ |s|, |t| ≤ 2500`; both strings over the 20 standard amino
 acids; the score fits in a signed 32-bit integer.
 
 ### BLOSUM62

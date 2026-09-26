@@ -51,8 +51,8 @@ void input_free(Input *in) {
 	in->t = NULL;
 }
 
-// Sixteen 16-bit scores per vector. For |s|, |t| <= 2000 every score a cell can
-// hold lies within ±22000, so 16 bits suffice, and saturating arithmetic keeps
+// Sixteen 16-bit scores per vector. For |s|, |t| <= 2500 every score a cell can
+// hold lies within ±27500, so 16 bits suffice, and saturating arithmetic keeps
 // the minus-infinity sentinel from wrapping around.
 enum { LANES = 16 };
 #define NEG INT16_MIN
