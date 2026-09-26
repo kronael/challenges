@@ -169,6 +169,26 @@ class TemporaryPathTests(unittest.TestCase):
             self.assertFalse(created_path.exists())
 
 
+class OracleCommandTests(unittest.TestCase):
+    def setUp(self) -> None:
+        bench.TMP.mkdir(exist_ok=True)
+
+    def test_python_golden_runs_main_py(self) -> None:
+        with tempfile.TemporaryDirectory(dir=bench.TMP) as raw_dir:
+            golden = Path(raw_dir)
+            (golden / "main.py").touch()
+            self.assertEqual(
+                bench.oracle_command(golden), ["uv", "run", "python", "main.py"]
+            )
+
+    def test_c_golden_is_built_then_runs_main(self) -> None:
+        with tempfile.TemporaryDirectory(dir=bench.TMP) as raw_dir:
+            golden = Path(raw_dir)
+            (golden / "Makefile").write_text("main:\n\ttouch main\n", encoding="utf-8")
+            self.assertEqual(bench.oracle_command(golden), ["./main"])
+            self.assertTrue((golden / "main").exists())
+
+
 class BenchmarkCaseTests(unittest.TestCase):
     def setUp(self) -> None:
         bench.TMP.mkdir(exist_ok=True)

@@ -10,18 +10,21 @@
 # contract holds across the whole repo.
 SHELL := /bin/bash
 
-# io challenges only: golden/rotten that ship a python case-suite. sys challenges
-# (29-34) have C golden/rotten with no cases — their rotten passes a weak sanity
-# check and fails a controlled adversarial run, verified by `make sys-rotten`.
-GOLDEN := $(sort $(dir $(wildcard [0-9][0-9]-*/golden/test_solution.py)))
+# io challenges: every golden or rotten with a python case-suite, and the golden
+# beside each such rotten, which is C when the challenge has a vec level. sys
+# challenges (29-34) have C golden/rotten with no cases — their rotten passes a
+# weak sanity check and fails a controlled adversarial run, verified by
+# `make sys-rotten`.
 ROTTEN := $(sort $(dir $(wildcard [0-9][0-9]-*/rotten/test_solution.py)))
+GOLDEN := $(sort $(dir $(wildcard [0-9][0-9]-*/golden/test_solution.py)) \
+	$(ROTTEN:rotten/=golden/))
 SYS    := $(sort $(dir $(wildcard [0-9][0-9]-*/golden/main.c)))
 SYS_ROTTEN := $(sort $(dir $(wildcard [0-9][0-9]-*/rotten/main.c)))
-# vec challenges: the golden and rotten controls whose Makefile includes the vec
-# grade. golden/ expects vectorized and rotten/ expects scalar, so one target
-# checks both ends of the contract, once per C compiler: cc, and clang too when
-# it is on PATH. Solver directories include it too, but theirs is their own gate
-# and fails until solved, exactly like their `make test`.
+# vec level: the golden and rotten controls whose Makefile includes the vec
+# grade. golden/ expects vectorized and rotten/ (66-68) expects scalar, so one
+# target checks both ends of the contract, once per C compiler: cc, and clang too
+# when it is on PATH. Solver directories include it too, but theirs is their own
+# gate and fails until solved, exactly like their `make test`.
 VEC    := $(sort $(dir $(shell grep -l 'shared/vec.mk' \
 	[0-9][0-9]-*/golden/Makefile [0-9][0-9]-*/rotten/Makefile 2>/dev/null)))
 VEC_CCS := cc $(if $(shell command -v clang 2>/dev/null),clang)
@@ -45,7 +48,7 @@ cases:
 test:
 	cd scripts && python3 -X dev -W error -m unittest discover -p 'test_*.py'
 	@fail=0; \
-	for d in $(GOLDEN) $(ROTTEN) $(VEC); do \
+	for d in $(sort $(GOLDEN) $(ROTTEN) $(VEC)); do \
 	  printf "test  %-34s " "$$d"; \
 	  if (cd $$d && make test) >/tmp/ptest.log 2>&1; then echo "ok"; \
 	  else echo "FAIL"; sed 's/^/    /' /tmp/ptest.log | tail -3; fail=1; fi; \
@@ -57,7 +60,7 @@ golden: cases
 	for d in $(GOLDEN); do \
 	  printf "golden %-33s " "$$d"; \
 	  if ! (cd $$d && make test) >/tmp/pgold.log 2>&1; then echo "TEST FAIL"; fail=1; continue; fi; \
-	  if grep -q '^bench:' $$d/Makefile; then \
+	  if $(MAKE) -n -C $$d bench >/dev/null 2>&1; then \
 	    if (cd $$d && make bench TIMEOUT=$(GOLDEN_TIMEOUT)) >/tmp/pgold-bench.log 2>&1; then \
 	      if grep -q 'TIMEOUT (' /tmp/pgold-bench.log; then \
 	        echo "BENCH TIMEOUT — golden too slow!"; fail=1; \

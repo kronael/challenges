@@ -101,6 +101,15 @@ def temp_path(label: str) -> Path:
     return Path(raw_path)
 
 
+def oracle_command(golden: Path) -> list[str]:
+    if (golden / "main.py").exists():
+        return ["uv", "run", "python", "main.py"]
+    subprocess.run(
+        ["make", "--no-print-directory", "-s", "main"], cwd=golden, check=True
+    )
+    return ["./main"]
+
+
 def report_error(label: str, result: Result) -> None:
     print(f"{label}  ERROR (exit {result.code})")
     if result.stderr:
@@ -128,9 +137,10 @@ def benchmark_case(
         label = f"{case.name} (seed {case.seed}):"
 
         if not expect_timeout:
+            golden = ROOT / case.challenge / "golden"
             oracle = run(
-                ["uv", "run", "python", "main.py"],
-                ROOT / case.challenge / "golden",
+                oracle_command(golden),
+                golden,
                 input_path,
                 expected_path,
                 oracle_timeout,
