@@ -12,9 +12,9 @@ you may take each item at most once (no splitting an item, no taking it twice).
 Maximise the total value of the packed items without letting their combined
 weight exceed `W`.
 
-Constraints: items up to 1000, capacity up to 10⁴, and each weight is a positive
-signed 32-bit integer. Values fit in signed 32-bit integers. The result and all
-accumulated values must fit in a signed 64-bit integer.
+Constraints: items up to 1000, `0 ≤ capacity ≤ 10⁴`, and each weight and each
+value is a positive signed 32-bit integer. The result and all accumulated
+values must fit in a signed 64-bit integer.
 
 ## Input
 
