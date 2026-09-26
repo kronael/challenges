@@ -919,14 +919,43 @@ class LintTests(unittest.TestCase):
         )
         self.assertEqual(self.lint({"solution.c": source}), [])
 
+    def test_c_allows_pragma_once_and_a_function_named_target(self) -> None:
+        files = {
+            "solution.h": "#pragma once\nint f(void);\n",
+            "solution.c": '#include "solution.h"\n'
+            "static int target(int x) { return x; }\n"
+            "int f(void) { return target(3); }\n",
+        }
+        self.assertEqual(self.lint(files), [])
+
+    def test_c_refuses_assembly_in_a_file_it_includes(self) -> None:
+        files = {
+            "solution.c": '#include "kernel.inc"\n',
+            "kernel.inc": 'static void f(void) { __asm__("nop"); }\n',
+        }
+        self.assertEqual(self.lint(files), ["kernel.inc: inline assembly"])
+
     def test_rust_refuses_assembly_target_features_and_build_scripts(self) -> None:
         for files in (
             {"src/lib.rs": 'pub fn f() { unsafe { std::arch::asm!("nop") } }\n'},
             {
+                "src/lib.rs": "use core::arch::asm as emit;\n"
+                'pub fn f() { unsafe { emit!("nop") } }\n'
+            },
+            {
                 "src/lib.rs": '#[target_feature(enable = "avx512f")]\n'
                 "pub unsafe fn f() {}\n"
             },
+            {
+                "src/lib.rs": '#[cfg_attr(all(), target_feature(enable = "avx512f"))]\n'
+                "pub unsafe fn f() {}\n"
+            },
             {"src/lib.rs": "pub fn f() {}\n", "build.rs": "fn main() {}\n"},
+            {
+                "Cargo.toml": '[package]\nname = "p"\nbuild = "gen.rs"\n',
+                "src/lib.rs": "pub fn f() {}\n",
+                "gen.rs": "fn main() {}\n",
+            },
         ):
             with self.subTest(files=files):
                 self.assertEqual(len(self.lint({"Cargo.toml": "", **files})), 1)
@@ -943,6 +972,17 @@ class LintTests(unittest.TestCase):
         source = 'package main\n\nimport "C"\n\nfunc solve() {}\n'
         self.assertEqual(
             self.lint({"go.mod": GO_MOD, "solution.go": source}), ["solution.go: cgo"]
+        )
+
+    def test_go_refuses_assembly_in_a_subpackage(self) -> None:
+        files = {
+            "go.mod": GO_MOD,
+            "solution.go": 'package main\n\nimport "probe/k"\n\nfunc solve() { k.F() }\n',
+            "k/k.go": "package k\n\nfunc F()\n",
+            "k/k_amd64.s": "",
+        }
+        self.assertEqual(
+            self.lint(files), ["k/k_amd64.s: compiled outside the graded build"]
         )
 
 

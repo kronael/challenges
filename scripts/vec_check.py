@@ -36,12 +36,15 @@ tail, and a horizontal sum cost a fraction of one. A loop the input never runs
 costs nothing. A grade that fails lists the source lines, or the libraries,
 where most of the counted scalar instructions ran.
 
-Before tracing, the solver's sources are checked for the ways to emit code the
-compiler did not choose for x86-64-v3: inline or standalone assembly, pragmas
-and attributes that change the target or the optimizer, Rust's
-`#[target_feature]`, and build scripts and cgo that compile code outside the
-graded build. While tracing, an AVX-512 instruction in the program's own code
-is refused for the same reason.
+Before tracing, every file under the solver's directory is checked for the ways
+to emit code the compiler did not choose for x86-64-v3: inline or standalone
+assembly, under any name it is imported as, pragmas and attributes that change
+the target or the optimizer, Rust's `#[target_feature]` and `#[naked]`, also
+inside `cfg_attr`, and build scripts, named in any Cargo.toml, and cgo that
+compile code outside the graded build. The check reads text, not the language,
+so a construct a C macro assembles from pieces, a file outside the directory
+that a source includes, and a dependency's own code pass it. While tracing, an
+AVX-512 instruction in the program's own code is refused for the same reason.
 
 Only the thread that calls the graded function is traced, so no other thread
 may work while it runs. At its entry every other thread of the program is
@@ -86,6 +89,7 @@ import signal
 import subprocess
 import sys
 import tempfile
+import tomllib
 from collections import Counter
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -216,16 +220,21 @@ ZEROING = re.compile(r"^v?(pxor|xorp[sd])$")
 
 C_BANNED = [
     (re.compile(r"\b(asm|__asm__|__asm)\b"), "inline assembly"),
-    (re.compile(r"^\s*#\s*pragma\b|\b_Pragma\s*\(", re.MULTILINE), "a #pragma"),
     (
-        re.compile(r"\b_*(target|optimize|target_clones)_*\s*\("),
+        re.compile(r"^\s*#\s*pragma\b(?!\s*once\s*$)|\b_Pragma\b", re.MULTILINE),
+        "a #pragma",
+    ),
+    (
+        re.compile(
+            r'\b_*(target|target_clones)_*\s*\(\s*"|\b_*optimize_*\s*\(\s*["\d]'
+        ),
         "a target or optimize attribute",
     ),
 ]
 RUST_BANNED = [
-    (re.compile(r"\b(asm|global_asm|naked_asm)!"), "inline assembly"),
+    (re.compile(r"\b(asm|global_asm|naked_asm)\b"), "inline assembly"),
     (
-        re.compile(r"#!?\[\s*(unsafe\s*\(\s*)?(target_feature|naked)\b"),
+        re.compile(r"\btarget_feature\s*\(|#!?\[[^\]]*\bnaked\b"),
         "#[target_feature] or #[naked]",
     ),
 ]
@@ -641,26 +650,48 @@ def strip_comments(source: str) -> str:
     return re.sub(r"//[^\n]*", "", source)
 
 
+def find_build_scripts(files: list[Path]) -> list[Path]:
+    scripts = []
+    for manifest in files:
+        if manifest.name != "Cargo.toml":
+            continue
+        package = tomllib.loads(manifest.read_text(encoding="utf-8")).get("package", {})
+        build = package.get("build", True)
+        script = manifest.parent / ("build.rs" if build is True else str(build))
+        if build is not False and script.exists():
+            scripts.append(script)
+    return scripts
+
+
 def lint(workdir: Path) -> list[str]:
+    files = sorted(path for path in workdir.rglob("*") if path.is_file())
     if (workdir / "Cargo.toml").exists():
-        sources = sorted((workdir / "src").rglob("*.rs"))
+        sources = [
+            path for path in files if path.relative_to(workdir).parts[0] != "target"
+        ]
         banned = RUST_BANNED
-        outside = [path for path in [workdir / "build.rs"] if path.exists()]
+        outside = find_build_scripts(sources)
     elif (workdir / "go.mod").exists():
-        sources = sorted(
-            path for path in workdir.glob("*.go") if not path.name.endswith("_test.go")
-        )
+        sources = [
+            path
+            for path in files
+            if path.suffix == ".go" and not path.name.endswith("_test.go")
+        ]
         banned = GO_BANNED
-        outside = sorted(
-            path for path in workdir.iterdir() if path.suffix in GO_OUTSIDE
-        )
+        outside = [path for path in files if path.suffix in GO_OUTSIDE]
     else:
-        sources = sorted([*workdir.glob("*.c"), *workdir.glob("*.h")])
+        sources = files
         banned = C_BANNED
         outside = []
-    problems = [f"{path.name}: compiled outside the graded build" for path in outside]
+    problems = [
+        f"{path.relative_to(workdir)}: compiled outside the graded build"
+        for path in outside
+    ]
     for path in sources:
-        text = strip_comments(path.read_text(encoding="utf-8"))
+        try:
+            text = strip_comments(path.read_text(encoding="utf-8"))
+        except UnicodeDecodeError:
+            continue
         problems += [
             f"{path.relative_to(workdir)}: {what}"
             for pattern, what in banned

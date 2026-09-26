@@ -109,16 +109,20 @@ decision) or BY-DESIGN (accepted variance).
   in CLAUDE.md: move `input_parse` out of `solution.c` into a harness file the
   solver does not edit, and have `lint()` refuse code that runs before `main`
   (constructors, `.init_array` sections, Go `init`) in the edited files.
-- **VEC-LINT-SHALLOW** (LOW, hardening) — Record-only. `lint()` in
-  `scripts/vec_check.py` regex-scans only the top-level sources. It misses
-  `use core::arch::asm as emit; emit!(…)`,
-  `#[cfg_attr(all(), target_feature(enable = "avx512f"))]`, a `build = "gen.rs"`
-  key in `Cargo.toml`, Go assembly in a subpackage (`k/k_amd64.s`), and a C
-  `#include` of a `.inc` that holds `__asm__`; each takes deliberate
-  construction. It wrongly refuses `#pragma once` and a C function named
-  `target`. **Fix:** scan every file under the solver directory, read
-  `Cargo.toml`'s `build` key, and exempt `#pragma once`; aliases and
-  `cfg_attr` need a parser rather than a regex.
+- **VEC-LINT-TEXT-ONLY** (LOW, hardening) — Record-only. `lint()` in
+  `scripts/vec_check.py` regex-scans the text of every file under the solver
+  directory, so it cannot see what only the language resolves: a C keyword or
+  attribute name built by token pasting or named by a macro
+  (`#define T target` then `__attribute__((T("avx512f")))`), a trigraph or
+  digraph `#pragma`, a file outside the directory that a C `#include`, a Rust
+  `include!` or `#[path]`, a Cargo `[lib] path`, or a Go `replace` pulls in, and
+  the code of a Cargo or Go dependency. The build itself is open too (not
+  tried): a solver Makefile can override the `main` recipe that
+  `shared/c/io.mk` defines, and a `.cargo/config.toml` can set
+  `build.rustc-wrapper`. Each takes deliberate construction. **Fix:** grade the
+  preprocessed C (`cc -E` with the build's flags, system headers dropped), and
+  refuse include paths that leave the directory, recipe overrides, and cargo
+  config files.
 - **VEC-RBP-COUNTS-AS-STACK** (LOW, grading) — Record-only, not observed in
   66–68. `STACK` in `scripts/vec_check.py` treats every `%rbp`-based address as
   the stack, but gcc, clang, and rustc at release settings omit the frame
