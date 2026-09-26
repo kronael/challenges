@@ -1,30 +1,17 @@
-# Project-wide checks across every NN-level-slug challenge.
-#
-#   make test     script tests pass; every golden AND rotten passes its test suite
-#   make golden   every golden passes test; I/O goldens also run generated bench cases
-#   make rotten   every I/O rotten passes test BUT times out on generated cases
-#   make all      test
-#
-# golden/ is the optimised reference; rotten/ is the naive trap that is correct on
-# the small cases but too slow on the large ones. These targets assert exactly that
-# contract holds across the whole repo.
+# Repo-wide checks; `make help` lists them. golden/ is the fast reference and
+# passes every level. rotten/ is the naive control: correct on the small cases,
+# but it fails the next level.
 SHELL := /bin/bash
 
-# io challenges: every golden or rotten with a python case-suite, and the golden
-# beside each such rotten, which is C when the challenge has a vec level. sys
-# challenges (29-34) have C golden/rotten with no cases — their rotten passes a
-# weak sanity check and fails a controlled adversarial run, verified by
-# `make sys-rotten`.
+# io and api goldens with a python suite, plus the golden beside each io
+# rotten, which is C when the challenge has the vec level. sys (29-34) golden
+# and rotten are C with no cases.
 ROTTEN := $(sort $(dir $(wildcard [0-9][0-9]-*/rotten/test_solution.py)))
 GOLDEN := $(sort $(dir $(wildcard [0-9][0-9]-*/golden/test_solution.py)) \
 	$(ROTTEN:rotten/=golden/))
 SYS    := $(sort $(dir $(wildcard [0-9][0-9]-*/golden/main.c)))
 SYS_ROTTEN := $(sort $(dir $(wildcard [0-9][0-9]-*/rotten/main.c)))
-# vec level: the golden and rotten controls whose Makefile includes the vec
-# grade. golden/ expects vectorized and rotten/ (66-68) expects scalar, so one
-# target checks both ends of the contract, once per C compiler: cc, and clang too
-# when it is on PATH. Solver directories include it too, but theirs is their own
-# gate and fails until solved, exactly like their `make test`.
+# vec level: every golden must grade vectorized, and 66-68's rotten scalar.
 VEC    := $(sort $(dir $(shell grep -l 'shared/vec.mk' \
 	[0-9][0-9]-*/golden/Makefile [0-9][0-9]-*/rotten/Makefile 2>/dev/null)))
 VEC_CCS := cc $(if $(shell command -v clang 2>/dev/null),clang)
@@ -50,8 +37,8 @@ test:
 	@fail=0; \
 	for d in $(sort $(GOLDEN) $(ROTTEN) $(VEC)); do \
 	  printf "test  %-34s " "$$d"; \
-	  if (cd $$d && make test) >/tmp/ptest.log 2>&1; then echo "ok"; \
-	  else echo "FAIL"; sed 's/^/    /' /tmp/ptest.log | tail -3; fail=1; fi; \
+	  if out=$$(cd $$d && make test 2>&1); then echo "ok"; \
+	  else echo "FAIL"; echo "$$out" | tail -3 | sed 's/^/    /'; fail=1; fi; \
 	done; \
 	[ $$fail -eq 0 ] && echo "all golden+rotten case suites pass" || { echo "FAILURES above"; exit 1; }
 
@@ -59,18 +46,11 @@ golden: cases
 	@fail=0; \
 	for d in $(GOLDEN); do \
 	  printf "golden %-33s " "$$d"; \
-	  if ! (cd $$d && make test) >/tmp/pgold.log 2>&1; then echo "TEST FAIL"; fail=1; continue; fi; \
-	  if $(MAKE) -n -C $$d bench >/dev/null 2>&1; then \
-	    if (cd $$d && make bench TIMEOUT=$(GOLDEN_TIMEOUT)) >/tmp/pgold-bench.log 2>&1; then \
-	      if grep -q 'TIMEOUT (' /tmp/pgold-bench.log; then \
-	        echo "BENCH TIMEOUT — golden too slow!"; fail=1; \
-	      else echo "ok (test + bench)"; fi; \
-	    else \
-	      if grep -q 'TIMEOUT (' /tmp/pgold-bench.log; then echo "BENCH TIMEOUT — golden too slow!"; \
-	      else echo "BENCH FAIL"; sed 's/^/    /' /tmp/pgold-bench.log | tail -3; fi; \
-	      fail=1; \
-	    fi; \
-	  else echo "ok (test; no bench)"; fi; \
+	  if ! (cd $$d && make test) >/dev/null 2>&1; then echo "TEST FAIL"; fail=1; \
+	  elif ! $(MAKE) -n -C $$d bench >/dev/null 2>&1; then echo "ok (test; no bench)"; \
+	  elif out=$$(cd $$d && make bench TIMEOUT=$(GOLDEN_TIMEOUT) 2>&1); then echo "ok (test + bench)"; \
+	  elif grep -q 'TIMEOUT (' <<<"$$out"; then echo "BENCH TIMEOUT — golden too slow!"; fail=1; \
+	  else echo "BENCH FAIL"; echo "$$out" | tail -3 | sed 's/^/    /'; fail=1; fi; \
 	done; \
 	[ $$fail -eq 0 ] && echo "all golden pass test and bench" || { echo "FAILURES above"; exit 1; }
 
@@ -78,16 +58,13 @@ rotten: cases
 	@fail=0; \
 	for d in $(ROTTEN); do \
 	  printf "rotten %-33s " "$$d"; \
-	  if ! (cd $$d && make test) >/tmp/prot.log 2>&1; then \
-	    echo "TEST FAIL — rotten must pass small cases"; sed 's/^/    /' /tmp/prot.log | tail -3; fail=1; continue; \
+	  if ! out=$$(cd $$d && make test 2>&1); then \
+	    echo "TEST FAIL — rotten must pass small cases"; echo "$$out" | tail -3 | sed 's/^/    /'; fail=1; continue; \
 	  fi; \
 	  echo "small ok"; \
-	  if python3 scripts/bench.py --workdir "$$d" --timeout "$(ROTTEN_TIMEOUT)" \
-	      --expect-timeout -- uv run python main.py >/tmp/prot-bench.log 2>&1; then \
-	    sed 's/^/       /' /tmp/prot-bench.log; \
-	  else \
-	    sed 's/^/       /' /tmp/prot-bench.log; fail=1; \
-	  fi; \
+	  out=$$(python3 scripts/bench.py --workdir "$$d" --timeout "$(ROTTEN_TIMEOUT)" \
+	      --expect-timeout -- uv run python main.py 2>&1) || fail=1; \
+	  echo "$$out" | sed 's/^/       /'; \
 	done; \
 	[ $$fail -eq 0 ] && echo "all rotten pass small tests and every large case times out" || { echo "FAILURES above"; exit 1; }
 
@@ -95,8 +72,8 @@ sys:
 	@fail=0; \
 	for d in $(SYS); do \
 	  printf "sys    %-33s " "$$d"; \
-	  if (cd $$d && make test) >/tmp/psys.log 2>&1; then echo "ok (stress passes)"; \
-	  else echo "FAIL"; sed 's/^/    /' /tmp/psys.log | tail -3; fail=1; fi; \
+	  if out=$$(cd $$d && make test 2>&1); then echo "ok (stress passes)"; \
+	  else echo "FAIL"; echo "$$out" | tail -3 | sed 's/^/    /'; fail=1; fi; \
 	done; \
 	[ $$fail -eq 0 ] && echo "all sys golden stress tests pass" || { echo "FAILURES above"; exit 1; }
 
@@ -104,14 +81,14 @@ sys-rotten:
 	@fail=0; \
 	for d in $(SYS_ROTTEN); do \
 	  printf "sysbad %-33s " "$$d"; \
-	  if ! (cd $$d && make test) >/tmp/psys-rotten-test.log 2>&1; then \
-	    echo "SANITY FAIL"; sed 's/^/    /' /tmp/psys-rotten-test.log | tail -3; fail=1; continue; \
+	  if ! out=$$(cd $$d && make test 2>&1); then \
+	    echo "SANITY FAIL"; echo "$$out" | tail -3 | sed 's/^/    /'; fail=1; continue; \
 	  fi; \
-	  (cd $$d && timeout -k 2 5 ./main stress) >/tmp/psys-rotten-stress.log 2>&1; code=$$?; \
+	  out=$$(cd $$d && timeout -k 2 5 ./main stress 2>&1); code=$$?; \
 	  if [ $$code -eq 1 ]; then echo "ok (sanity passes; stress detects the defect)"; \
 	  elif [ $$code -eq 0 ]; then echo "STRESS PASSED — defect not exposed"; fail=1; \
 	  elif [ $$code -eq 124 ]; then echo "STRESS HUNG"; fail=1; \
-	  else echo "STRESS CRASHED (exit $$code) — not a controlled detection"; sed 's/^/    /' /tmp/psys-rotten-stress.log | tail -3; fail=1; fi; \
+	  else echo "STRESS CRASHED (exit $$code) — not a controlled detection"; echo "$$out" | tail -3 | sed 's/^/    /'; fail=1; fi; \
 	done; \
 	[ $$fail -eq 0 ] && echo "all sys rotten controls expose their defect" || { echo "FAILURES above"; exit 1; }
 
@@ -135,12 +112,12 @@ clean:
 	done
 
 help:
-	@echo "test    — every io golden + rotten passes its case suite"
+	@echo "test    — script tests; every golden + rotten passes its case suite"
 	@echo "cases   — verify every seeded large-case recipe is reproducible"
 	@echo "golden  — every io golden passes test AND generated bench cases"
 	@echo "rotten  — every io rotten passes small tests and generated cases time out"
 	@echo "sys     — every sys (29-34) golden C stress test passes"
 	@echo "sys-rotten — every sys rotten passes sanity and fails controlled stress"
-	@echo "vec     — every vec golden vectorizes and every vec rotten stays scalar, under cc, then clang if on PATH"
+	@echo "vec     — every vec golden vectorizes and 66-68's rotten stays scalar, under cc, then clang if on PATH"
 	@echo "clean   — remove compiled artifacts from every challenge"
 	@echo "Override GOLDEN_TIMEOUT (def 15s) / ROTTEN_TIMEOUT (def 5s)."
