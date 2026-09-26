@@ -39,7 +39,10 @@ compiler did not choose for x86-64-v3: inline or standalone assembly, pragmas
 and attributes that change the target or the optimizer, Rust's
 `#[target_feature]`, and build scripts and cgo that compile code outside the
 graded build. While tracing, an AVX-512 instruction in the program's own code
-is refused for the same reason.
+is refused for the same reason. Only the thread that calls the graded function
+is traced, so a traced instruction that starts a thread or a process, a clone,
+clone3, fork, or vfork system call, or a goroutine, a call to Go's
+runtime.newproc, is refused as well.
 
 Go's asynchronous preemption and collector are switched off. The two ways Go's
 runtime moves to the thread's own stack run untraced until they resume the
@@ -72,6 +75,8 @@ WINDOW = 256
 LONGEST = 15
 TIMEOUT = 60
 DETOURS = ("runtime.morestack.abi0", "runtime.systemstack.abi0")
+SPAWNS = ("runtime.newproc",)
+SPAWN_SYSCALLS = {56, 57, 58, 435}  # clone, fork, vfork, clone3
 WORD = 2**64 - 1
 REFUSED = 126
 
@@ -113,6 +118,7 @@ class Insn:
     jump: bool
     vector_load: bool
     evex: bool
+    syscall: bool
 
 
 @dataclass
@@ -235,7 +241,11 @@ def decode(mnemonic: str, operands: str, first_byte: int) -> Insn:
     loads = any("(" in part for part in parts[:-1])
     vector_load = vector and loads and kind is not Kind.SCALAR
     return Insn(
-        kind, mnemonic.startswith(("j", "loop")), vector_load, first_byte == 0x62
+        kind,
+        mnemonic.startswith(("j", "loop")),
+        vector_load,
+        first_byte == 0x62,
+        mnemonic == "syscall",
     )
 
 
@@ -369,7 +379,12 @@ def enter(pid: int, entry: int) -> int:
 
 
 def trace(
-    pid: int, entry: int, detours: set[int], image: range, scalar_limit: float
+    pid: int,
+    entry: int,
+    detours: set[int],
+    spawns: set[int],
+    image: range,
+    scalar_limit: float,
 ) -> Count:
     returns = enter(pid, entry)
     regs = Regs()
@@ -389,6 +404,13 @@ def trace(
             insn = table[rip]
         if insn.evex and rip in image:
             sys.exit(f"vec_check: AVX-512 instruction at {rip:#x}, outside x86-64-v3")
+        if insn.syscall:
+            ptrace(GETREGS, pid, 0, ctypes.addressof(regs))
+        if rip in spawns or (insn.syscall and regs.rax in SPAWN_SYSCALLS):
+            sys.exit(
+                "vec_check: solve started a thread;"
+                " make vec grades single-threaded work only"
+            )
         segment += insn.kind is Kind.INTEGER
         count.scalar += insn.kind is Kind.SCALAR
         count.packed += insn.kind is Kind.PACKED
@@ -471,7 +493,10 @@ def run(binary: Path, function: str, input_path: Path, scalar_limit: float) -> C
         if function not in functions:
             sys.exit(f"vec_check: {binary} defines no function {function}")
         detours = {functions[name] for name in DETOURS if name in functions}
-        count = trace(pid, functions[function], detours, range(low, high), scalar_limit)
+        spawns = {functions[name] for name in SPAWNS if name in functions}
+        count = trace(
+            pid, functions[function], detours, spawns, range(low, high), scalar_limit
+        )
         if not count.returned:
             os.kill(pid, signal.SIGKILL)
             os.waitpid(pid, 0)

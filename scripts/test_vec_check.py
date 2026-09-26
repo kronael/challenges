@@ -130,6 +130,27 @@ long solve(const int *restrict x, int *restrict out, long n, int t) {
 }
 """
 
+# A packed pass over the input, then the selection on a thread solve starts.
+THREAD = """
+#include <pthread.h>
+#include <stdlib.h>
+struct job { const int *y; int *out; long n; int t; long k; };
+static void *select_kept(void *raw) {
+    struct job *j = raw;
+    for (long i = 0; i < j->n; i++) if (j->y[i] > j->t + 1) j->out[j->k++] = j->y[i] - 1;
+    return 0;
+}
+long solve(const int *restrict x, int *restrict out, long n, int t) {
+    int *y = malloc(n * sizeof *y);
+    for (long i = 0; i < n; i++) y[i] = x[i] + 1;
+    struct job j = {y, out, n, t, 0};
+    pthread_t thread;
+    if (pthread_create(&thread, 0, select_kept, &j) || pthread_join(thread, 0)) abort();
+    free(y);
+    return j.k;
+}
+"""
+
 GO_MOD = "module probe\n\ngo 1.27.1\n"
 GO_MAIN = (
     """package main
@@ -276,6 +297,31 @@ func solve(a, b, c []int32) {
 }
 """
 
+# The lane multiply, then a scalar pass on a goroutine that solve starts.
+GO_GOROUTINE = """package main
+
+import "simd/archsimd"
+
+//go:noinline
+func solve(a, b, c []int32) {
+\ti := 0
+\tfor ; i+8 <= len(a); i += 8 {
+\t\tarchsimd.LoadInt32x8(a[i:]).Mul(archsimd.LoadInt32x8(b[i:])).Store(c[i:])
+\t}
+\tfor ; i < len(a); i++ {
+\t\tc[i] = a[i] * b[i]
+\t}
+\tdone := make(chan bool)
+\tgo func() {
+\t\tfor i := range c {
+\t\t\tc[i] += a[i]
+\t\t}
+\t\tdone <- true
+\t}()
+\t<-done
+}
+"""
+
 # A cfg(target_feature) branch that is wrong only where AVX2 is enabled.
 RUST_CFG_SPLIT = """
 #[no_mangle]
@@ -385,6 +431,11 @@ class CTests(unittest.TestCase):
         self.assertEqual(done.returncode, 1)
         self.assertIn("inline assembly", done.stdout)
 
+    def test_selection_on_a_thread_solve_starts_is_refused(self) -> None:
+        done = self.check(SELECT_MAIN, THREAD, "vectorized")
+        self.assertEqual(done.returncode, 1)
+        self.assertIn("solve started a thread", done.stderr)
+
     def test_missing_symbol_fails(self) -> None:
         with tempfile.TemporaryDirectory() as raw_dir:
             workdir = Path(raw_dir)
@@ -453,6 +504,11 @@ class GoTests(unittest.TestCase):
                 binary, "main.solve", workdir / "input.json", float("inf")
             )
             self.assertTrue(count.returned)
+
+    def test_pass_on_a_goroutine_solve_starts_is_refused(self) -> None:
+        done = self.check(GO_GOROUTINE, "vectorized")
+        self.assertEqual(done.returncode, 1)
+        self.assertIn("solve started a thread", done.stderr)
 
     def test_assembly_file_is_refused(self) -> None:
         with tempfile.TemporaryDirectory() as raw_dir:

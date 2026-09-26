@@ -128,8 +128,9 @@ at a time in scalar registers fails `make vec`.
 `make vec` grades the code the compiler chose for `x86-64-v3`, so it refuses
 inline or standalone assembly, a `#pragma`, a `target` or `optimize` attribute,
 Rust's `#[target_feature]`, `#[naked]`, and `build.rs`, and cgo, and it stops at
-the first AVX-512 instruction the program itself runs. It needs Linux, `ptrace`,
-and `objdump`.
+the first AVX-512 instruction the program itself runs. `solve` must run on one
+thread: `make vec` stops when it starts a thread, a process, or a goroutine. It
+needs Linux, `ptrace`, and `objdump`.
 
 The C, Rust, and Go directories have this level; the Python one does not:
 

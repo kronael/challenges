@@ -102,15 +102,16 @@ decision) or BY-DESIGN (accepted variance).
 
 ## vec grader
 
-- **VEC-OTHER-THREADS-UNTRACED** (MED, grading) — Record-only, confirmed
-  2026-09-25; needs sign-off, because the fix adds a rule to the grade.
-  `scripts/vec_check.py` single-steps only the thread that calls `solve`. A C
-  `solve` that runs one packed pass and hands the scalar selection to a
-  `pthread_create` worker it then joins grades `0.01 scalar, 0.50 packed ->
-  vectorized`. A Go `solve` can do the same with `go f()` and no new thread,
-  since goroutines run on threads the runtime already has. **Fix:** refuse a
-  `solve` that makes a clone, clone3, fork, or vfork syscall (read `orig_rax`
-  after stepping a `syscall`) or enters `runtime.newproc`.
+- **VEC-THREAD-STARTED-BEFORE-SOLVE** (MED, grading) — Record-only, confirmed
+  2026-09-26; needs sign-off. `scripts/vec_check.py` refuses a thread, process,
+  or goroutine that `solve` starts, but still single-steps only the thread that
+  calls `solve`. A 68 C `input_parse` that starts a `pthread_create` worker to
+  do the selection, with `solve` running one packed pass and joining it, grades
+  `0.05 scalar, 0.13 packed -> vectorized`. A Go `init` goroutine fed over a
+  channel has the same shape (not tried). **Fix:** trace every thread
+  (`PTRACE_O_TRACECLONE`) while `solve` runs, or refuse a C or Rust `solve`
+  entered with more than one entry in `/proc/<pid>/task`; Go's runtime always
+  has several threads, so Go needs the former.
 - **VEC-LINT-SHALLOW** (LOW, hardening) — Record-only. `lint()` in
   `scripts/vec_check.py` regex-scans only the top-level sources. It misses
   `use core::arch::asm as emit; emit!(…)`,
