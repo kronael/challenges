@@ -95,6 +95,28 @@ decision) or BY-DESIGN (accepted variance).
   and `04/12–20.in` were also reviewed and are intentional/harmless — every
   `.in` is paired and each challenge has ≥8 small cases — so they are not logged.)
 
+## Hints
+
+- **59-HINT-03-SKIP-AHEAD-IS-LINEAR** (LOW, docs) — Record-only, confirmed
+  2026-09-26. `59-medium-price-undercut/hints/03.md` says the right-to-left
+  walk that hops `answer[j]` days "buys no worst-case guarantee". That holds
+  only when the walk steps one day past a day whose answer is `0`. A walk that
+  stops there instead (that day is not lower, and nothing after it is, so the
+  day being answered is never undercut) hops over each day at most once, since
+  its hop chain is the stack from `hints/02.md`, and is O(n) on every input: at
+  most `n` hops on every series of up to 9 days over 4 values, on 20000 random
+  series, and on each large recipe. `59_large_spiked_climb` times out only the
+  step-past-zero walk (2.7·10¹⁰ hops). **Fix:** say that the zero case sets the
+  bound — stepping past a never-undercut day is quadratic on a long climb,
+  stopping there is linear.
+- **59-HINT-04-NAMES-TWO-RECIPES** (LOW, docs) — Record-only. `hints/04.md`
+  says "On both large recipes every day stays open until the last session", so
+  the naive scan does the full n(n-1)/2 = 3.1·10¹⁰ comparisons. The third
+  recipe, `59_large_spiked_climb`, leaves seven days in eight open for good, so
+  the scan does 2.7·10¹⁰; native controls took 7.5–8.0 s CPU at `-O2` and
+  7.2–7.6 s at `-O3 -march=native` on the box where the rising ramp took
+  8.0–8.5 s. **Fix:** name all three recipes and give the third's count.
+
 ## vec grader
 
 - **VEC-THREAD-STARTED-BEFORE-SOLVE** (MED, grading) — Record-only, confirmed
