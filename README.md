@@ -28,6 +28,20 @@ make sys-rotten  # systems controls pass sanity and fail controlled stress
 make vec         # every level-3 golden vectorizes; 66–68's rotten stays scalar
 ```
 
+---
+
+## Three levels
+
+A solution climbs up to three levels, each a target in its solver directory:
+
+1. `make test` — correct: the right answer on every small case in `cases/`.
+2. `make bench` — fast: the right answer on every seeded large case, within
+   the time limit.
+3. `make vec` — vectorized: `solve` does its per-element work in SIMD lanes
+   on an `x86-64-v3` build. C, Rust, and Go only.
+
+The catalog's Levels column lists the levels each challenge has.
+
 I/O solver directories share these targets:
 
 | target  | does |
@@ -37,30 +51,13 @@ I/O solver directories share these targets:
 | `make fmt`   | format in place |
 | `make lint`  | run static analysis |
 | `make check` | format, then lint |
-| `make test`  | correctness — small cases only, fast |
-| `make bench` | correctness + speed — generate and check every seeded large case |
-| `make vec`   | vectorized — C, Rust, and Go, where the challenge has level 3 |
+| `make test`  | level 1 — small cases |
+| `make bench` | level 2 — seeded large cases, timed |
+| `make vec`   | level 3 — trace `solve`'s machine code |
 | `make help`  | list all targets |
 
-API, systems, and vec-only (66–68) challenges use targets suited to their test
-style. Their challenge README and `make help` list the available commands.
-
----
-
-## Three levels
-
-A solution climbs up to three levels, each a target in its solver directory:
-
-1. `make test` — correct: the answer matches every small case in `cases/`.
-2. `make bench` — fast: every seeded large case is answered correctly within
-   the time limit.
-3. `make vec` — vectorized: `solve` does its per-element work in packed SIMD
-   lanes, graded by tracing an `x86-64-v3` build. C, Rust, and Go only.
-
-A level a challenge lacks is simply absent; the catalog's Levels column lists
-the ones it has. `golden/` passes all of them. `rotten/` is correct but fails
-the level after `make test`: too slow for `make bench`, or, in 66–68, which have
-no large cases, scalar for `make vec`.
+API and systems challenges use targets suited to their test style, and 66–68
+have no `make bench`. Each challenge README and `make help` list its commands.
 
 ---
 
@@ -71,8 +68,8 @@ NN-level-slug/
   README.md      ← the problem only: task, constraints, I/O, examples
   hints/         ← the approach/technique, one spoiler per file (01.md, 02.md, …)
   cases/         ← tracked small NN.in / NN.out fixtures (I/O challenges)
-  golden/        ← optimized reference, C when the challenge has level 3
-  rotten/        ← deliberately naive benchmark control
+  golden/        ← optimized reference that passes every level; C with level 3
+  rotten/        ← naive control: correct, but fails the next level
   python/        ← stub: implement solve() in main.py
   go/            ← stub: implement solve() in solution.go
   rust/          ← stub: implement solve() in src/lib.rs
@@ -82,8 +79,8 @@ NN-level-slug/
 The reusable C scaffold lives once in `shared/c/`: JSON parsing, allocation
 helpers, the executable entry point, the fixture runner, and their Make rules.
 Each challenge's `c/` directory contains only `solution.c`, `solution.h`, and a
-one-line Makefile include. `input_parse` and `answer_print` are written for you;
-`solve()` is not.
+Makefile that includes those rules. `input_parse` and `answer_print` are
+written for you; `solve()` is not.
 
 Large benchmark inputs are deterministic recipes in `scripts/large_cases.py`,
 not checked-in payloads. `make bench` materializes one seeded case at a time in
@@ -101,8 +98,7 @@ comparisons, lives in `hints/`, one spoiler per numbered file.
 - **io** — reads JSON from stdin and writes one line in the documented format
 - **api** — implements functions checked directly by a language test suite
 - **sys** — exposes a systems API; the test is a stress test rather than files
-- **vec** — reads JSON like an io challenge but has levels 1 and 3 only: no
-  large cases, and a scalar C control in `rotten/`
+- **vec** — like io, but levels 1 and 3 only: no large cases
 
 I/O challenge input is always JSON
 (`{"n":4,"edges":[[0,1]],"loads":[10,null]}`), so parsing is real work rather
