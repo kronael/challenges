@@ -2,6 +2,60 @@
 
 All notable changes to this challenge bench are recorded here.
 
+## [v0.1.8] — 2026-09-26
+
+> challenges v0.1.8 — a fairer `make vec`, fewer spoilers
+>
+> Blind solvers and hostile reviewers worked through the new level; `make vec` now
+> grades only `solve` and says where a failing one spent its scalar work.
+>
+> • `make vec` ignores the solver's own flags, and threads started before `solve`
+> • A failed grade names the source lines that did the most scalar work
+> • Grades no longer depend on machine load or lazy symbol binding
+> • READMEs stop describing the solution's shape; first hints are gentler
+> • Python stubs reach their tests again, with ruff pinned
+>
+> Full notes below.
+
+### Fixed
+
+- `make vec` builds with only the flags `shared/vec.mk` sets, so a solver's
+  `-ffast-math` or `RUSTFLAGS` no longer turns a scalar loop "vectorized".
+- `make vec` pauses every other thread while `solve` runs and refuses a live
+  child process, so work handed to a thread or process started earlier no
+  longer escapes the trace.
+- The trace stops at 16 M instructions instead of a 60 s wall clock, so a
+  correct solve no longer fails on a busy machine.
+- Library functions bind at startup, so `solve` is not charged for the
+  dynamic linker's lookups (46 C: 0.56 → 0.27 scalar).
+- An iteration that runs packed work counts as a vector iteration, whether or
+  not the compiler hoisted its loads; zeroing a register marks nothing.
+- Only `%rsp`-based addresses count as the stack; heap pointers in `%rbp` no
+  longer hide loads and stores.
+- The source lint reads every file under the solver directory and Cargo build
+  scripts, and no longer refuses `#pragma once` or a C function named `target`.
+- The answer check tells a crash, a nonzero exit, and a timeout apart.
+- 12 Python stubs (03, 18, 19, 21, 22, 24–26, 28, 36, 42, 44) failed ruff lint
+  before their tests ran; ruff is pinned to 0.16.9 in every Makefile.
+- `scripts/test_bench.py` no longer fails under load on child start-up.
+
+### Changed
+
+- A failed `make vec` lists the five places with the most scalar work, by
+  source line.
+- The vec READMEs state the budget as a bare total and say which intrinsics a
+  `solve` may use in C, Rust, and Go; they no longer describe the work's shape.
+- Hint 1 of 13, 44, and 46 is a question; the named technique moved to hint 2.
+- Go solver builds go inside their directory, not a shared `/tmp` path.
+- C `make help` lists `vec`; 66–68's C directories drop the `bench` rule.
+- 13's C `solve` takes the readings as `int32_t`, like golden, Rust, and Go.
+- Hint figures re-measured under the new grader.
+
+### Added
+
+- A larger small case for 17, 44, and 46, and a third 59 large recipe where
+  most days are never undercut.
+
 ## [v0.1.7] — 2026-09-26
 
 > challenges v0.1.7 — three levels: correct, fast, vectorized
