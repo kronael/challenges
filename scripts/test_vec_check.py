@@ -644,6 +644,35 @@ class RustBuildTests(unittest.TestCase):
             self.assertIn("left: 7", done.stdout + done.stderr)
 
 
+class HelpTests(unittest.TestCase):
+    def targets(self, workdir: Path) -> set[str]:
+        done = subprocess.run(
+            ["make", "-s", "help"], cwd=workdir, capture_output=True, text=True
+        )
+        self.assertEqual(done.returncode, 0, done.stderr)
+        return {line.split()[0] for line in done.stdout.splitlines()}
+
+    def has_rule(self, workdir: Path, target: str) -> bool:
+        done = subprocess.run(["make", "-n", target], cwd=workdir, capture_output=True)
+        return done.returncode == 0
+
+    def test_help_lists_the_same_levels_in_every_language(self) -> None:
+        for challenge in sorted(path.parent for path in ROOT.glob("[0-9]*/vec.mk")):
+            listed = {}
+            for language in ("c", "go", "rust"):
+                workdir = challenge / language
+                listed[language] = self.targets(workdir)
+                for target in ("bench", "vec"):
+                    with self.subTest(workdir=workdir, target=target):
+                        self.assertEqual(
+                            target in listed[language], self.has_rule(workdir, target)
+                        )
+            with self.subTest(challenge=challenge.name):
+                self.assertIn("vec", listed["c"])
+                self.assertEqual(listed["c"], listed["go"])
+                self.assertEqual(listed["c"], listed["rust"])
+
+
 class LintTests(unittest.TestCase):
     def lint(self, files: dict[str, str]) -> list[str]:
         with tempfile.TemporaryDirectory() as raw_dir:

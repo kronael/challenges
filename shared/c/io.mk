@@ -1,4 +1,4 @@
-.PHONY: all build fmt lint check test bench clean help
+.PHONY: all build fmt lint check test clean help
 CC       ?= cc
 CFLAGS   ?= -std=c11 -O2 -g -Wall -Wextra
 LDLIBS   ?=
@@ -32,18 +32,23 @@ check: fmt lint
 test: build check run_tests
 	./run_tests
 
+ifneq ($(LARGE_CASES),none)
+.PHONY: bench
 bench: build
 	python3 ../../scripts/bench.py --timeout "$(TIMEOUT)" -- ./main
+endif
 
 clean:
 	rm -f main run_tests
 
-help:
+help::
 	@echo "all    — fmt build lint test (default)"
 	@echo "build  — compile ./main"
 	@echo "fmt    — clang-format in place (skipped when not installed)"
 	@echo "lint   — compile every source with -Wpedantic -Wshadow -Werror"
 	@echo "check  — fmt + lint"
 	@echo "test   — build + fmt + lint + run ../cases (small cases only)"
+ifneq ($(LARGE_CASES),none)
 	@echo "bench  — check output and time ./main on large cases (TIMEOUT=5)"
+endif
 	@echo "clean  — remove built binaries"

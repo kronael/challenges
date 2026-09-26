@@ -18,6 +18,9 @@ VEC_FUNC := main.solve
 else
 VEC_BIN  := ./main
 VEC_FUNC := solve
+
+help::
+	@echo "vec    — trace solve on one fixture and check its work runs in packed lanes"
 endif
 
 .PHONY: vec

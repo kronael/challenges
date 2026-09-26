@@ -4,6 +4,7 @@
 CFLAGS := -std=c11 -O3 -march=x86-64-v3 -g -Wall -Wextra
 
 VEC_EXPECT := vectorized
+LARGE_CASES := none
 
 include ../../shared/c/io.mk
 include ../../shared/vec.mk
