@@ -110,6 +110,7 @@ SPAWN_SYSCALLS = {56, 57, 58, 435}  # clone, fork, vfork, clone3
 FUTEX = 202
 FUTEX_WAITV = 449
 FUTEX_WAITS = {0, 6, 9, 11, 13}  # wait, lock_pi, wait_bitset, wait_requeue_pi, lock_pi2
+GO_G = -8  # the running goroutine's g, at -8(%fs)
 GO_STACKGUARD = 16
 GO_PREEMPT = 0xFFFFFFFFFFFFFADE
 WORD = 2**64 - 1
@@ -557,7 +558,7 @@ def thaw(pid: int, frozen: dict[int, int]) -> None:
 
 
 def is_preempted(pid: int, regs: Regs) -> bool:
-    goroutine = ptrace(PEEKTEXT, pid, regs.fs_base - 8) & WORD
+    goroutine = ptrace(PEEKTEXT, pid, regs.fs_base + GO_G) & WORD
     return ptrace(PEEKTEXT, pid, goroutine + GO_STACKGUARD) & WORD == GO_PREEMPT
 
 
