@@ -148,20 +148,20 @@ When scaffolding a new I/O challenge: write the reference first in
 - **vec** (66–68): reads JSON like an io challenge and keeps the golden/rotten
   pair, but is graded on the emitted machine code as well as the answer.
   `golden/` and `rotten/` are C: the SAME algorithm at the SAME complexity,
-  differing only in what the compiler can emit for it (golden may use
-  intrinsics). Every vec Makefile includes `shared/vec.mk`, whose `make vec`
+  differing only in what the compiler can emit for it; golden may use
+  intrinsics. Every vec Makefile includes `shared/vec.mk`, whose `make vec`
   traces the binary `make test` checks with `scripts/vec_check.py`: `solve`
   grades vectorized below one scalar instruction per input element with at
   least one packed instruction per 50, and that script's docstring defines a
   scalar instruction. Golden must grade vectorized and rotten scalar; root
-  `make vec` checks only those two, under `cc` and also `clang` when it is on
-  PATH. Each directory builds once, for `x86-64-v3`: C pins `CFLAGS` to
+  `make vec` checks only those two, under `cc`, then `clang` if on PATH. Each
+  directory builds once, for `x86-64-v3`: C pins `CFLAGS` to
   `-O3 -march=x86-64-v3`, Rust builds and tests in release with
   `-C target-cpu=x86-64-v3`, and Go exports `GOAMD64=v3` and
-  `GOEXPERIMENT=simd` (for `simd/archsimd`). Go's `main.go` locks the main
+  `GOEXPERIMENT=simd` for `simd/archsimd`. Go's `main.go` locks the main
   goroutine to its thread and `solve` stays `//go:noinline`, or the tracer
-  cannot follow the call. Tracing needs ptrace (Yama `ptrace_scope` 0 or 1),
-  not root. No Python and no seeded large cases.
+  cannot follow the call. Tracing needs ptrace, not root: Yama `ptrace_scope`
+  0 or 1. No seeded large cases.
 
 ## Layout
 
@@ -183,9 +183,8 @@ NN-level-slug/
 
 sys challenges have no `python/`; sys challenges 31 and 33 have no `go/`.
 API challenges 21 and 22 have `golden/`, `python/`, and `go/` (no `rotten/`,
-`rust/`, or `c/`). vec challenges 66–68 have C `golden/` and `rotten/`, the
-solver dirs `c/`, `rust/`, and `go/` (no `python/`), and a `vec.mk` naming the
-fixture `make vec` traces.
+`rust/`, or `c/`). vec challenges 66–68 have `golden/`, `rotten/`, `c/`,
+`rust/`, and `go/` (no `python/`), plus a `vec.mk` naming the traced fixture.
 
 ## Input / output format
 
