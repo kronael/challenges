@@ -43,20 +43,30 @@ instruction per byte of `stream`, averaged over the fixture, and at least one
 packed SIMD instruction per 50 bytes. Scalar instructions are
 
 - scalar floating-point arithmetic, compares, and conversions; loads and stores
-  of 64 bits or less that do not address the stack; and moves of one lane from
-  a vector register into a general-purpose one, wherever they run;
+  of 64 bits or less that do not address the stack through `%rsp`; and moves of
+  one lane from a vector register into a general-purpose one, wherever they
+  run;
 - arithmetic, compares, bit operations, and conditional sets and moves on
-  general-purpose registers, except in loop iterations that load several
-  elements into a vector register at once.
+  general-purpose registers, except in loop iterations that run a packed SIMD
+  instruction or load several elements into a vector register at once.
 
-String instructions such as `rep movsb` do not count.
+String instructions such as `rep movsb` do not count. Neither does zeroing a
+vector register by XORing it with itself, which is not a packed SIMD
+instruction either. `make vec` traces at most 16 million instructions and fails
+a `solve` that runs longer. A failed grade lists the source lines and libraries
+where `solve` retired the most scalar instructions.
 
-`make vec` grades the code the compiler chose for `x86-64-v3`, so it refuses
-inline or standalone assembly, a `#pragma`, a `target` or `optimize` attribute,
-Rust's `#[target_feature]`, `#[naked]`, and `build.rs`, and cgo, and it stops at
-the first AVX-512 instruction the program itself runs. `solve` must run on one
-thread: `make vec` stops when it starts a thread, a process, or a goroutine. It
-needs Linux, `ptrace`, and `objdump`.
+`make vec` grades the code the compiler chose for `x86-64-v3`. It builds with
+only the flags `shared/vec.mk` sets, whatever a solver's Makefile or the command
+line adds. It refuses inline or standalone assembly, a `#pragma` other than
+`#pragma once`, a `target` or `optimize` attribute, Rust's `#[target_feature]`
+and `#[naked]`, a build script, and cgo in any file under the solver directory,
+and it stops at the first AVX-512 instruction the program itself runs. `solve`
+must work alone: `make vec` pauses every other thread of the program while
+`solve` runs, and it fails when `solve` starts a thread, a process, or a
+goroutine, when `solve` waits for another thread, or when a process the program
+started is still running as `solve` begins. It needs Linux, `ptrace`, and
+`objdump`.
 
 Both levels must pass. There are no large cases and no level 2: `make bench`
 has nothing to run here.
@@ -117,8 +127,8 @@ make -C go vec
 ```
 
 All three solver directories build for `x86-64-v3`, the target `make vec`
-grades, and `make test` compiles with the same flags, so both need a machine
-with AVX2, BMI2, and FMA.
+grades, and `make test` compiles with the same flags, the ones `shared/vec.mk`
+sets, so both need a machine with AVX2, BMI2, and FMA.
 
 A `solve` may use x86 SIMD intrinsics: `<immintrin.h>` in C,
 `std::arch::x86_64` in Rust, and `simd/archsimd` in Go. In Rust, a call to one

@@ -62,9 +62,9 @@ make -C c
 make -C python
 ```
 
-The C, Rust, and Go directories build every target for `x86-64-v3`: C at
-`-O3 -march=x86-64-v3`, Rust in release with `-C target-cpu=x86-64-v3`, and Go
-with `GOAMD64=v3`. Every target there needs a machine with AVX2, BMI2, and FMA.
+The C, Rust, and Go directories build every target for `x86-64-v3`, with the
+flags `shared/vec.mk` sets: C at `-O3 -march=x86-64-v3`, Rust in release with
+`-C target-cpu=x86-64-v3`, and Go with `GOAMD64=v3`. Every target there needs a machine with AVX2, BMI2, and FMA.
 
 Stuck? See `hints/01.md`.
 
@@ -81,20 +81,30 @@ per base of `genome`, averaged over the fixture, and at least one packed SIMD
 instruction per 50 bases. Scalar instructions are
 
 - scalar floating-point arithmetic, compares, and conversions; loads and stores
-  of 64 bits or less that do not address the stack; and moves of one lane from
-  a vector register into a general-purpose one, wherever they run;
+  of 64 bits or less that do not address the stack through `%rsp`; and moves of
+  one lane from a vector register into a general-purpose one, wherever they
+  run;
 - arithmetic, compares, bit operations, and conditional sets and moves on
-  general-purpose registers, except in loop iterations that load several
-  elements into a vector register at once.
+  general-purpose registers, except in loop iterations that run a packed SIMD
+  instruction or load several elements into a vector register at once.
 
-String instructions such as `rep movsb` do not count.
+String instructions such as `rep movsb` do not count. Neither does zeroing a
+vector register by XORing it with itself, which is not a packed SIMD
+instruction either. `make vec` traces at most 16 million instructions and fails
+a `solve` that runs longer. A failed grade lists the source lines and libraries
+where `solve` retired the most scalar instructions.
 
-`make vec` grades the code the compiler chose for `x86-64-v3`, so it refuses
-inline or standalone assembly, a `#pragma`, a `target` or `optimize` attribute,
-Rust's `#[target_feature]`, `#[naked]`, and `build.rs`, and cgo, and it stops at
-the first AVX-512 instruction the program itself runs. `solve` must run on one
-thread: `make vec` stops when it starts a thread, a process, or a goroutine. It
-needs Linux, `ptrace`, and `objdump`.
+`make vec` grades the code the compiler chose for `x86-64-v3`. It builds with
+only the flags `shared/vec.mk` sets, whatever a solver's Makefile or the command
+line adds. It refuses inline or standalone assembly, a `#pragma` other than
+`#pragma once`, a `target` or `optimize` attribute, Rust's `#[target_feature]`
+and `#[naked]`, a build script, and cgo in any file under the solver directory,
+and it stops at the first AVX-512 instruction the program itself runs. `solve`
+must work alone: `make vec` pauses every other thread of the program while
+`solve` runs, and it fails when `solve` starts a thread, a process, or a
+goroutine, when `solve` waits for another thread, or when a process the program
+started is still running as `solve` begins. It needs Linux, `ptrace`, and
+`objdump`.
 
 The C, Rust, and Go directories have this level; the Python one does not:
 
