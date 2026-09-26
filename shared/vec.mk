@@ -9,12 +9,17 @@
 # The challenge's own vec.mk, one directory up, names the traced fixture:
 #
 #   VEC_INPUT := ../cases/14.in   the fixture solve runs on
-#   VEC_UNITS := dosage           the input array whose length is the unit of work
+#   VEC_UNITS := dosage           the unit of work: an input array's length, an
+#                                 integer field's value, or a product, a*b
 #
 # Every Makefile that includes this sets VEC_EXPECT := vectorized | scalar.
-# The traced program is the one `make test` checks: ./main for C, the release
-# build of src/main.rs for Rust, and the `build` output for Go, each built for
-# x86-64-v3 by its own Makefile.
+# The traced program is built for x86-64-v3, and `make vec` first checks its
+# answer on every fixture in ../cases, so the graded build is one whose answers
+# are checked. By default it is the program `make test` checks: ./main for C,
+# the release build of src/main.rs for Rust, and the `build` output for Go. A
+# Makefile whose `make test` keeps other flags sets VEC_BUILD, the target that
+# builds its x86-64-v3 program, and VEC_BIN, the path it writes, before
+# including this.
 #
 # This adds only the `vec` target, so it composes with shared/c/io.mk without
 # colliding on build, test, bench, or clean.
@@ -27,19 +32,23 @@ VEC_LANG   ?= $(if $(wildcard Cargo.toml),rust,$(if $(wildcard go.mod),go,c))
 include ../vec.mk
 
 ifeq ($(VEC_LANG),rust)
-VEC_BUILD := build
-VEC_BIN   := target/release/challenge
+VEC_BUILD ?= build
+VEC_BIN   ?= target/release/challenge
 VEC_FUNC  := solve
 else ifeq ($(VEC_LANG),go)
-VEC_BUILD := build
-VEC_BIN   := /tmp/$(MOD_NAME)-build
+VEC_BUILD ?= build
+VEC_BIN   ?= /tmp/$(MOD_NAME)-build
 VEC_FUNC  := main.solve
 else
-VEC_BUILD := main
-VEC_BIN   := ./main
+VEC_BUILD ?= main
+VEC_BIN   ?= ./main
 VEC_FUNC  := solve
 endif
 
 vec: $(VEC_BUILD)
+	@for f in ../cases/*.in; do \
+	  $(VEC_BIN) < "$$f" | cmp -s - "$${f%.in}.out" \
+	    || { echo "  $(VEC_BIN) printed the wrong answer for $$f"; exit 1; }; \
+	done
 	@python3 $(VEC_ROOT)/scripts/vec_check.py --binary $(VEC_BIN) --function $(VEC_FUNC) \
-	  --input $(VEC_INPUT) --units $(VEC_UNITS) --expect $(VEC_EXPECT)
+	  --input $(VEC_INPUT) --units '$(VEC_UNITS)' --expect $(VEC_EXPECT)
