@@ -169,6 +169,63 @@ long solve(const int *restrict x, int *restrict out, long n, int t) {
 }
 """
 
+# The same, on a thread the program starts before solve and solve hands the job.
+EARLY_THREAD = """
+#include <pthread.h>
+#include <stdatomic.h>
+#include <stdlib.h>
+static struct { const int *y; int *out; long n; int t; long k; } job;
+static atomic_int posted;
+static pthread_t worker;
+static void *select_kept(void *raw) {
+    (void)raw;
+    while (!atomic_load(&posted)) {}
+    for (long i = 0; i < job.n; i++) if (job.y[i] > job.t + 1) job.out[job.k++] = job.y[i] - 1;
+    return 0;
+}
+__attribute__((constructor)) static void start(void) {
+    if (pthread_create(&worker, 0, select_kept, 0)) abort();
+}
+long solve(const int *restrict x, int *restrict out, long n, int t) {
+    int *y = malloc(n * sizeof *y);
+    for (long i = 0; i < n; i++) y[i] = x[i] + 1;
+    job.y = y, job.out = out, job.n = n, job.t = t;
+    atomic_store(&posted, 1);
+    if (pthread_join(worker, 0)) abort();
+    free(y);
+    return job.k;
+}
+"""
+
+# The same, in a process the program starts before solve, sharing the job.
+EARLY_PROCESS = """
+#define _DEFAULT_SOURCE
+#include <stdatomic.h>
+#include <stdlib.h>
+#include <sys/mman.h>
+#include <sys/wait.h>
+#include <unistd.h>
+struct job { atomic_int posted; long n; int t; long k; int y[%(n)d]; int out[%(n)d]; };
+static struct job *job;
+static pid_t worker;
+__attribute__((constructor)) static void start(void) {
+    job = mmap(0, sizeof *job, PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANONYMOUS, -1, 0);
+    if (job == MAP_FAILED || (worker = fork()) < 0) abort();
+    if (worker) return;
+    while (!atomic_load(&job->posted)) {}
+    for (long i = 0; i < job->n; i++) if (job->y[i] > job->t + 1) job->out[job->k++] = job->y[i] - 1;
+    _exit(0);
+}
+long solve(const int *restrict x, int *restrict out, long n, int t) {
+    for (long i = 0; i < n; i++) job->y[i] = x[i] + 1;
+    job->n = n, job->t = t;
+    atomic_store(&job->posted, 1);
+    if (waitpid(worker, 0, 0) != worker) abort();
+    for (long i = 0; i < job->k; i++) out[i] = job->out[i];
+    return job->k;
+}
+""" % {"n": N}
+
 # A C solver directory that make builds with shared/c/: it reads x and prints
 # the sum solve returns.
 C_HEADER = """
@@ -289,33 +346,14 @@ func solve(a, b, c []int32) {
 }
 """
 
-# The same loop, a vector per call two calls deep. Single-stepping outlasts the
-# scheduler's time slice, so the goroutine is preempted at one of the calls.
-GO_CALLS = """package main
-
-import "simd/archsimd"
-
-//go:noinline
-func multiply(a, b, c []int32, i int) {
-\tarchsimd.LoadInt32x8(a[i:]).Mul(archsimd.LoadInt32x8(b[i:])).Store(c[i:])
-}
-
-//go:noinline
-func step(a, b, c []int32, i int) {
-\tmultiply(a, b, c, i)
-}
-
-//go:noinline
-func solve(a, b, c []int32) {
-\ti := 0
-\tfor ; i+8 <= len(a); i += 8 {
-\t\tstep(a, b, c, i)
-\t}
-\tfor ; i < len(a); i++ {
-\t\tc[i] = a[i] * b[i]
-\t}
-}
-"""
+# GO_MAIN with a loop that makes no call and outlasts the scheduler's time
+# slice just before solve, so the runtime has asked the goroutine to yield
+# by the time solve's stack check runs.
+GO_BUSY_MAIN = GO_MAIN.replace(
+    "\tsolve(a, b, c)\n",
+    "\ts := 0\n\tfor i := 0; i < 100_000_000; i++ {\n\t\ts += i * i\n\t}\n"
+    "\tb[0] += int32(s & 1)\n\tsolve(a, b, c)\n",
+)
 
 # The same loop into a 4 MiB scratch slice, which grows the heap.
 GO_HEAP_GROWTH = """package main
@@ -379,6 +417,42 @@ func solve(a, b, c []int32) {
 \t\t}
 \t\tdone <- true
 \t}()
+\t<-done
+}
+"""
+
+# The same, on a goroutine the program starts before solve and solve hands the
+# job over a channel.
+GO_EARLY_GOROUTINE = """package main
+
+import "simd/archsimd"
+
+var (
+\twork = make(chan [2][]int32)
+\tdone = make(chan bool)
+)
+
+func init() {
+\tgo func() {
+\t\tjob := <-work
+\t\ta, c := job[0], job[1]
+\t\tfor i := range c {
+\t\t\tc[i] += a[i]
+\t\t}
+\t\tdone <- true
+\t}()
+}
+
+//go:noinline
+func solve(a, b, c []int32) {
+\ti := 0
+\tfor ; i+8 <= len(a); i += 8 {
+\t\tarchsimd.LoadInt32x8(a[i:]).Mul(archsimd.LoadInt32x8(b[i:])).Store(c[i:])
+\t}
+\tfor ; i < len(a); i++ {
+\t\tc[i] = a[i] * b[i]
+\t}
+\twork <- [2][]int32{a, c}
 \t<-done
 }
 """
@@ -545,6 +619,16 @@ class CTests(unittest.TestCase):
         self.assertEqual(done.returncode, 1)
         self.assertIn("solve started a thread", done.stderr)
 
+    def test_selection_on_a_thread_started_before_solve_is_refused(self) -> None:
+        done = self.check(SELECT_MAIN, EARLY_THREAD, "vectorized")
+        self.assertEqual(done.returncode, 1)
+        self.assertIn("solve waited for another thread", done.stderr)
+
+    def test_selection_in_a_process_started_before_solve_is_refused(self) -> None:
+        done = self.check(SELECT_MAIN, EARLY_PROCESS, "vectorized")
+        self.assertEqual(done.returncode, 1)
+        self.assertIn("a process the program started runs beside solve", done.stderr)
+
     def test_first_call_into_libc_is_not_charged_for_binding(self) -> None:
         with tempfile.TemporaryDirectory() as raw_dir:
             workdir = Path(raw_dir)
@@ -643,9 +727,9 @@ class ClangTests(CTests):
 
 @unittest.skipUnless(shutil.which("go"), "go is not on PATH")
 class GoTests(unittest.TestCase):
-    def build(self, workdir: Path, source: str) -> Path:
+    def build(self, workdir: Path, source: str, driver: str = GO_MAIN) -> Path:
         (workdir / "go.mod").write_text(GO_MOD, encoding="utf-8")
-        (workdir / "main.go").write_text(GO_MAIN, encoding="utf-8")
+        (workdir / "main.go").write_text(driver, encoding="utf-8")
         (workdir / "solution.go").write_text(source, encoding="utf-8")
         built = subprocess.run(
             ["go", "build", "-o", "prog", "."],
@@ -657,13 +741,16 @@ class GoTests(unittest.TestCase):
         self.assertEqual(built.returncode, 0, built.stderr)
         return workdir / "prog"
 
-    def check(self, source: str, expect: str) -> subprocess.CompletedProcess[str]:
+    def check(
+        self, source: str, expect: str, driver: str = GO_MAIN
+    ) -> subprocess.CompletedProcess[str]:
         with tempfile.TemporaryDirectory() as raw_dir:
             workdir = Path(raw_dir)
-            return grade(workdir, self.build(workdir, source), "main.solve", expect)
+            binary = self.build(workdir, source, driver)
+            return grade(workdir, binary, "main.solve", expect)
 
-    def assert_grade(self, source: str, expect: str) -> None:
-        done = self.check(source, expect)
+    def assert_grade(self, source: str, expect: str, driver: str = GO_MAIN) -> None:
+        done = self.check(source, expect, driver)
         self.assertEqual(done.returncode, 0, done.stdout + done.stderr)
 
     def test_lane_multiply_is_vectorized(self) -> None:
@@ -676,7 +763,7 @@ class GoTests(unittest.TestCase):
         self.assert_grade(GO_HELPER, "vectorized")
 
     def test_scheduler_preempting_solve_does_not_count(self) -> None:
-        self.assert_grade(GO_CALLS, "vectorized")
+        self.assert_grade(GO_HELPER, "vectorized", GO_BUSY_MAIN)
 
     def test_heap_growth_does_not_count(self) -> None:
         self.assert_grade(GO_HEAP_GROWTH, "vectorized")
@@ -695,6 +782,11 @@ class GoTests(unittest.TestCase):
         done = self.check(GO_GOROUTINE, "vectorized")
         self.assertEqual(done.returncode, 1)
         self.assertIn("solve started a thread", done.stderr)
+
+    def test_pass_on_a_goroutine_started_before_solve_is_refused(self) -> None:
+        done = self.check(GO_EARLY_GOROUTINE, "vectorized")
+        self.assertEqual(done.returncode, 1)
+        self.assertIn("solve waited for another thread", done.stderr)
 
     def test_build_and_grade_stay_in_the_solver_directory(self) -> None:
         with tempfile.TemporaryDirectory() as raw_dir:

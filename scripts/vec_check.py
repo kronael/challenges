@@ -41,10 +41,15 @@ compiler did not choose for x86-64-v3: inline or standalone assembly, pragmas
 and attributes that change the target or the optimizer, Rust's
 `#[target_feature]`, and build scripts and cgo that compile code outside the
 graded build. While tracing, an AVX-512 instruction in the program's own code
-is refused for the same reason. Only the thread that calls the graded function
-is traced, so a traced instruction that starts a thread or a process, a clone,
-clone3, fork, or vfork system call, or a goroutine, a call to Go's
-runtime.newproc, is refused as well.
+is refused for the same reason.
+
+Only the thread that calls the graded function is traced, so no other thread
+may work while it runs. At its entry every other thread of the program is
+stopped until it returns, and a program that has started another process that
+is still running is refused. A traced instruction that starts a thread or a
+process, a clone, clone3, fork, or vfork system call, or a goroutine, a call to
+Go's runtime.newproc, is refused, and so is a futex wait, which can only wait
+for a stopped thread.
 
 The dynamic linker binds every library function when the program starts, not
 at its first call, so solve is not charged for looking up a function that main
@@ -55,7 +60,10 @@ runtime moves to the thread's own stack run untraced until they resume the
 function that entered them: runtime.morestack grows the goroutine's stack or
 preempts it, and runtime.systemstack grows the heap among other bookkeeping.
 All of it is work that is not the solver's, and how much of it runs depends on
-timing and on the heap the program built before solve.
+timing and on the heap the program built before solve. The runtime can only
+have asked the goroutine to yield before the other threads stopped; a detour
+entered with that request pending runs with them resumed, because the yield
+hands the goroutine to the scheduler on another thread and back.
 
 The grade traces at most STEPS instructions and fails a function that runs
 longer. The count decides, not the clock, so a loaded machine grades a function
@@ -92,6 +100,11 @@ PLACES = 5
 DETOURS = ("runtime.morestack.abi0", "runtime.systemstack.abi0")
 SPAWNS = ("runtime.newproc",)
 SPAWN_SYSCALLS = {56, 57, 58, 435}  # clone, fork, vfork, clone3
+FUTEX = 202
+FUTEX_WAITV = 449
+FUTEX_WAITS = {0, 6, 9, 11, 13}  # wait, lock_pi, wait_bitset, wait_requeue_pi, lock_pi2
+GO_STACKGUARD = 16
+GO_PREEMPT = 0xFFFFFFFFFFFFFADE
 WORD = 2**64 - 1
 REFUSED = 126
 
@@ -103,7 +116,14 @@ SINGLESTEP = 9
 GETREGS = 12
 SETREGS = 13
 DETACH = 17
+SETOPTIONS = 0x4200
+GETEVENTMSG = 0x4201
+SEIZE = 0x4206
+INTERRUPT = 0x4207
+TRACE_SPAWNS = 0x2 | 0x4 | 0x8  # fork, vfork, clone
+WALL = 0x40000000
 SET_PDEATHSIG = 1
+SET_CHILD_SUBREAPER = 36
 
 libc = ctypes.CDLL(None, use_errno=True)
 libc.ptrace.restype = ctypes.c_long
@@ -418,6 +438,7 @@ def launch(binary: Path, stdin: Path, stdout: int) -> int:
             os.dup2(os.open(stdin, os.O_RDONLY), 0)
             os.dup2(stdout, 1)
             libc.prctl(SET_PDEATHSIG, ctypes.c_ulong(signal.SIGKILL))
+            libc.prctl(SET_CHILD_SUBREAPER, ctypes.c_ulong(1))
             if libc.ptrace(TRACEME, 0, None, None) == -1:
                 os._exit(REFUSED)
             os.execve(binary, [str(binary)], env)
@@ -435,7 +456,7 @@ def launch(binary: Path, stdin: Path, stdout: int) -> int:
     return pid
 
 
-def enter(pid: int, entry: int) -> int:
+def enter(pid: int, entry: int, frozen: dict[int, int]) -> int:
     regs = Regs()
     original = ptrace(PEEKTEXT, pid, entry) & WORD
     ptrace(POKETEXT, pid, entry, (original & ~0xFF) | 0xCC)
@@ -454,6 +475,12 @@ def enter(pid: int, entry: int) -> int:
         if pending != signal.SIGTRAP:
             continue
         pending = 0
+        if status >> 16:
+            spawned = ctypes.c_ulong()
+            ptrace(GETEVENTMSG, pid, 0, ctypes.addressof(spawned))
+            os.waitpid(spawned.value, WALL)
+            frozen[spawned.value] = 0
+            continue
         ptrace(GETREGS, pid, 0, ctypes.addressof(regs))
         if regs.rip == entry + 1:
             break
@@ -463,16 +490,77 @@ def enter(pid: int, entry: int) -> int:
     return ptrace(PEEKTEXT, pid, regs.rsp) & WORD
 
 
+def find_processes(pid: int) -> list[int]:
+    children: dict[int, list[int]] = {}
+    for stat in Path("/proc").glob("[0-9]*/stat"):
+        try:
+            state, parent = stat.read_text().rpartition(")")[2].split()[:2]
+        except OSError:
+            continue
+        if state != "Z":
+            children.setdefault(int(parent), []).append(int(stat.parent.name))
+    found = []
+    unseen = [pid]
+    while unseen:
+        spawned = children.get(unseen.pop(), [])
+        found += spawned
+        unseen += spawned
+    return found
+
+
+def freeze(pid: int, frozen: dict[int, int]) -> None:
+    processes = find_processes(pid)
+    for process in processes:
+        try:
+            os.kill(process, signal.SIGKILL)
+        except ProcessLookupError:
+            pass
+    if processes:
+        sys.exit(
+            "vec_check: a process the program started runs beside solve;"
+            " make vec grades single-threaded work only"
+        )
+    ptrace(SETOPTIONS, pid, 0, TRACE_SPAWNS)
+    while True:
+        tasks = {int(task.name) for task in Path(f"/proc/{pid}/task").iterdir()}
+        threads = tasks - frozen.keys() - {pid}
+        if not threads:
+            return
+        for tid in threads:
+            try:
+                ptrace(SEIZE, tid)
+            except ProcessLookupError:
+                continue
+            ptrace(INTERRUPT, tid)
+            _, status = os.waitpid(tid, WALL)
+            if os.WIFSTOPPED(status):
+                frozen[tid] = 0 if status >> 16 else os.WSTOPSIG(status)
+
+
+def thaw(pid: int, frozen: dict[int, int]) -> None:
+    ptrace(SETOPTIONS, pid)
+    for tid, pending in frozen.items():
+        ptrace(DETACH, tid, 0, pending)
+    frozen.clear()
+
+
+def is_preempted(pid: int, regs: Regs) -> bool:
+    goroutine = ptrace(PEEKTEXT, pid, regs.fs_base - 8) & WORD
+    return ptrace(PEEKTEXT, pid, goroutine + GO_STACKGUARD) & WORD == GO_PREEMPT
+
+
 def trace(
     pid: int,
     entry: int,
     detours: set[int],
     spawns: set[int],
     image: range,
+    frozen: dict[int, int],
     scalar_limit: float,
     step_limit: int,
 ) -> Count:
-    returns = enter(pid, entry)
+    returns = enter(pid, entry, frozen)
+    freeze(pid, frozen)
     regs = Regs()
     table: dict[int, Insn] = {}
     count = Count()
@@ -482,8 +570,13 @@ def trace(
     pending = 0
     while True:
         if rip in detours:
+            preempted = is_preempted(pid, regs)
             rip = ptrace(PEEKTEXT, pid, regs.rsp) & WORD
-            enter(pid, rip)
+            if preempted:
+                thaw(pid, frozen)
+            enter(pid, rip, frozen)
+            if preempted:
+                freeze(pid, frozen)
         insn = table.get(rip)
         if insn is None:
             table.update(disassemble(read_memory(pid, rip, WINDOW), rip))
@@ -495,6 +588,14 @@ def trace(
         if rip in spawns or (insn.syscall and regs.rax in SPAWN_SYSCALLS):
             sys.exit(
                 "vec_check: solve started a thread;"
+                " make vec grades single-threaded work only"
+            )
+        waits = regs.rax == FUTEX_WAITV or (
+            regs.rax == FUTEX and regs.rsi & 0x7F in FUTEX_WAITS
+        )
+        if insn.syscall and waits:
+            sys.exit(
+                "vec_check: solve waited for another thread;"
                 " make vec grades single-threaded work only"
             )
         if insn.kind is Kind.INTEGER:
@@ -595,15 +696,18 @@ def run(
             sys.exit(f"vec_check: {binary} defines no function {function}")
         detours = {functions[name] for name in DETOURS if name in functions}
         spawns = {functions[name] for name in SPAWNS if name in functions}
+        frozen: dict[int, int] = {}
         count = trace(
             pid,
             functions[function],
             detours,
             spawns,
             range(low, high),
+            frozen,
             scalar_limit,
             step_limit,
         )
+        thaw(pid, frozen)
         count.places = locate(pid, binary, offset, functions, count.hot)
         if not count.returned:
             os.kill(pid, signal.SIGKILL)

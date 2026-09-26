@@ -97,16 +97,18 @@ decision) or BY-DESIGN (accepted variance).
 
 ## vec grader
 
-- **VEC-THREAD-STARTED-BEFORE-SOLVE** (MED, grading) — Record-only, confirmed
-  2026-09-26; needs sign-off. `scripts/vec_check.py` refuses a thread, process,
-  or goroutine that `solve` starts, but still single-steps only the thread that
-  calls `solve`. A 68 C `input_parse` that starts a `pthread_create` worker to
-  do the selection, with `solve` running one packed pass and joining it, grades
-  `0.05 scalar, 0.13 packed -> vectorized`. A Go `init` goroutine fed over a
-  channel has the same shape (not tried). **Fix:** trace every thread
-  (`PTRACE_O_TRACECLONE`) while `solve` runs, or refuse a C or Rust `solve`
-  entered with more than one entry in `/proc/<pid>/task`; Go's runtime always
-  has several threads, so Go needs the former.
+- **VEC-WORK-BEFORE-SOLVE** (MED, grading) — Record-only, needs the owner's
+  decision. `scripts/vec_check.py` traces only `solve`, so work the program
+  does before `solve` is entered is not graded. The solver edits the code that
+  runs then: C's `input_parse` lives in `solution.c`, a C
+  `__attribute__((constructor))` or a Go `init` runs before `main`, and Rust's
+  `src/main.rs` and Go's `main.go` sit beside the edited file. Any of them can
+  compute the answer for `solve` to copy out, or start a thread or process
+  that finishes it before `solve` starts; the grader stops other threads and
+  refuses other processes only from `solve`'s entry. **Fix:** a contract change
+  in CLAUDE.md: move `input_parse` out of `solution.c` into a harness file the
+  solver does not edit, and have `lint()` refuse code that runs before `main`
+  (constructors, `.init_array` sections, Go `init`) in the edited files.
 - **VEC-LINT-SHALLOW** (LOW, hardening) — Record-only. `lint()` in
   `scripts/vec_check.py` regex-scans only the top-level sources. It misses
   `use core::arch::asm as emit; emit!(…)`,
