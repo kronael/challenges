@@ -2,6 +2,40 @@
 
 All notable changes to this challenge bench are recorded here.
 
+## [Unreleased]
+
+### Added
+
+- **vec level** for io challenges 13, 17, 44, and 46: `make vec` in their C,
+  Rust, and Go solver directories, as the third level after `make test` and
+  `make bench`. Each directory grades its own `x86-64-v3` build (`main-vec`,
+  a Rust release build, Go with `GOAMD64=v3`) and keeps its `make test` and
+  `make bench` builds and flags. Each challenge's `vec.mk` names its fixture,
+  `vec.in` with `vec.out`; the README gains a Level 3 section and the hints
+  gain level-3 rungs before the sources.
+- `make vec` first checks the traced build's answer on every case in `cases/`.
+- `VEC_UNITS` takes a product such as `items*capacity`; a factor is an array's
+  or string's length or an integer field's value.
+- Small cases: 13's windows across several eight-reading steps (10–18), 46's
+  one-window genome and matches past the last full vector (10–11), and 44's
+  back-to-back gaps (10).
+
+### Changed
+
+- 13, 17, 44, and 46's `golden/` is now the vectorized C reference; it is the
+  oracle for `make bench` and `make regen`, and regenerates every tracked `.out`
+  byte for byte. `rotten/` stays the Python bench trap. `scripts/bench.py`
+  builds and runs a C golden's `./main` when `golden/` has no `main.py`, and the
+  root `make test`, `make golden`, and `make vec` cover C goldens.
+- The README explains the three levels once, and the catalog lists each
+  challenge's levels.
+
+### Fixed
+
+- 44's golden opened a gap only after a match, so it missed alignments that put
+  a gap in `t` right after a gap in `s`; `W`×11 against `D`×11 scored -44
+  instead of -42.
+
 ## [v0.1.6] — 2026-09-26
 
 > challenges v0.1.6 — SIMD-graded challenges
