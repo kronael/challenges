@@ -1,13 +1,18 @@
 import json
 import pathlib
+
 import pytest
+
 from main import solve
 
-CASES = sorted(p for p in pathlib.Path("../cases").glob("*.in") if "_large_" not in p.name)
+CASES = sorted(
+    p for p in pathlib.Path("../cases").glob("*.in") if "_large_" not in p.name
+)
 
 
 def test_cases_exist():
     assert CASES, "no small cases found in ../cases"
+
 
 assert CASES, "no small cases found in ../cases"
 

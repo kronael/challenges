@@ -1,6 +1,8 @@
 import json
 import pathlib
+
 import pytest
+
 from main import solve
 
 CASES = sorted(
