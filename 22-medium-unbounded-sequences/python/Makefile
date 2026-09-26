@@ -5,11 +5,11 @@ build:
 	uv run python -c "import main"
 
 fmt:
-	uv run --with ruff ruff format .
-	uv run --with ruff ruff check --select I --fix .
+	uv run --with ruff==0.16.9 ruff format .
+	uv run --with ruff==0.16.9 ruff check --select I --fix .
 
 lint:
-	uv run --with ruff ruff check .
+	uv run --with ruff==0.16.9 ruff check .
 
 check: fmt lint
 
