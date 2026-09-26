@@ -69,12 +69,12 @@ Stuck? See `hints/01.md`.
 `make test` checks the answer and `make bench` its speed. `make vec`, the
 optional third level, checks how the program got it. It checks the program's
 answer on every case in `cases/`, then runs it on the fixture that `vec.mk`
-names and single-steps the call to `solve`: every
-instruction `solve` retires, in its own code, in the functions it calls, and in
-the library routines those call, except the Go runtime's stack growth, heap
-growth, and preemption. It passes when `solve` retires fewer than one scalar
-instruction per base of `genome`, averaged over the fixture, and at least one
-packed SIMD instruction per 50 bases. Scalar instructions are
+names and single-steps the call to `solve`: every instruction `solve` retires,
+in its own code, in the functions it calls, and in the library routines those
+call, except the Go runtime's stack growth, heap growth, and preemption. It
+passes when `solve` retires fewer than one scalar instruction per base of
+`genome`, averaged over the fixture, and at least one packed SIMD instruction
+per 50 bases. Scalar instructions are
 
 - scalar floating-point arithmetic, compares, and conversions; loads and stores
   of 64 bits or less that do not address the stack; and moves of one lane from
