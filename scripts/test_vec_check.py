@@ -388,11 +388,10 @@ fn sums() {
 """
 
 
+# A vec challenge beside links to shared/ and scripts/, with 68's Makefile for
+# the language; files maps paths in the challenge to their text, and make vec
+# traces cases/01.in, N zeros in x.
 def lay_out(root: Path, language: str, files: dict[str, str]) -> Path:
-    """Lay out a vec challenge under root beside links to shared/ and scripts/,
-    with 68's Makefile for language, and return its solver directory. files maps
-    paths in the challenge to their text; cases/01.in, N zeros in x, is the
-    fixture make vec traces."""
     challenge = root / "99-medium-probe"
     workdir = challenge / language
     workdir.mkdir(parents=True)
@@ -517,6 +516,17 @@ class CTests(unittest.TestCase):
                 binary, "solve", workdir / "input.json", float("inf")
             )
             self.assertLess(count.scalar, 50)
+
+    def test_trace_stops_at_the_step_limit_whatever_the_clock(self) -> None:
+        with tempfile.TemporaryDirectory() as raw_dir:
+            workdir = Path(raw_dir)
+            binary = self.build(workdir, SCALE_MAIN, ELEMENTWISE).resolve()
+            (workdir / "input.json").write_text("{}", encoding="utf-8")
+            count = vec_check.run(
+                binary, "solve", workdir / "input.json", float("inf"), 100
+            )
+            self.assertFalse(count.returned)
+            self.assertEqual(count.steps, 101)
 
     def test_missing_symbol_fails(self) -> None:
         with tempfile.TemporaryDirectory() as raw_dir:

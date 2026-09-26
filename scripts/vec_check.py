@@ -53,8 +53,13 @@ runtime moves to the thread's own stack run untraced until they resume the
 function that entered them: runtime.morestack grows the goroutine's stack or
 preempts it, and runtime.systemstack grows the heap among other bookkeeping.
 All of it is work that is not the solver's, and how much of it runs depends on
-timing and on the heap the program built before solve. A grade that takes
-longer than TIMEOUT seconds fails, and the traced program dies with the grader.
+timing and on the heap the program built before solve.
+
+The grade traces at most STEPS instructions and fails a function that runs
+longer. The count decides, not the clock, so a loaded machine grades a function
+as an idle one does. A program that keeps the grader waiting HANG seconds for
+its next stop, blocked in a system call or running untraced code, fails as well,
+and the traced program dies with the grader.
 """
 
 from __future__ import annotations
@@ -77,7 +82,8 @@ BUDGET = 1.0
 PACKED_FLOOR = 0.02
 WINDOW = 256
 LONGEST = 15
-TIMEOUT = 60
+STEPS = 16_000_000
+HANG = 60
 DETOURS = ("runtime.morestack.abi0", "runtime.systemstack.abi0")
 SPAWNS = ("runtime.newproc",)
 SPAWN_SYSCALLS = {56, 57, 58, 435}  # clone, fork, vfork, clone3
@@ -129,6 +135,7 @@ class Insn:
 class Count:
     scalar: int = 0
     packed: int = 0
+    steps: int = 0
     returned: bool = False
 
 
@@ -293,6 +300,13 @@ def disassemble(code: bytes, address: int) -> dict[int, Insn]:
     return found
 
 
+def wait(pid: int) -> int:
+    signal.alarm(HANG)
+    _, status = os.waitpid(pid, 0)
+    signal.alarm(0)
+    return status
+
+
 def read_memory(pid: int, address: int, size: int) -> bytes:
     return b"".join(
         (ptrace(PEEKTEXT, pid, address + offset) & WORD).to_bytes(8, "little")
@@ -347,7 +361,7 @@ def launch(binary: Path, stdin: Path, stdout: int) -> int:
             os.execve(binary, [str(binary)], env)
         finally:
             os._exit(127)
-    _, status = os.waitpid(pid, 0)
+    status = wait(pid)
     if os.WIFEXITED(status) and os.WEXITSTATUS(status) == REFUSED:
         sys.exit(
             "vec_check: this system does not permit ptrace, which the grade needs:"
@@ -366,7 +380,7 @@ def enter(pid: int, entry: int) -> int:
     pending = 0
     while True:
         ptrace(CONT, pid, 0, pending)
-        _, status = os.waitpid(pid, 0)
+        status = wait(pid)
         if not os.WIFSTOPPED(status):
             code = os.waitstatus_to_exitcode(status)
             hint = "; was it inlined into its caller?" if code == 0 else ""
@@ -394,6 +408,7 @@ def trace(
     spawns: set[int],
     image: range,
     scalar_limit: float,
+    step_limit: int,
 ) -> Count:
     returns = enter(pid, entry)
     regs = Regs()
@@ -424,8 +439,11 @@ def trace(
         count.scalar += insn.kind is Kind.SCALAR
         count.packed += insn.kind is Kind.PACKED
         vector |= insn.vector_load
+        count.steps += 1
+        if count.steps > step_limit:
+            return count
         ptrace(SINGLESTEP, pid, 0, pending)
-        _, status = os.waitpid(pid, 0)
+        status = wait(pid)
         if not os.WIFSTOPPED(status):
             code = os.waitstatus_to_exitcode(status)
             sys.exit(
@@ -494,7 +512,13 @@ def count_units(input_path: Path, units: str) -> int:
     return math.prod(size(fields[key]) for key in units.split("*"))
 
 
-def run(binary: Path, function: str, input_path: Path, scalar_limit: float) -> Count:
+def run(
+    binary: Path,
+    function: str,
+    input_path: Path,
+    scalar_limit: float,
+    step_limit: int = STEPS,
+) -> Count:
     with tempfile.TemporaryFile() as out:
         pid = launch(binary, input_path, out.fileno())
         base, low, high = find_image(pid, binary)
@@ -504,14 +528,20 @@ def run(binary: Path, function: str, input_path: Path, scalar_limit: float) -> C
         detours = {functions[name] for name in DETOURS if name in functions}
         spawns = {functions[name] for name in SPAWNS if name in functions}
         count = trace(
-            pid, functions[function], detours, spawns, range(low, high), scalar_limit
+            pid,
+            functions[function],
+            detours,
+            spawns,
+            range(low, high),
+            scalar_limit,
+            step_limit,
         )
         if not count.returned:
             os.kill(pid, signal.SIGKILL)
-            os.waitpid(pid, 0)
+            wait(pid)
             return count
         ptrace(DETACH, pid)
-        _, status = os.waitpid(pid, 0)
+        status = wait(pid)
         code = os.waitstatus_to_exitcode(status)
         if code != 0:
             sys.exit(f"vec_check: {binary.name} exited with status {code}")
@@ -553,13 +583,17 @@ def main() -> None:
     signal.signal(
         signal.SIGALRM,
         lambda *_: sys.exit(
-            f"vec_check: {args.binary.name} did not finish within {TIMEOUT} s"
-            " under the tracer"
+            f"vec_check: {args.binary.name} kept the tracer waiting {HANG} s"
+            " for its next stop"
         ),
     )
-    signal.alarm(TIMEOUT)
     units = max(count_units(args.input, args.units), 1)
     count = run(args.binary.resolve(), args.function, args.input, BUDGET * units)
+    if count.steps > STEPS:
+        sys.exit(
+            f"vec_check: {args.function} ran more than {STEPS:,} instructions,"
+            " the most the grade traces"
+        )
     scalar = count.scalar / units
     packed = count.packed / units
     vectorized = count.returned and scalar < BUDGET and packed >= PACKED_FLOOR
