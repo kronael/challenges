@@ -36,7 +36,7 @@ help:
 	@echo "all    — fmt build lint test (default)"
 	@echo "build  — cargo build --release for x86-64-v3"
 	@echo "fmt    — cargo fmt"
-	@echo "lint   — cargo clippy"
+	@echo "lint   — cargo clippy --release"
 	@echo "check  — fmt + lint"
 	@echo "test   — build + fmt + lint + cargo test --release (small cases only)"
 	@echo "bench  — check output and time the release binary on large cases (TIMEOUT=5)"
