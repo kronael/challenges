@@ -36,6 +36,7 @@ All notable changes to this challenge bench are recorded here.
   goroutine, whose work it did not trace.
 - `make vec`'s answer check fails a build that exits nonzero or runs past
   10 s, where it passed or hung.
+- C solver builds rebuild when their Makefile changes, such as a new flag.
 - 44's golden opened a gap only after a match, so it missed alignments that put
   a gap in `t` right after a gap in `s`; `W`×11 against `D`×11 scored -44
   instead of -42.

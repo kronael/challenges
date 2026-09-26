@@ -12,10 +12,10 @@ all: fmt build lint test
 
 build: main
 
-main: $(C_IO_MAKEFILE) $(C_IO_DIR)/main.c solution.c $(C_IO_HEADERS)
+main: $(MAKEFILE_LIST) $(C_IO_DIR)/main.c solution.c $(C_IO_HEADERS)
 	$(CC) $(CPPFLAGS) $(C_IO_CPPFLAGS) $(CFLAGS) -o $@ $(C_IO_DIR)/main.c solution.c $(LDLIBS)
 
-run_tests: $(C_IO_MAKEFILE) $(C_IO_DIR)/test.c solution.c $(C_IO_HEADERS)
+run_tests: $(MAKEFILE_LIST) $(C_IO_DIR)/test.c solution.c $(C_IO_HEADERS)
 	$(CC) $(CPPFLAGS) $(C_IO_CPPFLAGS) $(CFLAGS) -o $@ $(C_IO_DIR)/test.c solution.c $(LDLIBS)
 
 fmt:
