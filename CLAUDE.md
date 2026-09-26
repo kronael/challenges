@@ -156,7 +156,9 @@ challenge with `make vec` has a root `vec.mk` naming the traced fixture, a C
 `golden/`, and solver Makefiles that include `shared/vec.mk`. The fixture is a
 tracked root `vec.in`/`vec.out` pair in 13, 17, 44, and 46, and one of the
 `cases/` pairs in 66–68. Every target of those solver directories builds for
-`x86-64-v3`, so `make test`, `make bench`, and `make vec` check one program.
+`x86-64-v3` with only the flags `shared/vec.mk` sets, plus the challenge
+`vec.mk`'s `VEC_CFLAGS`, so `make test`, `make bench`, and `make vec` check one
+program, whatever flags a solver Makefile or the command line adds.
 How it grades: `shared/vec.mk`'s header and the `scripts/vec_check.py`
 docstring.
 
