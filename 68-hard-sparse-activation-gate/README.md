@@ -25,13 +25,14 @@ another, and nothing else.
 `make vec` checks how the program got it. It runs the same build on the
 fixture that `vec.mk` names and single-steps the call to `solve`: every
 instruction `solve` retires, in its own code, in the functions it calls, and in
-the library routines those call. It passes when `solve` retires fewer than one
-scalar instruction per score, averaged over the fixture, and at least one packed
-SIMD instruction per 50 scores. Scalar instructions are
+the library routines those call, except the Go runtime's stack growth, heap
+growth, and preemption. It passes when `solve` retires fewer than one scalar
+instruction per score, averaged over the fixture, and at least one packed SIMD
+instruction per 50 scores. Scalar instructions are
 
-- scalar floating-point arithmetic, loads and stores of 64 bits or less that do
-  not address the stack, and moves of one lane from a vector register into a
-  general-purpose one, wherever they run;
+- scalar floating-point arithmetic, compares, and conversions; loads and stores
+  of 64 bits or less that do not address the stack; and moves of one lane from
+  a vector register into a general-purpose one, wherever they run;
 - arithmetic, compares, and bit operations on general-purpose registers, except
   in loop iterations that load several elements into a vector register at once.
 
