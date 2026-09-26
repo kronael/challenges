@@ -83,13 +83,13 @@ Answer solve(const Input *in) {
 	// so vector k holds rows k, seg + k, 2·seg + k, …, and the row above any row
 	// is the same lane of vector k - 1. The profile holds, for each amino acid
 	// a, the substitution score of a against every row in that layout. Rows
-	// past n pad the last lane; no row above them reads them.
-	int16_t *prof = (int16_t *)xmalloc(20 * width * sizeof *prof);
-	for (size_t r = 0; r < width; r++) {
+	// past n pad the last lane with zeros; no row above them reads them.
+	int16_t *prof = (int16_t *)xcalloc(20 * width, sizeof *prof);
+	for (size_t r = 0; r < n; r++) {
 		const size_t at = (r % seg) * LANES + r / seg;
-		const int code = r < n ? aa_index(s[r]) : 0;
+		const int code = aa_index(s[r]);
 		for (int a = 0; a < 20; a++) {
-			prof[(size_t)a * width + at] = r < n ? (int16_t)BLOSUM62[code][a] : 0;
+			prof[(size_t)a * width + at] = (int16_t)BLOSUM62[code][a];
 		}
 	}
 
