@@ -28,15 +28,16 @@ Harness is **editor + `make test`**. Each challenge has its own dir
 
 **io challenges** have five language dirs: `golden/`, `python/`, `go/`, `rust/`, `c/`.
 
-- **`golden/main.py`** — the optimised reference. Always passes `make test`.
-  Never shown to the solver. Used to generate tracked small `.out` files and
-  ephemeral expected benchmark output.
+- **`golden/main.py`** — the optimised reference; C instead (`solution.c`,
+  `solution.h`, 66's Makefile) when the challenge has a vec level. Always
+  passes every level the challenge has. Never shown to the solver. Used to
+  generate tracked small `.out` files and ephemeral expected benchmark output.
 - **`rotten/`** — its OWN dir, a sibling of `golden/` (same shape: `main.py` +
   `Makefile` + `pyproject.toml`, never a file nested inside `golden/`). It holds
-  the *naive* reference: correct, so `make test` PASSES the small cases, but too
-  slow, so `make bench` TIMEOUTs. It is the trap the solver must beat — the
-  obvious O(n²)/exponential approach the problem punishes. `rotten/`'s test
-  runs only tracked small cases. (sys
+  the *naive* reference, the trap for the level after `make test`: correct, so
+  `make test` PASSES the small cases, but too slow, so `make bench` TIMEOUTs.
+  It is the trap the solver must beat — the obvious O(n²)/exponential approach
+  the problem punishes. `rotten/`'s test runs only tracked small cases. (sys
   challenges: `rotten/main.c` is the obvious-but-wrong version — torn reads, false
   sharing, ABA — that passes a weak check but fails the stress test / race
   detector.)
@@ -101,7 +102,8 @@ complete, every concurrent operation stubbed to `abort()`), plus a finished
 one, move it to `golden/` and replace the original with a stub.
 
 When scaffolding a new I/O challenge: write the reference first in
-`golden/main.py`, verify it passes, then write stubs in the four solver dirs.
+`golden/main.py` (or `golden/solution.c`), verify it passes, then write stubs in
+the four solver dirs.
 
 ## README vs hints/ — never spoil the problem
 
@@ -145,23 +147,24 @@ When scaffolding a new I/O challenge: write the reference first in
 - **sys** (29–34): concurrent / lock-free systems challenge. No `cases/`, no
   stdin/stdout. The test *is* a stress test written in the language (many
   threads, barrier-synced, assert the invariant).
-- **vec** (66–68): reads JSON like an io challenge and keeps the golden/rotten
-  pair, but is graded on the emitted machine code as well as the answer.
-  `golden/` and `rotten/` are C: the SAME algorithm at the SAME complexity,
-  differing only in what the compiler can emit for it; golden may use
-  intrinsics. Every vec Makefile includes `shared/vec.mk`, whose `make vec`
-  traces the binary `make test` checks with `scripts/vec_check.py`: `solve`
-  grades vectorized below one scalar instruction per input element with at
-  least one packed instruction per 50, and that script's docstring defines a
-  scalar instruction. Golden must grade vectorized and rotten scalar; root
-  `make vec` checks only those two, under `cc`, then `clang` if on PATH. Each
-  directory builds once, for `x86-64-v3`: C pins `CFLAGS` to
-  `-O3 -march=x86-64-v3`, Rust builds and tests in release with
-  `-C target-cpu=x86-64-v3`, and Go exports `GOAMD64=v3` and
-  `GOEXPERIMENT=simd` for `simd/archsimd`. Go's `main.go` locks the main
-  goroutine to its thread and `solve` stays `//go:noinline`, or the tracer
-  cannot follow the call. Tracing needs ptrace, not root: Yama `ptrace_scope`
-  0 or 1. No seeded large cases.
+- **vec** is a level, not only a type: `make test` (correct) → `make bench`
+  (fast) → `make vec` (vectorized), in `c/`, `rust/`, `go/` only. io challenges
+  13, 17, 44, 46 have all three; the vec-only 66–68 have no large cases. A
+  challenge with the level has `vec.mk` at its root, naming `VEC_INPUT`, the
+  traced fixture (`vec.in` + `vec.out` beside `cases/` in 13–46, a case in
+  66–68), and `VEC_UNITS`, the unit of work (a field, or a product `a*b`); a C
+  `golden/` including `shared/c/io.mk` and `shared/vec.mk`; and solver Makefiles
+  including `shared/vec.mk`. `make vec` runs every `../cases` fixture through
+  the traced `x86-64-v3` build, then `scripts/vec_check.py` grades `solve`
+  vectorized below one scalar instruction per unit with at least one packed per
+  50; its docstring defines a scalar instruction. io solver dirs keep their
+  `make test`/`make bench` builds and grade their own (`VEC_BUILD`/`VEC_BIN`: C
+  `main-vec`, Rust release, Go `GOAMD64=v3`); golden and 66–68 build once, for
+  `x86-64-v3`. 66–68's `rotten/` is C: the same algorithm, scalar. Root
+  `make vec` checks goldens and 66–68's rottens, under `cc`, then `clang` if on
+  PATH. Go exports `GOEXPERIMENT=simd`, locks `main` to its thread, and keeps
+  `solve` `//go:noinline`; Rust's `solve` is `#[no_mangle]`. Tracing needs
+  ptrace: Yama `ptrace_scope` 0 or 1.
 
 ## Layout
 
@@ -173,7 +176,7 @@ NN-level-slug/
   README.md              problem statement, constraints, I/O, examples
   hints/                 01.md, 02.md, … — one spoiler per file, sources last
   cases/                 tracked small NN.in / NN.out fixtures (io only)
-  golden/  main.py · test_solution.py · Makefile · pyproject.toml   (fast reference)
+  golden/  main.py · test_solution.py · Makefile · pyproject.toml   (fast reference; C if vec level)
   rotten/  main.py · test_solution.py · Makefile · pyproject.toml   (naive trap: passes test, fails bench)
   python/  main.py · test_solution.py · Makefile
   go/      main.go · solution.go · solution_test.go · go.mod · Makefile
@@ -184,7 +187,7 @@ NN-level-slug/
 sys challenges have no `python/`; sys challenges 31 and 33 have no `go/`.
 API challenges 21 and 22 have `golden/`, `python/`, and `go/` (no `rotten/`,
 `rust/`, or `c/`). vec challenges 66–68 have `golden/`, `rotten/`, `c/`,
-`rust/`, and `go/` (no `python/`), plus a `vec.mk` naming the traced fixture.
+`rust/`, and `go/` (no `python/`).
 
 ## Input / output format
 
@@ -207,6 +210,7 @@ I/O solver directories share these targets:
 | `check` | fmt then lint |
 | `test`  | build + check + tracked small-case suite |
 | `bench` | generate seeded large cases, check output, then report elapsed time |
+| `vec`   | level 3, where the challenge has it: grade `solve`'s machine code (C, Rust, Go) |
 | `help`  | print all targets |
 
 Running `make` (no target) = fmt + build + lint + test.
@@ -290,10 +294,11 @@ The race detector and the stress test are your debugger for sys challenges.
 
 ## State of the repo
 
-- 01–20, 23–28, 35–39, 41–65: io challenges with cases and language harnesses.
+- 01–20, 23–28, 35–39, 41–65: io challenges with cases and language harnesses;
+  13, 17, 44, 46 also have the vec level.
 - 21–22: Python API exercises with direct tests and no rotten reference.
 - 29–34: sys challenges with stress tests.
-- 66–68: vec challenges — C, Rust, and Go only, graded on emitted code by `make vec`.
+- 66–68: vec-only challenges — C, Rust, and Go; `make test` and `make vec`.
 
 ## Sources
 

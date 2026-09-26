@@ -25,7 +25,7 @@ make golden      # I/O and API golden tests pass; I/O benchmarks stay fast
 make rotten      # I/O rotten controls pass small cases; every large case times out
 make sys         # systems golden C stress tests pass
 make sys-rotten  # systems controls pass sanity and fail controlled stress
-make vec         # every vec golden vectorizes and every vec rotten stays scalar
+make vec         # every level-3 golden vectorizes; 66–68's rotten stays scalar
 ```
 
 I/O solver directories share these targets:
@@ -39,10 +39,28 @@ I/O solver directories share these targets:
 | `make check` | format, then lint |
 | `make test`  | correctness — small cases only, fast |
 | `make bench` | correctness + speed — generate and check every seeded large case |
+| `make vec`   | vectorized — C, Rust, and Go, where the challenge has level 3 |
 | `make help`  | list all targets |
 
-API, systems, and vec challenges use targets suited to their test style. Their
-challenge README and `make help` list the available commands.
+API, systems, and vec-only (66–68) challenges use targets suited to their test
+style. Their challenge README and `make help` list the available commands.
+
+---
+
+## Three levels
+
+A solution climbs up to three levels, each a target in its solver directory:
+
+1. `make test` — correct: the answer matches every small case in `cases/`.
+2. `make bench` — fast: every seeded large case is answered correctly within
+   the time limit.
+3. `make vec` — vectorized: `solve` does its per-element work in packed SIMD
+   lanes, graded by tracing an `x86-64-v3` build. C, Rust, and Go only.
+
+A level a challenge lacks is simply absent; the catalog's Levels column lists
+the ones it has. `golden/` passes all of them. `rotten/` is correct but fails
+the level after `make test`: too slow for `make bench`, or, in 66–68, which have
+no large cases, scalar for `make vec`.
 
 ---
 
@@ -53,7 +71,7 @@ NN-level-slug/
   README.md      ← the problem only: task, constraints, I/O, examples
   hints/         ← the approach/technique, one spoiler per file (01.md, 02.md, …)
   cases/         ← tracked small NN.in / NN.out fixtures (I/O challenges)
-  golden/        ← optimized reference; always passes make test
+  golden/        ← optimized reference, C when the challenge has level 3
   rotten/        ← deliberately naive benchmark control
   python/        ← stub: implement solve() in main.py
   go/            ← stub: implement solve() in solution.go
@@ -83,10 +101,8 @@ comparisons, lives in `hints/`, one spoiler per numbered file.
 - **io** — reads JSON from stdin and writes one line in the documented format
 - **api** — implements functions checked directly by a language test suite
 - **sys** — exposes a systems API; the test is a stress test rather than files
-- **vec** — reads JSON like an io challenge, and is graded on the machine code
-  as well as the answer: `make vec` builds the solution for `x86-64-v3`, traces
-  it on one fixture, and checks that it does its per-element work in packed
-  SIMD lanes
+- **vec** — reads JSON like an io challenge but has levels 1 and 3 only: no
+  large cases, and a scalar C control in `rotten/`
 
 I/O challenge input is always JSON
 (`{"n":4,"edges":[[0,1]],"loads":[10,null]}`), so parsing is real work rather
@@ -99,75 +115,75 @@ than splitting whitespace.
 Difficulty is based on prerequisite depth, correctness edge cases,
 implementation burden, and the constraints enforced by `make bench`.
 
-| # | Name | Level | Lang |
-|---|------|-------|------|
-| [01](01-easy-max-subarray/) | Maximum Subarray | easy | py go rs c |
-| [02](02-easy-mod-exp/) | Modular Power | easy | py go rs c |
-| [03](03-easy-max-drawdown/) | Max Drawdown | easy | py go rs c |
-| [04](04-medium-edge-costs/) | Vertex Load Assignment | medium | py go rs c |
-| [05](05-medium-price-streak/) | Price Streak | medium | py go rs c |
-| [06](06-medium-edit-distance/) | Edit Distance | medium | py go rs c |
-| [07](07-medium-coin-change/) | Coin Change | medium | py go rs c |
-| [08](08-medium-interval-scheduling/) | Interval Scheduling | medium | py go rs c |
-| [09](09-medium-count-inversions/) | Count Inversions | medium | py go rs c |
-| [10](10-medium-route-costs/) | Route Costs | medium | py go rs c |
-| [11](11-medium-friend-groups/) | Friend Groups | medium | py go rs c |
-| [12](12-medium-textbook-split/) | Textbook Split | medium | py go rs c |
-| [13](13-medium-sliding-window-max/) | Sliding Window Maximum | medium | py go rs c |
-| [14](14-medium-count-primes/) | Count Primes | medium | py go rs c |
-| [15](15-medium-huge-fibonacci/) | Huge Fibonacci | medium | py go rs c |
-| [16](16-medium-string-search/) | String Search | medium | py go rs c |
-| [17](17-medium-knapsack/) | 0/1 Knapsack | medium | py go rs c |
-| [18](18-medium-task-ordering/) | Task Ordering | medium | py go rs c |
-| [19](19-medium-mst/) | Cheapest Road Network | medium | py go rs c |
-| [20](20-medium-lcs/) | Longest Common Subsequence | medium | py go rs c |
-| [21](21-medium-constraint-puzzles/) | Constraint Puzzles | medium | py go |
-| [22](22-medium-unbounded-sequences/) | Unbounded Sequences | medium | py go |
-| [23](23-medium-search-suggestions/) | Search Suggestions | medium | py go rs c |
-| [24](24-medium-lru-cache/) | Cache Eviction | medium | py go rs c |
-| [25](25-medium-running-median/) | Running Median | medium | py go rs c |
-| [26](26-medium-dynamic-prefix-sums/) | Dynamic Prefix Sums | medium | py go rs c |
-| [27](27-medium-weighted-job-scheduling/) | Weighted Job Scheduling | medium | py go rs c |
-| [28](28-medium-news-feed-merge/) | News Feed Merge | medium | py go rs c |
-| [29](29-hard-mpsc-queue/) | Multi-Producer Queue | hard | go rs c |
-| [30](30-hard-consistent-tick-snapshot/) | Consistent Tick Snapshot | hard | go rs c |
-| [31](31-hard-work-stealing-deque/) | Concurrent Owner/Thief Deque | hard | rs c |
-| [32](32-hard-two-thread-buffer/) | Two-Thread Buffer | hard | go rs c |
-| [33](33-hard-lock-free-stack-reclamation/) | Lock-Free Stack Reclamation | hard | rs c |
-| [34](34-hard-reusable-spin-barrier/) | Reusable Spin Barrier | hard | go rs c |
-| [35](35-hard-dynamic-range-sums/) | Dynamic Range Sums | hard | py go rs c |
-| [36](36-hard-matrix-chain/) | Matrix Chain Multiplication | hard | py go rs c |
-| [37](37-hard-prime-pair-sets/) | Prime Pair Sets | hard | py go rs c |
-| [38](38-hard-distinct-substrings/) | Distinct Substrings | hard | py go rs c |
-| [39](39-hard-max-flow/) | Max Flow | hard | py go rs c |
-| [41](41-hard-ordered-set-queries/) | Ordered Set Queries | hard | py go rs c |
-| [42](42-hard-fragmented-string-queries/) | Fragmented String Queries | hard | py go rs c |
-| [43](43-hard-order-book/) | Order Book | hard | py go rs c |
-| [44](44-hard-affine-align/) | Affine Alignment Score | hard | py go rs c |
-| [45](45-hard-kmer-assembly/) | K-mer Assembly | hard | py go rs c |
-| [46](46-hard-crispr-offtarget/) | CRISPR Off-Targets | hard | py go rs c |
-| [47](47-hard-rna-max-pairs/) | RNA Max Pairs | hard | py go rs c |
-| [48](48-hard-shortest-superstring/) | Shortest Superstring | hard | py go rs c |
-| [49](49-hard-gene-region-decoder/) | Gene Region Decoder | hard | py go rs c |
-| [50](50-hard-tree-sequence-likelihood/) | Tree Sequence Likelihood | hard | py go rs c |
-| [51](51-hard-deadline-scheduler/) | Deadline Scheduler | hard | py go rs c |
-| [52](52-hard-service-pairing/) | Service Pairing | hard | py go rs c |
-| [53](53-hard-circular-genome-distance/) | Circular Genome Distance | hard | py go rs c |
-| [54](54-hard-spectrum-peptide-recovery/) | Spectrum Peptide Recovery | hard | py go rs c |
-| [55](55-hard-changing-network-queries/) | Changing Network Queries | hard | py go rs c |
-| [56](56-hard-orthogonal-segment-crossings/) | Orthogonal Segment Crossings | hard | py go rs c |
-| [57](57-hard-causal-event-replay/) | Causal Event Replay | hard | py go rs c |
-| [58](58-medium-kth-worst-fill/) | Kth Worst Fill | medium | py go rs c |
-| [59](59-medium-price-undercut/) | Price Undercut | medium | py go rs c |
-| [60](60-medium-venue-ancestor/) | Venue Ancestor | medium | py go rs c |
-| [61](61-hard-critical-venue-links/) | Critical Venue Links | hard | py go rs c |
-| [62](62-hard-neutral-basket/) | Neutral Basket | hard | py go rs c |
-| [63](63-hard-liquidity-wall/) | Liquidity Wall | hard | py go rs c |
-| [64](64-medium-signal-path/) | Signal Path | medium | py go rs c |
-| [65](65-hard-strategy-portfolio/) | Strategy Portfolio | hard | py go rs c |
-| [66](66-medium-variant-allele-counts/) | Variant Allele Counts | medium | go rs c |
-| [67](67-medium-tick-frame-audit/) | Tick Frame Audit | medium | go rs c |
-| [68](68-hard-sparse-activation-gate/) | Sparse Activation Gate | hard | go rs c |
+| # | Name | Difficulty | Lang | Levels |
+|---|------|------------|------|--------|
+| [01](01-easy-max-subarray/) | Maximum Subarray | easy | py go rs c | test bench |
+| [02](02-easy-mod-exp/) | Modular Power | easy | py go rs c | test bench |
+| [03](03-easy-max-drawdown/) | Max Drawdown | easy | py go rs c | test bench |
+| [04](04-medium-edge-costs/) | Vertex Load Assignment | medium | py go rs c | test bench |
+| [05](05-medium-price-streak/) | Price Streak | medium | py go rs c | test bench |
+| [06](06-medium-edit-distance/) | Edit Distance | medium | py go rs c | test bench |
+| [07](07-medium-coin-change/) | Coin Change | medium | py go rs c | test bench |
+| [08](08-medium-interval-scheduling/) | Interval Scheduling | medium | py go rs c | test bench |
+| [09](09-medium-count-inversions/) | Count Inversions | medium | py go rs c | test bench |
+| [10](10-medium-route-costs/) | Route Costs | medium | py go rs c | test bench |
+| [11](11-medium-friend-groups/) | Friend Groups | medium | py go rs c | test bench |
+| [12](12-medium-textbook-split/) | Textbook Split | medium | py go rs c | test bench |
+| [13](13-medium-sliding-window-max/) | Sliding Window Maximum | medium | py go rs c | test bench vec |
+| [14](14-medium-count-primes/) | Count Primes | medium | py go rs c | test bench |
+| [15](15-medium-huge-fibonacci/) | Huge Fibonacci | medium | py go rs c | test bench |
+| [16](16-medium-string-search/) | String Search | medium | py go rs c | test bench |
+| [17](17-medium-knapsack/) | 0/1 Knapsack | medium | py go rs c | test bench vec |
+| [18](18-medium-task-ordering/) | Task Ordering | medium | py go rs c | test bench |
+| [19](19-medium-mst/) | Cheapest Road Network | medium | py go rs c | test bench |
+| [20](20-medium-lcs/) | Longest Common Subsequence | medium | py go rs c | test bench |
+| [21](21-medium-constraint-puzzles/) | Constraint Puzzles | medium | py go | test |
+| [22](22-medium-unbounded-sequences/) | Unbounded Sequences | medium | py go | test |
+| [23](23-medium-search-suggestions/) | Search Suggestions | medium | py go rs c | test bench |
+| [24](24-medium-lru-cache/) | Cache Eviction | medium | py go rs c | test bench |
+| [25](25-medium-running-median/) | Running Median | medium | py go rs c | test bench |
+| [26](26-medium-dynamic-prefix-sums/) | Dynamic Prefix Sums | medium | py go rs c | test bench |
+| [27](27-medium-weighted-job-scheduling/) | Weighted Job Scheduling | medium | py go rs c | test bench |
+| [28](28-medium-news-feed-merge/) | News Feed Merge | medium | py go rs c | test bench |
+| [29](29-hard-mpsc-queue/) | Multi-Producer Queue | hard | go rs c | test |
+| [30](30-hard-consistent-tick-snapshot/) | Consistent Tick Snapshot | hard | go rs c | test |
+| [31](31-hard-work-stealing-deque/) | Concurrent Owner/Thief Deque | hard | rs c | test |
+| [32](32-hard-two-thread-buffer/) | Two-Thread Buffer | hard | go rs c | test |
+| [33](33-hard-lock-free-stack-reclamation/) | Lock-Free Stack Reclamation | hard | rs c | test |
+| [34](34-hard-reusable-spin-barrier/) | Reusable Spin Barrier | hard | go rs c | test |
+| [35](35-hard-dynamic-range-sums/) | Dynamic Range Sums | hard | py go rs c | test bench |
+| [36](36-hard-matrix-chain/) | Matrix Chain Multiplication | hard | py go rs c | test bench |
+| [37](37-hard-prime-pair-sets/) | Prime Pair Sets | hard | py go rs c | test bench |
+| [38](38-hard-distinct-substrings/) | Distinct Substrings | hard | py go rs c | test bench |
+| [39](39-hard-max-flow/) | Max Flow | hard | py go rs c | test bench |
+| [41](41-hard-ordered-set-queries/) | Ordered Set Queries | hard | py go rs c | test bench |
+| [42](42-hard-fragmented-string-queries/) | Fragmented String Queries | hard | py go rs c | test bench |
+| [43](43-hard-order-book/) | Order Book | hard | py go rs c | test bench |
+| [44](44-hard-affine-align/) | Affine Alignment Score | hard | py go rs c | test bench vec |
+| [45](45-hard-kmer-assembly/) | K-mer Assembly | hard | py go rs c | test bench |
+| [46](46-hard-crispr-offtarget/) | CRISPR Off-Targets | hard | py go rs c | test bench vec |
+| [47](47-hard-rna-max-pairs/) | RNA Max Pairs | hard | py go rs c | test bench |
+| [48](48-hard-shortest-superstring/) | Shortest Superstring | hard | py go rs c | test bench |
+| [49](49-hard-gene-region-decoder/) | Gene Region Decoder | hard | py go rs c | test bench |
+| [50](50-hard-tree-sequence-likelihood/) | Tree Sequence Likelihood | hard | py go rs c | test bench |
+| [51](51-hard-deadline-scheduler/) | Deadline Scheduler | hard | py go rs c | test bench |
+| [52](52-hard-service-pairing/) | Service Pairing | hard | py go rs c | test bench |
+| [53](53-hard-circular-genome-distance/) | Circular Genome Distance | hard | py go rs c | test bench |
+| [54](54-hard-spectrum-peptide-recovery/) | Spectrum Peptide Recovery | hard | py go rs c | test bench |
+| [55](55-hard-changing-network-queries/) | Changing Network Queries | hard | py go rs c | test bench |
+| [56](56-hard-orthogonal-segment-crossings/) | Orthogonal Segment Crossings | hard | py go rs c | test bench |
+| [57](57-hard-causal-event-replay/) | Causal Event Replay | hard | py go rs c | test bench |
+| [58](58-medium-kth-worst-fill/) | Kth Worst Fill | medium | py go rs c | test bench |
+| [59](59-medium-price-undercut/) | Price Undercut | medium | py go rs c | test bench |
+| [60](60-medium-venue-ancestor/) | Venue Ancestor | medium | py go rs c | test bench |
+| [61](61-hard-critical-venue-links/) | Critical Venue Links | hard | py go rs c | test bench |
+| [62](62-hard-neutral-basket/) | Neutral Basket | hard | py go rs c | test bench |
+| [63](63-hard-liquidity-wall/) | Liquidity Wall | hard | py go rs c | test bench |
+| [64](64-medium-signal-path/) | Signal Path | medium | py go rs c | test bench |
+| [65](65-hard-strategy-portfolio/) | Strategy Portfolio | hard | py go rs c | test bench |
+| [66](66-medium-variant-allele-counts/) | Variant Allele Counts | medium | go rs c | test vec |
+| [67](67-medium-tick-frame-audit/) | Tick Frame Audit | medium | go rs c | test vec |
+| [68](68-hard-sparse-activation-gate/) | Sparse Activation Gate | hard | go rs c | test vec |
 
 ---
 
