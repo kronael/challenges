@@ -130,6 +130,25 @@ decision) or BY-DESIGN (accepted variance).
   as the stack, after checking what Go, which keeps frame pointers, then
   counts.
 
+## vec level
+
+- **46-VEC-SOLVE-TIMES-OUT-IN-BENCH** (MED, bench) — Record-only, reproduced
+  2026-09-26. 46's level-3 shape compares every window with every guide,
+  `O(guides × genome)`, which clears `make bench` only when optimized. Through
+  the solver builds `make bench` keeps, the golden's C `solve` takes 3.3 s of
+  its 5 s in `c/` (`-O2`, baseline x86-64) on an idle machine and TIMEOUTs on
+  both large cases with three busy loops on the box's two CPUs; the Rust form in
+  `hints/06.md` TIMEOUTs in `rust/`'s debug `make bench` even idle, while it
+  grades 0.49 scalar per base in `make vec`. `rotten/`'s Python times out as it
+  should. So a `solve` can pass level 3 and fail level 2. **Fix:** owner's call
+  — a release build for Rust's `make bench`, a longer timeout for 46, or
+  smaller large cases (a digest refreeze).
+- **17-RUST-TEST-NOT-FORMATTED** (LOW, hygiene) — Record-only, seen
+  2026-09-26. `17-medium-knapsack/rust/tests/correctness.rs` is not
+  `cargo fmt` clean, so `make test` in `rust/` (test runs `check`, which runs
+  `fmt`) rewraps its `assert_eq!` and leaves a tracked file modified. **Fix:**
+  commit the `cargo fmt` output.
+
 ## Script tests
 
 - **BENCH-TEST-STARTUP-RACE** (LOW, test) — Record-only, seen 2026-09-26 at
