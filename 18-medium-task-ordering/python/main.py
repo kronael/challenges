@@ -3,7 +3,6 @@ import sys
 
 
 def solve(n, edges):
-    _ = (n, edges)
     pass
 
 

@@ -3,7 +3,6 @@ import sys
 
 
 def solve(dims):
-    _ = dims
     pass
 
 

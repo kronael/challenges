@@ -3,7 +3,6 @@ import sys
 
 
 def solve(feeds):
-    _ = feeds
     pass
 
 

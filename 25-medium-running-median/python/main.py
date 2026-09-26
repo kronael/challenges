@@ -3,7 +3,6 @@ import sys
 
 
 def solve(stream):
-    _ = stream
     pass
 
 

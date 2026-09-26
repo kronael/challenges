@@ -3,7 +3,6 @@ import sys
 
 
 def solve(prices):
-    _ = prices
     pass
 
 

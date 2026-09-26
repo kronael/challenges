@@ -3,7 +3,6 @@ import sys
 
 
 def solve(parts, queries):
-    _ = (parts, queries)
     pass
 
 

@@ -34,7 +34,6 @@ IDX = {c: i for i, c in enumerate(AA)}
 
 
 def solve(s, t):
-    _ = (s, t)
     pass
 
 

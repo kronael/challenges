@@ -3,7 +3,6 @@ import sys
 
 
 def solve(n, initial, queries):
-    _ = (n, initial, queries)
     pass
 
 

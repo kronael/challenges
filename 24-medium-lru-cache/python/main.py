@@ -3,7 +3,6 @@ import sys
 
 
 def solve(capacity, ops):
-    _ = (capacity, ops)
     pass
 
 
