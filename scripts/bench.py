@@ -104,9 +104,7 @@ def temp_path(label: str) -> Path:
 def oracle_command(golden: Path) -> list[str]:
     if (golden / "main.py").exists():
         return ["uv", "run", "python", "main.py"]
-    subprocess.run(
-        ["make", "--no-print-directory", "-s", "main"], cwd=golden, check=True
-    )
+    subprocess.run(["make", "-s", "main"], cwd=golden, check=True)
     return ["./main"]
 
 

@@ -12,12 +12,10 @@ all: fmt build lint test
 
 build: main
 
-main: $(C_IO_MAKEFILE) $(C_IO_DIR)/main.c solution.c $(C_IO_HEADERS)
+main main-vec: $(C_IO_MAKEFILE) $(C_IO_DIR)/main.c solution.c $(C_IO_HEADERS)
 	$(CC) $(CPPFLAGS) $(C_IO_CPPFLAGS) $(CFLAGS) -o $@ $(C_IO_DIR)/main.c solution.c $(LDLIBS)
 
-main-vec: $(C_IO_MAKEFILE) $(C_IO_DIR)/main.c solution.c $(C_IO_HEADERS)
-	$(CC) $(CPPFLAGS) $(C_IO_CPPFLAGS) -std=c11 -O3 -march=x86-64-v3 -g -Wall -Wextra \
-	  -o $@ $(C_IO_DIR)/main.c solution.c $(LDLIBS)
+main-vec: CFLAGS := -std=c11 -O3 -march=x86-64-v3 -g -Wall -Wextra
 
 run_tests: $(C_IO_MAKEFILE) $(C_IO_DIR)/test.c solution.c $(C_IO_HEADERS)
 	$(CC) $(CPPFLAGS) $(C_IO_CPPFLAGS) $(CFLAGS) -o $@ $(C_IO_DIR)/test.c solution.c $(LDLIBS)
