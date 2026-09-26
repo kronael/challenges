@@ -7,7 +7,6 @@ BIN_NAME := $(shell grep '^name' Cargo.toml | head -1 | sed 's/.*= *"\(.*\)"/\1/
 export RUSTFLAGS := -C target-cpu=x86-64-v3
 
 VEC_EXPECT := vectorized
-VEC_BIN    := target/release/$(BIN_NAME)
 
 all: fmt build lint test
 

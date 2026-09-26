@@ -1,4 +1,5 @@
 .PHONY: all build fmt lint check test clean help
+BIN_NAME := $(shell grep '^name' Cargo.toml | head -1 | sed 's/.*= *"\(.*\)"/\1/')
 
 # `make test` and `make vec` check one build: both compile in release for
 # x86-64-v3, the target `make vec` grades, so code behind cfg(target_feature)

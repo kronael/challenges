@@ -70,7 +70,6 @@ perf.data
 */rotten/main
 */rotten/run_tests
 */c/main
-*/c/main-vec
 */c/run_tests
 */c/stress
 */c/benchmark
