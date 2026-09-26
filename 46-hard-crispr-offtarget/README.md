@@ -67,9 +67,9 @@ Stuck? See `hints/01.md`.
 ## Level 3 — `make vec`
 
 `make test` checks the answer and `make bench` its speed. `make vec`, the
-optional third level, checks how the program got it. It builds its own
-`x86-64-v3` program, checks its answer on every case in `cases/`, then runs it
-on the fixture that `vec.mk` names and single-steps the call to `solve`: every
+optional third level, checks how the program got it. It checks the program's
+answer on every case in `cases/`, then runs it on the fixture that `vec.mk`
+names and single-steps the call to `solve`: every
 instruction `solve` retires, in its own code, in the functions it calls, and in
 the library routines those call, except the Go runtime's stack growth, heap
 growth, and preemption. It passes when `solve` retires fewer than one scalar
@@ -102,11 +102,11 @@ make -C rust vec
 make -C go vec
 ```
 
-Its build is C at `-O3 -march=x86-64-v3`, Rust in release with
-`-C target-cpu=x86-64-v3`, and Go with `GOAMD64=v3`, so it needs a machine with
-AVX2, BMI2, and FMA. `make test` and `make bench` keep their own builds, and a
-`solve` must pass them too. The Go directory builds every target with
-`GOEXPERIMENT=simd`, so a Go `solve` may import `simd/archsimd`; its `go.mod`
-requires Go 1.27.1 or newer.
+Those three directories build every target for `x86-64-v3`: C at
+`-O3 -march=x86-64-v3`, Rust in release with `-C target-cpu=x86-64-v3`, and Go
+with `GOAMD64=v3`. So `make test`, `make bench`, and `make vec` check one
+program, and all three need a machine with AVX2, BMI2, and FMA. The Go directory
+also builds with `GOEXPERIMENT=simd`, so a Go `solve` may import
+`simd/archsimd`; its `go.mod` requires Go 1.27.1 or newer.
 
 Stuck on this level? See `hints/04.md`.
