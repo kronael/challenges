@@ -20,7 +20,7 @@ Output an order that respects every local and cross-process dependency. When
 several events are eligible, emit the event with the smallest `id`. Inputs are
 guaranteed to describe a valid history.
 
-Constraints: 1 to 32 processes and at most 200000 events.
+Constraints: 1 to 32 processes and at most 250000 events.
 
 ## Input
 

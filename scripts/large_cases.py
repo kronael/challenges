@@ -15,7 +15,7 @@ DNA = "ACGT"
 LOWER = "abcdefghijklmnopqrstuvwxyz"
 PROTEIN = "ARNDCQEGHILKMFPSTWYV"
 RNA = "ACGU"
-EXPECTED_DIGEST = "084f5cca02ec1ab824d3ce4e76f2c133a6c6fa280e6e0b69a76c7ad629f1a15e"
+EXPECTED_DIGEST = "5cf47dec2cfc79493c55390833f330f8ecb9d6ee32ac5999ed20371318a0c935"
 
 
 class Rng:
@@ -692,7 +692,7 @@ def build_57(name: str, rng: Rng) -> dict[str, Any]:
     processes = 4
     events = []
     if name == "09_large_independent":
-        per_process = 30_000
+        per_process = 62_500
         for process in range(processes):
             for sequence in range(1, per_process + 1):
                 clock = [0] * processes
@@ -700,7 +700,7 @@ def build_57(name: str, rng: Rng) -> dict[str, Any]:
                 events.append(event(process * per_process + sequence, process, clock))
     else:
         counts = [0] * processes
-        for i in range(80_000):
+        for i in range(250_000):
             process = i % processes
             counts[process] += 1
             events.append(event(i + 1, process, counts.copy()))
