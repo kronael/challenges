@@ -34,7 +34,7 @@ The assigned loads, space-separated on one line.
 
 **Example 2** - two fixed nodes constrain the middle
 ```
-{"n":3,"edges":[[0,1],[1,2]],"loads":[5,null,8]} → 5 7 8
+{"n":3,"edges":[[0,1],[1,2]],"loads":[5,null,7]} → 5 6 7
 ```
 
 ## Run
