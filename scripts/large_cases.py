@@ -15,7 +15,7 @@ DNA = "ACGT"
 LOWER = "abcdefghijklmnopqrstuvwxyz"
 PROTEIN = "ARNDCQEGHILKMFPSTWYV"
 RNA = "ACGU"
-EXPECTED_DIGEST = "eb5702c669aabee91ef1c83f97370650179b46a3e045bc5c07aeb1d48ff43df7"
+EXPECTED_DIGEST = "c32fcbad1e880c767ac26ce52e3894c65811bc1d097d9a9c5caeec64222c372c"
 
 
 class Rng:
@@ -204,12 +204,12 @@ def build_15(name: str, rng: Rng) -> dict[str, Any]:
 
 def build_16(name: str, rng: Rng) -> dict[str, Any]:
     del rng
-    pattern = "a" * 12_000
+    pattern = "a" * 15_000
     if name == "09_large_allmatch":
-        text = "a" * 2_500_000
+        text = "a" * 3_000_000
     else:
-        pattern = "a" * 11_999 + "b"
-        text = "a" * 2_500_000
+        pattern = "a" * 14_999 + "b"
+        text = "a" * 3_000_000
     return {"text": text, "pattern": pattern}
 
 
