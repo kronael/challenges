@@ -3,14 +3,13 @@ import sys
 
 
 def solve(s):
-    # Naive: dump every substring into a set — correct, but quadratic memory and
-    # cubic time. It TIMEOUTs and blows up on the large cases — the trap.
+    # Naive: count each substring at its first occurrence, found by searching the
+    # whole text again — n² substrings, each an O(n) slice and search, so O(n³)
+    # time. It TIMEOUTs on the large cases.
     n = len(s)
-    seen = set()
-    for i in range(n):
-        for j in range(i + 1, n + 1):
-            seen.add(s[i:j])
-    return len(seen)
+    return sum(
+        1 for i in range(n) for j in range(i + 1, n + 1) if s.find(s[i:j]) == i
+    )
 
 
 def main():
