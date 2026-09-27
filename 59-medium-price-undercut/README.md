@@ -17,9 +17,6 @@ For every day `i` report the wait until it is undercut: `j - i`, where `j` is th
 smallest index greater than `i` with `prices[j] < prices[i]`. Report `0` for a
 day that is never undercut, including the last day of the series.
 
-Every day of the series gets its own answer, and the series can be long, so the
-whole report must be produced within the stated limits.
-
 Constraints: `1 <= n <= 250000`, `n` equals the length of `prices`, and every
 settlement price fits in a signed 32-bit integer and may be negative.
 
