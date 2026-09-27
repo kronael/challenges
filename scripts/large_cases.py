@@ -15,7 +15,7 @@ DNA = "ACGT"
 LOWER = "abcdefghijklmnopqrstuvwxyz"
 PROTEIN = "ARNDCQEGHILKMFPSTWYV"
 RNA = "ACGU"
-EXPECTED_DIGEST = "6c1c100fd5c69ef5e2f10c90133b4580427c082ca1738a21fa2da635dda064c2"
+EXPECTED_DIGEST = "fb5eef122ba2ffc6d534a9488d143e1e6bb143c5bc1fb34ba444432de07c2638"
 
 
 class Rng:
@@ -160,7 +160,7 @@ def build_10(name: str, rng: Rng) -> dict[str, Any]:
 
 
 def build_11(name: str, rng: Rng) -> dict[str, Any]:
-    n = 200_000
+    n = 500_000
     if name == "09_large_random":
         unions = [
             [rng.integer(0, n - 1), rng.integer(0, n - 1)] for _ in range(n)
