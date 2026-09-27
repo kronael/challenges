@@ -148,16 +148,6 @@ decision) or BY-DESIGN (accepted variance).
   10 µs on an insert and on a narrow range count, so no mix of the two that
   keeps it within a third of the 10 s Python timeout reached a 2× wall.
   **Fix (optional):** a faster golden. No test — design. Measured 2026-09-27.
-- **38-ROTTEN-BENCH-MEMORY** (LOW, ops) — `make rotten` runs 38's rotten
-  (`rotten/main.py:12`, every substring into one set) with no memory cap. Under
-  uv's CPython 3.14 it holds 2.3 GB RSS on `09_large_random` and 3.3 GB on
-  `10_large_binary` when `scripts/bench.py` stops it at the 5 s timeout, so on
-  a box already short of memory the run pushes into swap. An address-space cap
-  on every run is not sound, because Go reserves large virtual memory, and a
-  cap on the `--expect-timeout` runs alone turns 38's timeout into a
-  `MemoryError`, which `make rotten` reports as an error. **Fix:** needs
-  sign-off — cap the `--expect-timeout` runs and count a memory-cap failure as
-  the wall, or accept the transient. No test — ops. Measured 2026-09-27.
 
 ## vec grader
 
