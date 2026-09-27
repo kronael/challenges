@@ -2,6 +2,51 @@
 
 All notable changes to this challenge bench are recorded here.
 
+## [v0.1.9] — 2026-09-27
+
+> challenges v0.1.9 — every bench wall holds against native code
+>
+> Every large case now times out a plain native copy of the naive solution,
+> even at `-O3 -march=native`, and the docs match what the repo runs.
+>
+> • 15 challenges get bigger or reshaped large cases; 10 READMEs raise a size limit
+> • `make golden` and `make rotten` now also cover the systems challenges
+> • READMEs fixed where an example, caption, or field name was wrong
+> • `make rotten` no longer needs gigabytes of memory for 38
+>
+> Full notes below.
+
+### Changed
+
+- Large cases of 03, 09, 11, 14, 16, 19, 26, 27, 35, 41, 43, 52, 56, 57, and
+  59 grow or change shape, so a native copy of `rotten/` at `-O2` or
+  `-O3 -march=native` runs past the 5 s solver timeout on every one, and each
+  golden still passes with room to spare.
+- README size limits raised: 03 and 09 (n), 11 (n, friendships, queries),
+  19 (n), 26 (n, queries), 27 (n), 43 (orders), 56 (segments), 57 (events),
+  59 (n).
+- `make golden` runs the systems goldens' stress tests and `make rotten` the
+  systems rottens' checks; the `sys` and `sys-rotten` targets are gone.
+- `CLAUDE.md` says Rust `make bench` times the debug build on purpose (release
+  in 13, 17, 44, and 46), and gives C's 5 s timeout.
+
+### Fixed
+
+- 02 names its modulus `mod`, the input field; 04's Example 2 uses feasible
+  fixed loads; 22 documents Go's `unfold`; 41's and 44's captions and 49's
+  output line say what they show; 59 drops a line that urged speed.
+- The template's Run section lists the C track and the first hint.
+- `make vec`'s lint reads the preprocessed C, refuses Rust, Cargo, and Go
+  paths that reach outside the solver directory, and refuses a
+  `.cargo/config.toml` or a solver Makefile that replaces a shared recipe.
+- 38's rotten keeps its memory at O(n); it held 2–3 GB when `make rotten`
+  stopped it, enough to push a busy box into swap.
+
+### Known
+
+- 41 range and 46 keep walls under 2×, and 16 and 46 have simple variants that
+  no input size separates from the golden; `BUGS.md` records each.
+
 ## [v0.1.8] — 2026-09-26
 
 > challenges v0.1.8 — a fairer `make vec`, fewer spoilers
