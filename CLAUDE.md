@@ -151,10 +151,10 @@ the four solver dirs.
   cases; `rotten/` is C, the same algorithm left scalar.
 
 Three levels: `make test` (correct), `make bench` (fast), `make vec`
-(vectorized; C, Rust, and Go only). io 13, 17, 44, and 46 have all three. A
+(vectorized; C, Rust, and Go only). io 13, 44, and 46 have all three. A
 challenge with `make vec` has a root `vec.mk` naming the traced fixture, a C
 `golden/`, and solver Makefiles that include `shared/vec.mk`. The fixture is a
-tracked root `vec.in`/`vec.out` pair in 13, 17, 44, and 46, and one of the
+tracked root `vec.in`/`vec.out` pair in 13, 44, and 46, and one of the
 `cases/` pairs in 66–68. Every target of those solver directories builds for
 `x86-64-v3` with only the flags `shared/vec.mk` sets, plus the challenge
 `vec.mk`'s `VEC_CFLAGS`, so `make test`, `make bench`, and `make vec` check one
@@ -173,7 +173,7 @@ NN-level-slug/
   hints/                 01.md, 02.md, … — one spoiler per file, sources last
   cases/                 tracked small NN.in / NN.out fixtures (io and vec only)
   vec.mk                 make vec's traced fixture and unit of work (vec level only)
-  vec.in · vec.out       traced fixture outside cases/ (13, 17, 44, 46)
+  vec.in · vec.out       traced fixture outside cases/ (13, 44, 46)
   golden/  main.py · test_solution.py · Makefile · pyproject.toml   (fast reference; C if vec level)
   rotten/  main.py · test_solution.py · Makefile · pyproject.toml   (naive trap: passes test, fails bench)
   python/  main.py · test_solution.py · Makefile
@@ -222,10 +222,10 @@ The runner terminates the whole process group, then kills it 2s later, so the
 benchmark can **never hang** regardless of what the binary does.
 Defaults: **5s** Rust/Go/C, **10s** Python. Override: `make bench TIMEOUT=30`.
 Rust `make bench` times the debug build on purpose: the complexity walls do not
-depend on optimization. 13, 17, 44, and 46 time release, the one program their
+depend on optimization. 13, 44, and 46 time release, the one program their
 `make vec` grades.
 
-A Python I/O `golden/` has `all: test`; a C one (13, 17, 44, 46) keeps the
+A Python I/O `golden/` has `all: test`; a C one (13, 44, 46) keeps the
 `shared/c/io.mk` targets. Both add a `regen` target to regenerate tracked `.out`
 files. API, sys, and vec challenges use targets specific to their test style;
 check their README and `make help` instead of assuming this table applies.
@@ -259,7 +259,7 @@ materializes these cases ephemerally.
 - **py** — `uv run` (pytest, ruff); no venv to manage.
 - **go** — stdlib `go test`.
 - **rs** — `cargo test`. io: `src/main.rs` is the timed binary, a debug build
-  except in 13, 17, 44, and 46; sys: `src/bin/bench.rs`, a release build.
+  except in 13, 44, and 46; sys: `src/bin/bench.rs`, a release build.
 - **c** — `cc -std=c11`, no dependencies. io: `./run_tests` drives `../cases`,
   `./main` is the timed binary; sys: `./stress` and `./benchmark`. `lint`
   recompiles everything with `-Wpedantic -Wshadow -Werror`.
@@ -298,7 +298,7 @@ The race detector and the stress test are your debugger for sys challenges.
 ## State of the repo
 
 - 01–20, 23–28, 35–39, 41–65: io challenges with cases and language harnesses;
-  13, 17, 44, 46 also have the vec level.
+  13, 44, 46 also have the vec level.
 - 21–22: Python API exercises with direct tests and no rotten reference.
 - 29–34: sys challenges with stress tests.
 - 66–68: vec-only challenges — C, Rust, and Go; `make test` and `make vec`.

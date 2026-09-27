@@ -129,7 +129,7 @@ implementation burden, and the constraints enforced by `make bench`.
 | [14](14-medium-count-primes/) | Count Primes | medium | py go rs c | test bench |
 | [15](15-medium-huge-fibonacci/) | Huge Fibonacci | medium | py go rs c | test bench |
 | [16](16-medium-string-search/) | String Search | medium | py go rs c | test bench |
-| [17](17-medium-knapsack/) | 0/1 Knapsack | medium | py go rs c | test bench vec |
+| [17](17-medium-knapsack/) | 0/1 Knapsack | medium | py go rs c | test bench |
 | [18](18-medium-task-ordering/) | Task Ordering | medium | py go rs c | test bench |
 | [19](19-medium-mst/) | Cheapest Road Network | medium | py go rs c | test bench |
 | [20](20-medium-lcs/) | Longest Common Subsequence | medium | py go rs c | test bench |
