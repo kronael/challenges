@@ -15,7 +15,7 @@ DNA = "ACGT"
 LOWER = "abcdefghijklmnopqrstuvwxyz"
 PROTEIN = "ARNDCQEGHILKMFPSTWYV"
 RNA = "ACGU"
-EXPECTED_DIGEST = "666eb55bfb4b179f6909a12cdbc111c2654b02da8416d93638b0dfffb2852df9"
+EXPECTED_DIGEST = "d54248ea783f08b22b2faed9931a3c3360692da6619e2f7f368001a163980685"
 
 
 class Rng:
@@ -378,14 +378,18 @@ def build_35(name: str, rng: Rng) -> dict[str, Any]:
     values = [rng.integer(-1_000, 1_000) for _ in range(n)]
     updates = [
         ["update", rng.integer(1, n // 16), rng.integer(-1_000, 1_000)]
-        for _ in range(n // 2)
+        for _ in range(n // 4)
     ]
     queries = [
-        ["sum", rng.integer(1, n // 4), rng.integer(3 * n // 4, n)]
-        for _ in range(n // 2)
+        ["sum", rng.integer(1, n // 16), rng.integer(15 * n // 16, n)]
+        for _ in range(3 * n // 4)
     ]
     if name == "09_large_mixed":
-        ops = [op for pair in zip(updates, queries, strict=True) for op in pair]
+        ops = [
+            op
+            for i, update in enumerate(updates)
+            for op in (update, *queries[3 * i : 3 * i + 3])
+        ]
     else:
         ops = updates + queries
     return {"n": n, "values": values, "ops": ops}
