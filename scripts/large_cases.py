@@ -15,7 +15,7 @@ DNA = "ACGT"
 LOWER = "abcdefghijklmnopqrstuvwxyz"
 PROTEIN = "ARNDCQEGHILKMFPSTWYV"
 RNA = "ACGU"
-EXPECTED_DIGEST = "26453978fce682edefc239954a377c7d9c8c5690b5b8da336a84311ebe38e736"
+EXPECTED_DIGEST = "0ad3035dff3c71846edc7612402691a4fe58f5a8827624e1bfb24200e4a84578"
 
 
 class Rng:
@@ -65,7 +65,7 @@ def build_02(name: str, rng: Rng) -> dict[str, Any]:
 
 
 def build_03(name: str, rng: Rng) -> dict[str, Any]:
-    n = 200_000
+    n = 1_000_000
     if name == "09_large_decline":
         prices = [1_000_000 - 6 * i for i in range(n)]
     else:
