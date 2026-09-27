@@ -5,7 +5,7 @@ import sys
 
 def solve(costs):
     # Naive: try all n! one-to-one placements and keep the cheapest total.
-    # Correct, but factorial work TIMEOUTs on the 12x12 and 13x13 large cases.
+    # Correct, but factorial work TIMEOUTs on the 13x13 and 14x14 large cases.
     best = None
     for hosts in itertools.permutations(range(len(costs))):
         total = sum(costs[service][host] for service, host in enumerate(hosts))
