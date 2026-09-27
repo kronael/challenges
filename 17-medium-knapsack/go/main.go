@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
-	"runtime"
 )
 
 type item struct {
@@ -15,12 +14,6 @@ type item struct {
 type input struct {
 	Capacity int    `json:"capacity"`
 	Items    []item `json:"items"`
-}
-
-// init keeps the main goroutine, and so solve, on the thread the program
-// started on: `make vec` single-steps that one thread.
-func init() {
-	runtime.LockOSThread()
 }
 
 func main() {

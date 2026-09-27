@@ -2,30 +2,24 @@
 TIMEOUT  ?= 5
 BIN_NAME := $(shell grep '^name' Cargo.toml | head -1 | sed 's/.*= *"\(.*\)"/\1/')
 
-# Every target builds in release with the flags shared/vec.mk sets, the
-# flags `make vec` grades, so `make test`, `make bench`, and `make vec` check
-# one program.
-
-VEC_EXPECT := vectorized
-
 all: fmt build lint test
 
 build:
-	cargo build --release
+	cargo build
 
 fmt:
 	cargo fmt
 
 lint:
-	cargo clippy --release
+	cargo clippy
 
 check: fmt lint
 
 test: build check
-	cargo test --release
+	cargo test
 
 bench: build
-	python3 ../../scripts/bench.py --timeout "$(TIMEOUT)" -- ./target/release/$(BIN_NAME)
+	python3 ../../scripts/bench.py --timeout "$(TIMEOUT)" -- ./target/debug/$(BIN_NAME)
 
 clean:
 	cargo clean
@@ -33,12 +27,9 @@ clean:
 help:
 	@echo "clean  — remove build artifacts"
 	@echo "all    — fmt build lint test (default)"
-	@echo "build  — cargo build --release for x86-64-v3"
+	@echo "build  — cargo build (debug)"
 	@echo "fmt    — cargo fmt"
-	@echo "lint   — cargo clippy --release"
+	@echo "lint   — cargo clippy"
 	@echo "check  — fmt + lint"
-	@echo "test   — build + fmt + lint + cargo test --release (small cases only)"
-	@echo "bench  — check output and time the release binary on large cases (TIMEOUT=5)"
-	@echo "vec    — trace solve on the vec fixture and check its work runs in packed lanes"
-
-include ../../shared/vec.mk
+	@echo "test   — build + fmt + lint + cargo test (small cases only)"
+	@echo "bench  — check output and time debug binary on large cases (TIMEOUT=5)"

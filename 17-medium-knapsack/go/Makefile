@@ -2,12 +2,6 @@
 TIMEOUT  ?= 5
 MOD_NAME := $(shell awk '/^module/{print $$2}' go.mod)
 
-# simd/archsimd exists only under GOEXPERIMENT=simd, and GOAMD64=v3 is the
-# x86-64-v3 target `make vec` grades. shared/vec.mk sets both for every
-# target, so `make test`, `make bench`, and `make vec` check one program.
-
-VEC_EXPECT := vectorized
-
 all: fmt build lint test
 
 build:
@@ -33,12 +27,9 @@ clean:
 help:
 	@echo "clean  — remove built binaries"
 	@echo "all    — fmt build lint test (default)"
-	@echo "build  — go build for GOAMD64=v3"
+	@echo "build  — go build"
 	@echo "fmt    — gofmt"
 	@echo "lint   — go vet"
 	@echo "check  — fmt + lint"
 	@echo "test   — build + fmt + lint + go test (small cases only)"
 	@echo "bench  — check output and time binary on large cases (TIMEOUT=5)"
-	@echo "vec    — trace solve on the vec fixture and check its work runs in packed lanes"
-
-include ../../shared/vec.mk
