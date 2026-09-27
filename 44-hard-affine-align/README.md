@@ -78,7 +78,7 @@ A single integer: the maximum global alignment score.
 {"s":"PRTEINS","t":"PRTWPSEIN"} → 8
 ```
 
-**Example 2** — identical strings align on the diagonal with no gaps
+**Example 2** — identical strings align residue for residue with no gaps
 ```
 {"s":"MEEPQSDPSV","t":"MEEPQSDPSV"} → 52
 ```
