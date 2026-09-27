@@ -114,6 +114,51 @@ decision) or BY-DESIGN (accepted variance).
   and `04/12–20.in` were also reviewed and are intentional/harmless — every
   `.in` is paired and each challenge has ≥8 small cases — so they are not logged.)
 
+## make bench walls
+
+- **16-LIBRARY-COMPARE-CLEARS-BENCH** (MED, design) — needs sign-off.
+  `16-medium-string-search`'s wall holds only against the character by
+  character loop in `rotten/main.py:6`. The same O(|T|·|P|) scan written with a
+  library compare clears `make bench` on both recipes at the README maximum
+  (|T| = 3·10⁶, |P| = 1.5·10⁴): C `memcmp` takes 0.5–0.8 s CPU a case at `-O2`
+  and `-O3 -march=native`, and Python `text.startswith(pattern, i)` takes 1.5 s
+  on `09_large_allmatch` and 0.17 s on `10_large_nearmiss`, where CPython
+  compares the last character first. Rust slice `==` and Go string `==` reach
+  the same library compare (not timed). The character loop in C takes 11.7 s
+  at `-O2`. A 2× wall against `memcmp` needs |T|·|P| about 15× larger, and
+  the golden already prints 3·10⁶ positions on allmatch. **Fix:** owner's call —
+  a bare time bound in the README (the CLAUDE.md exception; this is the
+  measurement it asks for), or accept that 16 times only the character loop.
+  No test — design. Measured 2026-09-27.
+- **46-BENCH-WALL-UNDER-2X** (LOW, design) — deferred, trade-off. A native
+  control of `rotten/` (guide × window × base, `-O3 -march=native`) takes 7.7 s
+  CPU a case on both recipes, 1.54× the 5 s budget. A 2× wall needs about
+  1.3·10⁶ bases, where the Go sliding window of `hints/06.md` (3.6 s a case at
+  10⁶) passes 4.7 s and stops fitting the budget; C's takes 2.3 s. The same
+  triple loop with the window loop innermost (one pass per guide base, adding
+  into a byte counter per window) does the same O(guides × genome × L)
+  comparisons, vectorizes 32 windows at a time, and takes 1.0 s a case (golden
+  0.9 s), so no genome length separates it from the golden; `make vec` was not
+  run on it. **Fix:** owner's call — accept the 1.5× wall and the swapped-loop
+  pass, or reshape the level. No test — design. Measured 2026-09-27.
+- **41-RANGE-WALL-UNDER-2X** (LOW, design) — deferred, trade-off.
+  `10_large_range` (3·10⁵ inserts, then 5·10⁴ narrow range counts) holds a
+  native control of `rotten/` to 8.7 s CPU at `-O3 -march=native`, 1.74× the
+  5 s budget, while the Python golden takes 3.1 s. The golden spends about
+  10 µs on an insert and on a narrow range count, so no mix of the two that
+  keeps it within a third of the 10 s Python timeout reached a 2× wall.
+  **Fix (optional):** a faster golden. No test — design. Measured 2026-09-27.
+- **38-ROTTEN-BENCH-MEMORY** (LOW, ops) — `make rotten` runs 38's rotten
+  (`rotten/main.py:12`, every substring into one set) with no memory cap. Under
+  uv's CPython 3.14 it holds 2.3 GB RSS on `09_large_random` and 3.3 GB on
+  `10_large_binary` when `scripts/bench.py` stops it at the 5 s timeout, so on
+  a box already short of memory the run pushes into swap. An address-space cap
+  on every run is not sound, because Go reserves large virtual memory, and a
+  cap on the `--expect-timeout` runs alone turns 38's timeout into a
+  `MemoryError`, which `make rotten` reports as an error. **Fix:** needs
+  sign-off — cap the `--expect-timeout` runs and count a memory-cap failure as
+  the wall, or accept the transient. No test — ops. Measured 2026-09-27.
+
 ## vec grader
 
 - **VEC-WORK-BEFORE-SOLVE** (MED, grading) — Record-only, needs the owner's
