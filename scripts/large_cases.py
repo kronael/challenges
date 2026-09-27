@@ -15,7 +15,7 @@ DNA = "ACGT"
 LOWER = "abcdefghijklmnopqrstuvwxyz"
 PROTEIN = "ARNDCQEGHILKMFPSTWYV"
 RNA = "ACGU"
-EXPECTED_DIGEST = "d54248ea783f08b22b2faed9931a3c3360692da6619e2f7f368001a163980685"
+EXPECTED_DIGEST = "6197a7838be0f5bde48db0b06d9ba6dfa239ae8f2511796457c539825f0eb22b"
 
 
 class Rng:
@@ -428,20 +428,20 @@ def build_41(name: str, rng: Rng) -> dict[str, Any]:
         values = [rng.integer(-(1 << 31), (1 << 31) - 1) for _ in range(200_000)]
         ops = [["insert", value] for value in values]
         ops.extend(
-            ["search", rng.integer(-(1 << 31), (1 << 31) - 1)]
+            ["search", rng.integer(1 << 30, (1 << 31) - 1)]
             for _ in range(200_000)
         )
     else:
-        values = [rng.integer(-2_000_000, 2_000_000) for _ in range(125_000)]
+        values = [rng.integer(-2_000_000, 2_000_000) for _ in range(300_000)]
         ops = [["insert", value] for value in values]
         if name == "10_large_range":
-            for _ in range(125_000):
+            for _ in range(50_000):
                 low = rng.integer(-2_000_000, 1_990_000)
                 ops.append(["range_count", low, low + rng.integer(0, 10_000)])
         else:
             ops.extend(
                 ["range_count", -(1 << 31), (1 << 31) - 1]
-                for _ in range(125_000)
+                for _ in range(100_000)
             )
     return {"ops": ops}
 
