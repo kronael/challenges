@@ -15,7 +15,7 @@ DNA = "ACGT"
 LOWER = "abcdefghijklmnopqrstuvwxyz"
 PROTEIN = "ARNDCQEGHILKMFPSTWYV"
 RNA = "ACGU"
-EXPECTED_DIGEST = "fb5eef122ba2ffc6d534a9488d143e1e6bb143c5bc1fb34ba444432de07c2638"
+EXPECTED_DIGEST = "eb5702c669aabee91ef1c83f97370650179b46a3e045bc5c07aeb1d48ff43df7"
 
 
 class Rng:
@@ -194,7 +194,7 @@ def build_13(name: str, rng: Rng) -> dict[str, Any]:
 
 def build_14(name: str, rng: Rng) -> dict[str, Any]:
     del rng
-    return {"n": 10_000_000 if name == "09_large_ten_million" else 100_000_000}
+    return {"n": 50_000_000 if name == "09_large_fifty_million" else 100_000_000}
 
 
 def build_15(name: str, rng: Rng) -> dict[str, Any]:
@@ -1074,7 +1074,7 @@ NAMES = {
     "11-medium-friend-groups": ("09_large_random", "10_large_chain"),
     "12-medium-textbook-split": ("09_large_random", "10_large_wide"),
     "13-medium-sliding-window-max": ("09_large_random", "10_large_decreasing"),
-    "14-medium-count-primes": ("09_large_ten_million", "10_large_hundred_million"),
+    "14-medium-count-primes": ("09_large_fifty_million", "10_large_hundred_million"),
     "15-medium-huge-fibonacci": ("09_large_n", "10_large_n2"),
     "16-medium-string-search": ("09_large_allmatch", "10_large_nearmiss"),
     "17-medium-knapsack": ("09_large_random", "10_large_small_weights"),
