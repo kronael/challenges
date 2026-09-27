@@ -44,10 +44,15 @@ to emit code the compiler did not choose for x86-64-v3: inline or standalone
 assembly, under any name it is imported as, pragmas and attributes that change
 the target or the optimizer, Rust's `#[target_feature]` and `#[naked]`, also
 inside `cfg_attr`, and build scripts, named in any Cargo.toml, and cgo that
-compile code outside the graded build. The check reads text, not the language,
-so a construct a C macro assembles from pieces, a file outside the directory
-that a source includes, and a dependency's own code pass it. While tracing, an
-AVX-512 instruction in the program's own code is refused for the same reason.
+compile code outside the graded build. The C is checked after `cc -E` with the
+build's own flags, so a keyword or attribute a macro assembles from pieces and a
+trigraph or digraph pragma are seen after expansion, and a header the source
+includes is checked wherever it resolves, system headers aside. Reaching out of
+the directory another way is refused: an `include!`, `#[path]`, Cargo `[lib]
+path`, or Go `replace` that resolves outside it, a `.cargo/config`, and a solver
+Makefile that overrides a recipe `shared/c/io.mk` or `shared/vec.mk` defines. A
+Cargo or Go dependency's own code is not read, and still passes. While tracing,
+an AVX-512 instruction in the program's own code is refused for the same reason.
 
 Only the thread that calls the graded function is traced, so no other thread
 may work while it runs. At its entry every other thread of the program is
@@ -88,6 +93,7 @@ import json
 import math
 import os
 import re
+import shlex
 import signal
 import subprocess
 import sys
@@ -228,13 +234,11 @@ C_BANNED = [
         re.compile(r"^\s*#\s*pragma\b(?!\s*once\s*$)|\b_Pragma\b", re.MULTILINE),
         "a #pragma",
     ),
-    (
-        re.compile(
-            r'\b_*(target|target_clones)_*\s*\(\s*"|\b_*optimize_*\s*\(\s*["\d]'
-        ),
-        "a target or optimize attribute",
-    ),
 ]
+C_LITERAL = re.compile(r"\"(\\.|[^\"\\\n])*\"|'(\\.|[^'\\\n])*'")
+C_ATTRIBUTE = re.compile(r"\b__attribute(__)?\s*\(|\[\s*\[")
+C_TARGET = re.compile(r"\b_*(target|target_clones|optimize)_*\b")
+MARKER = re.compile(r'# \d+ "(.*)"((?: \d)*)')
 RUST_BANNED = [
     (re.compile(r"\b(asm|global_asm|naked_asm)\b"), "inline assembly"),
     (
@@ -246,6 +250,38 @@ GO_BANNED = [
     (re.compile(r'^\s*import\s*(\(\s*)?"C"', re.MULTILINE), "cgo"),
 ]
 GO_OUTSIDE = {".s", ".S", ".syso", ".c", ".cc", ".cpp"}
+RUST_STRING = re.compile(r'"((?:\\.|[^"\\])*)"|r(#*)"(.*?)"\2', re.DOTALL)
+RUST_PATH = re.compile(r"#!?\[[^\]]*\bpath\s*=([^\],]*)")
+RUST_INCLUDE = re.compile(r"\binclude(_str|_bytes)?\s*!\s*[([{]([^)\]}]*)")
+GO_REPLACE = re.compile(r"=>\s+(\S+)")
+OVERRIDE = re.compile(
+    r"^(?P<where>.+):\d+: warning: ignoring old recipe for target '(?P<target>[^']+)'"
+)
+SHARED_MK = re.compile(r"shared/(c/io|vec)\.mk$")
+
+
+def decode_rust(literal: str) -> str:
+    literal = re.sub(r"\\x([0-9a-fA-F]{2})", lambda m: chr(int(m[1], 16)), literal)
+    literal = re.sub(r"\\u\{([0-9a-fA-F]+)\}", lambda m: chr(int(m[1], 16)), literal)
+    return re.sub(r"\\(.)", r"\1", literal)
+
+
+def one_string(text: str) -> str | None:
+    body = text.strip()
+    match = RUST_STRING.fullmatch(body)
+    if match is None:
+        return None
+    if match[3] is not None:
+        return match[3]
+    return decode_rust(match[1])
+
+
+def escapes_dir(base: Path, literal: str, workdir: Path) -> bool:
+    try:
+        target = (base / literal).resolve()
+    except (ValueError, OSError):
+        return True
+    return not target.is_relative_to(workdir.resolve())
 
 
 def ptrace(request: int, pid: int, addr: int = 0, data: int = 0) -> int:
@@ -667,14 +703,184 @@ def find_build_scripts(files: list[Path]) -> list[Path]:
     return scripts
 
 
-def lint(workdir: Path) -> list[str]:
+def manifest_targets(manifest: dict[str, object]) -> list[str]:
+    paths = []
+    lib = manifest.get("lib")
+    if isinstance(lib, dict) and "path" in lib:
+        paths.append(str(lib["path"]))
+    for key in ("bin", "bench", "test", "example"):
+        for target in manifest.get(key, []):
+            if isinstance(target, dict) and "path" in target:
+                paths.append(str(target["path"]))
+    return paths
+
+
+def find_reaches(workdir: Path, sources: list[Path]) -> list[str]:
+    problems = []
+    for path in sources:
+        if path.name == "Cargo.toml":
+            manifest = tomllib.loads(path.read_text(encoding="utf-8"))
+            problems += [
+                f"{path.relative_to(workdir)}: a target path outside the directory"
+                for spec in manifest_targets(manifest)
+                if escapes_dir(path.parent, spec, workdir)
+            ]
+        if path.suffix != ".rs":
+            continue
+        try:
+            text = strip_comments(path.read_text(encoding="utf-8"))
+        except UnicodeDecodeError:
+            continue
+        for pattern, what in ((RUST_PATH, "#[path]"), (RUST_INCLUDE, "include!")):
+            for match in pattern.finditer(text):
+                literal = one_string(match[match.re.groups])
+                if literal is None or escapes_dir(path.parent, literal, workdir):
+                    problems.append(
+                        f"{path.relative_to(workdir)}: {what} outside the directory"
+                    )
+    return problems
+
+
+def find_go_reaches(workdir: Path, gomod: Path) -> list[str]:
+    problems = []
+    for target in GO_REPLACE.findall(gomod.read_text(encoding="utf-8")):
+        if target.startswith((".", "/")) and escapes_dir(gomod.parent, target, workdir):
+            problems.append("go.mod: a replace directive outside the directory")
+    return list(dict.fromkeys(problems))
+
+
+def find_cargo_config(files: list[Path]) -> list[Path]:
+    return [
+        path
+        for path in files
+        if path.parent.name == ".cargo" and path.name in ("config.toml", "config")
+    ]
+
+
+def find_overrides(workdir: Path) -> list[str]:
+    if not (workdir / "Makefile").exists():
+        return []
+    done = subprocess.run(
+        ["make", "-pn"],
+        cwd=workdir,
+        stdin=subprocess.DEVNULL,
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.PIPE,
+        text=True,
+    )
+    problems = []
+    for line in done.stderr.splitlines():
+        match = OVERRIDE.match(line)
+        if match is not None and SHARED_MK.search(match["where"]):
+            problems.append(
+                f"Makefile: overrides the {match['target']} recipe shared/*.mk defines"
+            )
+    return list(dict.fromkeys(problems))
+
+
+def show(workdir: Path, path: Path) -> str:
+    return os.path.relpath(path, workdir.resolve())
+
+
+def is_under(path: Path, dirs: list[Path]) -> bool:
+    return any(path.is_relative_to(directory) for directory in dirs)
+
+
+def find_system_dirs(cc: str) -> list[Path]:
+    done = subprocess.run(
+        [cc, "-E", "-v", "-x", "c", "/dev/null"], capture_output=True, text=True
+    )
+    lines = done.stderr.splitlines()
+    first = lines.index("#include <...> search starts here:") + 1
+    last = lines.index("End of search list.")
+    return [Path(line.strip()).resolve() for line in lines[first:last]]
+
+
+def find_attributes(text: str) -> str:
+    spans = []
+    for opener in C_ATTRIBUTE.finditer(text):
+        pair = "()" if opener[0].startswith("_") else "[]"
+        depth = 0
+        for end in range(opener.start(), len(text)):
+            depth += (text[end] == pair[0]) - (text[end] == pair[1])
+            if depth == 0 and text[end] == pair[1]:
+                break
+        spans.append(text[opener.start() : end + 1])
+    return "\n".join(spans)
+
+
+def preprocess(
+    workdir: Path, cc: list[str], source: Path, system: list[Path]
+) -> tuple[dict[Path, list[str]], str | None]:
+    done = subprocess.run(
+        [*cc, "-E", str(source)],
+        cwd=workdir,
+        capture_output=True,
+        text=True,
+    )
+    if done.returncode != 0:
+        errors = [line for line in done.stderr.splitlines() if "error" in line]
+        detail = errors[0] if errors else done.stderr.strip().splitlines()[-1]
+        return {}, f"{show(workdir, source)}: code the preprocessor rejects ({detail})"
+    kept: dict[Path, list[str]] = {}
+    stack = [source.resolve()]
+    for line in done.stdout.splitlines():
+        marker = MARKER.fullmatch(line)
+        if marker is None:
+            path = stack[-1]
+            if not is_under(path, system):
+                kept.setdefault(path, []).append(line)
+            continue
+        flags = marker[2].split()
+        path = (workdir / marker[1]).resolve()
+        if "1" in flags:
+            stack.append(path)
+        elif "2" in flags:
+            stack.pop()
+        else:
+            stack[-1] = path
+    return kept, None
+
+
+def lint_c(workdir: Path, cc: list[str], sources: list[Path]) -> list[str]:
+    system = find_system_dirs(cc[0])
+    kept: dict[Path, list[str]] = {}
+    problems = []
+    for source in sources:
+        found, refused = preprocess(workdir, cc, source, system)
+        if refused is not None:
+            problems.append(refused)
+        for path, lines in found.items():
+            kept.setdefault(path, []).extend(lines)
+    for path, lines in kept.items():
+        text = C_LITERAL.sub('""', "\n".join(lines))
+        text = text.replace("<:", "[").replace(":>", "]")
+        problems += [
+            f"{show(workdir, path)}: {what}"
+            for pattern, what in C_BANNED
+            if pattern.search(text)
+        ]
+        if C_TARGET.search(find_attributes(text)):
+            problems.append(f"{show(workdir, path)}: a target or optimize attribute")
+    return list(dict.fromkeys(problems))
+
+
+def lint(
+    workdir: Path, cc: str = "cc", c_sources: list[Path] | None = None
+) -> list[str]:
     files = sorted(path for path in workdir.rglob("*") if path.is_file())
+    reaches = find_overrides(workdir)
     if (workdir / "Cargo.toml").exists():
         sources = [
             path for path in files if path.relative_to(workdir).parts[0] != "target"
         ]
         banned = RUST_BANNED
         outside = find_build_scripts(sources)
+        reaches += find_reaches(workdir, sources)
+        reaches += [
+            f"{path.relative_to(workdir)}: a cargo build override"
+            for path in find_cargo_config(sources)
+        ]
     elif (workdir / "go.mod").exists():
         sources = [
             path
@@ -683,11 +889,11 @@ def lint(workdir: Path) -> list[str]:
         ]
         banned = GO_BANNED
         outside = [path for path in files if path.suffix in GO_OUTSIDE]
+        reaches += find_go_reaches(workdir, workdir / "go.mod")
     else:
-        sources = files
-        banned = C_BANNED
-        outside = []
-    problems = [
+        compiled = [path for path in files if path.suffix == ".c"]
+        return reaches + lint_c(workdir, shlex.split(cc), c_sources or compiled)
+    problems = reaches + [
         f"{path.relative_to(workdir)}: compiled outside the graded build"
         for path in outside
     ]
@@ -777,12 +983,22 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument("--expect", choices=("vectorized", "scalar"), required=True)
     parser.add_argument("--sources", type=Path, default=Path.cwd())
+    parser.add_argument(
+        "--cc", default="cc", help="the compiler and flags the C build runs"
+    )
+    parser.add_argument(
+        "--c-sources",
+        nargs="+",
+        type=Path,
+        help="the C files the build compiles into the binary, all under --sources"
+        " by default",
+    )
     return parser.parse_args()
 
 
 def main() -> None:
     args = parse_args()
-    problems = lint(args.sources)
+    problems = lint(args.sources, args.cc, args.c_sources)
     for problem in problems:
         print(f"  {problem} is not allowed")
     if problems:

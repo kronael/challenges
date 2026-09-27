@@ -719,6 +719,16 @@ class CMakeTests(unittest.TestCase):
         self.assertEqual(done.returncode, 2, done.stdout + done.stderr)
         self.assertIn("./main crashed with SIGSEGV on ../cases/01.in", done.stdout)
 
+    def test_a_makefile_overriding_the_main_recipe_is_refused(self) -> None:
+        override = (
+            "\nmain: solution.c\n"
+            "\t$(CC) $(CPPFLAGS) $(C_IO_CPPFLAGS) $(CFLAGS)"
+            " -o main $(C_IO_DIR)/main.c solution.c\n"
+        )
+        done = self.vec(C_SUM, override)
+        self.assertEqual(done.returncode, 2, done.stdout + done.stderr)
+        self.assertIn("overrides the main recipe", done.stdout)
+
 
 @unittest.skipUnless(shutil.which("clang"), "clang is not on PATH")
 class ClangTests(CTests):
@@ -891,14 +901,17 @@ class HelpTests(unittest.TestCase):
                 self.assertEqual(listed["c"], listed["rust"])
 
 
+BUILD_CC = "cc -std=c11 -O3 -march=x86-64-v3"
+
+
 class LintTests(unittest.TestCase):
-    def lint(self, files: dict[str, str]) -> list[str]:
+    def lint(self, files: dict[str, str], cc: str = "cc") -> list[str]:
         with tempfile.TemporaryDirectory() as raw_dir:
             workdir = Path(raw_dir)
             for name, text in files.items():
                 (workdir / name).parent.mkdir(parents=True, exist_ok=True)
                 (workdir / name).write_text(text, encoding="utf-8")
-            return vec_check.lint(workdir)
+            return vec_check.lint(workdir, cc)
 
     def test_c_refuses_what_changes_the_target_or_optimizer(self) -> None:
         for source in (
@@ -934,6 +947,30 @@ class LintTests(unittest.TestCase):
             "kernel.inc": 'static void f(void) { __asm__("nop"); }\n',
         }
         self.assertEqual(self.lint(files), ["kernel.inc: inline assembly"])
+
+    def test_c_sees_escapes_only_the_preprocessor_reveals(self) -> None:
+        for source in (
+            "#define CAT(a, b) a##b\nvoid f(void) { CAT(__as, m__)(\"nop\"); }\n",
+            '#define T target\n__attribute__((T("avx512f"))) int f(int x) { return x; }\n',
+            "#define CAT(a, b) a##b\n#define P CAT(_Pra, gma)\n"
+            'P("GCC target(\\"avx512f\\")")\nint x;\n',
+            '__attribute__((target(("avx512f")))) int f(int x) { return x; }\n',
+            '__attribute__((target(L"avx512f"))) int f(int x) { return x; }\n',
+            'enum { N = 3 };\n__attribute__((optimize(N))) int f(int x) { return x; }\n',
+            "%:pragma GCC unroll 4\nint x;\n",
+            "??=pragma GCC unroll 4\nint x;\n",
+        ):
+            with self.subTest(source=source):
+                self.assertTrue(self.lint({"solution.c": source}, BUILD_CC))
+
+    def test_c_still_allows_the_honest_constructs_after_preprocessing(self) -> None:
+        files = {
+            "solution.h": "#pragma once\nint f(void);\n",
+            "solution.c": '#include "solution.h"\n#include <immintrin.h>\n'
+            "static int target(int x) { return x; }\n"
+            "int f(void) { return target(_mm_popcnt_u32(3)); }\n",
+        }
+        self.assertEqual(self.lint(files, BUILD_CC), [])
 
     def test_rust_refuses_assembly_target_features_and_build_scripts(self) -> None:
         for files in (
@@ -983,6 +1020,71 @@ class LintTests(unittest.TestCase):
         }
         self.assertEqual(
             self.lint(files), ["k/k_amd64.s: compiled outside the graded build"]
+        )
+
+    CARGO = '[package]\nname = "probe"\nversion = "0.1.0"\nedition = "2021"\n'
+
+    def test_rust_refuses_a_module_reaching_outside_the_directory(self) -> None:
+        for source in (
+            'include!("../../outside.rs");\npub fn f() {}\n',
+            'include!(concat!(env!("OUT_DIR"), "/gen.rs"));\npub fn f() {}\n',
+            '#[path = "../../outside.rs"]\nmod k;\npub fn f() {}\n',
+            '#[path = "\\x2e\\x2e/\\x2e\\x2e/outside.rs"]\nmod k;\npub fn f() {}\n',
+            '#[cfg_attr(all(), path = "../../outside.rs")]\nmod k;\npub fn f() {}\n',
+        ):
+            with self.subTest(source=source):
+                self.assertEqual(
+                    len(self.lint({"Cargo.toml": self.CARGO, "src/lib.rs": source})), 1
+                )
+
+    def test_rust_refuses_a_manifest_target_outside_the_directory(self) -> None:
+        manifest = self.CARGO + '\n[lib]\npath = "../outside.rs"\n'
+        self.assertEqual(
+            self.lint({"Cargo.toml": manifest}),
+            ["Cargo.toml: a target path outside the directory"],
+        )
+
+    def test_rust_allows_a_manifest_target_inside_the_directory(self) -> None:
+        manifest = (
+            self.CARGO
+            + '\n[lib]\npath = "src/lib.rs"\n\n[[bin]]\nname = "probe"\n'
+            'path = "src/main.rs"\n'
+        )
+        files = {
+            "Cargo.toml": manifest,
+            "src/lib.rs": "pub fn f() {}\n",
+            "src/main.rs": "fn main() {}\n",
+        }
+        self.assertEqual(self.lint(files), [])
+
+    def test_rust_refuses_a_cargo_config_build_override(self) -> None:
+        for name in (".cargo/config.toml", ".cargo/config"):
+            files = {
+                "Cargo.toml": self.CARGO,
+                "src/lib.rs": "pub fn f() {}\n",
+                name: '[build]\nrustc-wrapper = "./wrap.sh"\n',
+            }
+            with self.subTest(name=name):
+                self.assertEqual(
+                    self.lint(files), [f"{name}: a cargo build override"]
+                )
+
+    def test_go_refuses_a_replace_reaching_outside_the_directory(self) -> None:
+        solution = 'package main\n\nimport "probe/k"\n\nfunc solve() { k.F() }\n'
+        for tail in (
+            "\nrequire probe/k v0.0.0\n\nreplace probe/k => ../k\n",
+            "\nrequire probe/k v0.0.0\n\nreplace (\n\tprobe/k => ../k\n)\n",
+        ):
+            with self.subTest(tail=tail):
+                self.assertEqual(
+                    self.lint({"go.mod": GO_MOD + tail, "solution.go": solution}),
+                    ["go.mod: a replace directive outside the directory"],
+                )
+
+    def test_go_allows_a_module_version_replace(self) -> None:
+        gomod = GO_MOD + "\nrequire other v1.0.0\n\nreplace other => other v1.2.3\n"
+        self.assertEqual(
+            self.lint({"go.mod": gomod, "solution.go": "package main\n"}), []
         )
 
 

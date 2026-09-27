@@ -1,6 +1,7 @@
 # `make vec`: check this directory's build on every ../cases fixture and on
 # VEC_INPUT, then trace solve on VEC_INPUT with scripts/vec_check.py, whose
-# docstring states the grade.
+# docstring states the grade. A C build hands it the compiler, flags, and
+# sources of ./main, so it checks what the preprocessor leaves of them.
 #
 # This file sets the flags every target of the including Makefile builds with,
 # so `make test`, `make bench`, and `make vec` check one program: x86-64-v3,
@@ -38,6 +39,8 @@ override CC := $(firstword $(CC))
 override CFLAGS := -std=c11 -O3 -march=x86-64-v3 -g -Wall -Wextra $(VEC_CFLAGS)
 override CPPFLAGS :=
 override LDLIBS :=
+VEC_LINT = --cc '$(CC) $(CPPFLAGS) $(C_IO_CPPFLAGS) $(CFLAGS)' \
+  --c-sources $(C_IO_DIR)/main.c solution.c
 
 help::
 	@echo "vec    — trace solve on one fixture and check its work runs in packed lanes"
@@ -59,4 +62,4 @@ vec: build
 	    || { echo "  $(VEC_BIN) printed the wrong answer for $$f"; exit 1; }; \
 	done
 	@python3 ../../scripts/vec_check.py --binary $(VEC_BIN) --function $(VEC_FUNC) \
-	  --input $(VEC_INPUT) --units '$(VEC_UNITS)' --expect $(VEC_EXPECT)
+	  --input $(VEC_INPUT) --units '$(VEC_UNITS)' --expect $(VEC_EXPECT) $(VEC_LINT)
