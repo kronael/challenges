@@ -14,7 +14,7 @@ coordinates. A horizontal segment is `[x1, x2, y]`. A vertical segment is
 Count all horizontal-vertical pairs that intersect. Several segments may cross
 at the same point; each pair is counted separately.
 
-Constraints: up to `200000` segments of each orientation, coordinates between
+Constraints: up to `300000` segments of each orientation, coordinates between
 `-10⁹` and `10⁹`, with `x1 ≤ x2` and `y1 ≤ y2`.
 
 ## Input

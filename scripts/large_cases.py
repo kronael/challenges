@@ -15,7 +15,7 @@ DNA = "ACGT"
 LOWER = "abcdefghijklmnopqrstuvwxyz"
 PROTEIN = "ARNDCQEGHILKMFPSTWYV"
 RNA = "ACGU"
-EXPECTED_DIGEST = "8af8f4adbd04fe1c906019a241d5a6a5dedb76d2f08210b490507479f157560a"
+EXPECTED_DIGEST = "084f5cca02ec1ab824d3ce4e76f2c133a6c6fa280e6e0b69a76c7ad629f1a15e"
 
 
 class Rng:
@@ -674,7 +674,7 @@ def build_55(name: str, rng: Rng) -> dict[str, Any]:
 
 def build_56(name: str, rng: Rng) -> dict[str, Any]:
     del rng
-    n = 150_000
+    n = 300_000
     if name == "09_large_dense":
         horizontal = [[0, n, y] for y in range(n)]
         vertical = [[x, 0, n - 1] for x in range(n)]
