@@ -21,10 +21,10 @@ From the repo root, verify the whole bench at once:
 ```bash
 make test        # script tests; I/O, API, and vec golden + rotten suites pass
 make cases       # all seeded large-case recipes reproduce their frozen hashes
-make golden      # I/O and API golden tests pass; I/O benchmarks stay fast
-make rotten      # I/O rotten controls pass small cases; every large case times out
-make sys         # systems golden C stress tests pass
-make sys-rotten  # systems controls pass sanity and fail controlled stress
+make golden      # I/O and API golden tests pass; I/O benchmarks stay fast;
+                 # systems golden C stress tests pass
+make rotten      # I/O rotten controls pass small cases; every large case times out;
+                 # systems controls pass sanity and fail controlled stress
 make vec         # every level-3 golden vectorizes; 66–68's rotten stays scalar
 ```
 

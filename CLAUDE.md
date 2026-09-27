@@ -63,7 +63,7 @@ Harness is **editor + `make test`**. Each challenge has its own dir
   Do not depend on architecture luck, an unbounded hang, or an implementation
   spin cutoff. Prefer barrier-controlled interleavings. Performance traps require
   pinned, warmed-up, repeated measurements and an asserted regression.
-  The root `make sys-rotten` target enforces the sanity-pass/adversarial-fail
+  The root `make rotten` target enforces the sanity-pass/adversarial-fail
   contract and rejects hangs.
 - **`python/main.py`, `go/solution.go`, `rust/src/lib.rs`, `c/solution.c`** — stubs
   ONLY. Only the algorithm body is a stub (`pass` / `return nil` / `todo!()` /

@@ -25,7 +25,7 @@ CLEAN := $(sort \
 GOLDEN_TIMEOUT ?= 15   # generous: golden must finish well within this
 ROTTEN_TIMEOUT ?= 5    # short: the naive trap must blow past this
 
-.PHONY: all test cases golden rotten sys sys-rotten vec clean help
+.PHONY: all test cases golden rotten vec clean help
 
 all: test
 
@@ -52,7 +52,12 @@ golden: cases
 	  elif grep -q 'TIMEOUT (' <<<"$$out"; then echo "BENCH TIMEOUT — golden too slow!"; fail=1; \
 	  else echo "BENCH FAIL"; echo "$$out" | tail -3 | sed 's/^/    /'; fail=1; fi; \
 	done; \
-	[ $$fail -eq 0 ] && echo "all golden pass test and bench" || { echo "FAILURES above"; exit 1; }
+	for d in $(SYS); do \
+	  printf "sys    %-33s " "$$d"; \
+	  if out=$$(cd $$d && make test 2>&1); then echo "ok (stress passes)"; \
+	  else echo "FAIL"; echo "$$out" | tail -3 | sed 's/^/    /'; fail=1; fi; \
+	done; \
+	[ $$fail -eq 0 ] && echo "all golden pass test and bench; all sys golden stress tests pass" || { echo "FAILURES above"; exit 1; }
 
 rotten: cases
 	@fail=0; \
@@ -66,19 +71,6 @@ rotten: cases
 	      --expect-timeout -- uv run python main.py 2>&1) || fail=1; \
 	  echo "$$out" | sed 's/^/       /'; \
 	done; \
-	[ $$fail -eq 0 ] && echo "all rotten pass small tests and every large case times out" || { echo "FAILURES above"; exit 1; }
-
-sys:
-	@fail=0; \
-	for d in $(SYS); do \
-	  printf "sys    %-33s " "$$d"; \
-	  if out=$$(cd $$d && make test 2>&1); then echo "ok (stress passes)"; \
-	  else echo "FAIL"; echo "$$out" | tail -3 | sed 's/^/    /'; fail=1; fi; \
-	done; \
-	[ $$fail -eq 0 ] && echo "all sys golden stress tests pass" || { echo "FAILURES above"; exit 1; }
-
-sys-rotten:
-	@fail=0; \
 	for d in $(SYS_ROTTEN); do \
 	  printf "sysbad %-33s " "$$d"; \
 	  if ! out=$$(cd $$d && make test 2>&1); then \
@@ -90,7 +82,7 @@ sys-rotten:
 	  elif [ $$code -eq 124 ]; then echo "STRESS HUNG"; fail=1; \
 	  else echo "STRESS CRASHED (exit $$code) — not a controlled detection"; echo "$$out" | tail -3 | sed 's/^/    /'; fail=1; fi; \
 	done; \
-	[ $$fail -eq 0 ] && echo "all sys rotten controls expose their defect" || { echo "FAILURES above"; exit 1; }
+	[ $$fail -eq 0 ] && echo "all rotten pass small tests and every large case times out; all sys rotten controls expose their defect" || { echo "FAILURES above"; exit 1; }
 
 vec:
 	@fail=0; \
@@ -114,10 +106,8 @@ clean:
 help:
 	@echo "test    — script tests; every golden + rotten passes its case suite"
 	@echo "cases   — verify every seeded large-case recipe is reproducible"
-	@echo "golden  — every io golden passes test AND generated bench cases"
-	@echo "rotten  — every io rotten passes small tests and generated cases time out"
-	@echo "sys     — every sys (29-34) golden C stress test passes"
-	@echo "sys-rotten — every sys rotten passes sanity and fails controlled stress"
+	@echo "golden  — every io golden passes test AND generated bench cases; every sys (29-34) golden C stress test passes"
+	@echo "rotten  — every io rotten passes small tests and generated cases time out; every sys rotten passes sanity and fails controlled stress"
 	@echo "vec     — every vec golden vectorizes and 66-68's rotten stays scalar, under cc, then clang if on PATH"
 	@echo "clean   — remove compiled artifacts from every challenge"
 	@echo "Override GOLDEN_TIMEOUT (def 15s) / ROTTEN_TIMEOUT (def 5s)."
