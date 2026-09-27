@@ -16,7 +16,7 @@ This is *weighted* scheduling, not plain interval scheduling (challenge 08):
 there you maximise the *count* of jobs, while here each job carries a weight and
 you maximise the *sum*.
 
-Constraints: `n` up to 10⁵; start, end and weight fit in 32-bit integers
+Constraints: `n` up to 3·10⁵; start, end and weight fit in 32-bit integers
 (`start < end`, `weight ≥ 0`). The total profit can exceed 32 bits.
 
 ## Input / Output

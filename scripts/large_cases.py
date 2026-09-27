@@ -15,7 +15,7 @@ DNA = "ACGT"
 LOWER = "abcdefghijklmnopqrstuvwxyz"
 PROTEIN = "ARNDCQEGHILKMFPSTWYV"
 RNA = "ACGU"
-EXPECTED_DIGEST = "8df8e2eb50e2c92cad9b43ed156f1c1cd2fa180a88b66d65f494abc0c8714427"
+EXPECTED_DIGEST = "666eb55bfb4b179f6909a12cdbc111c2654b02da8416d93638b0dfffb2852df9"
 
 
 class Rng:
@@ -330,7 +330,7 @@ def build_26(name: str, rng: Rng) -> dict[str, Any]:
 def build_27(name: str, rng: Rng) -> dict[str, Any]:
     if name == "09_large_random":
         jobs = []
-        for i in range(100_000):
+        for i in range(300_000):
             start = i * 3
             jobs.append(
                 {
@@ -342,7 +342,7 @@ def build_27(name: str, rng: Rng) -> dict[str, Any]:
     else:
         jobs = [
             {"start": i, "end": i + 1, "weight": i % 1_000 + 1}
-            for i in range(100_000)
+            for i in range(300_000)
         ]
     return {"jobs": jobs}
 
