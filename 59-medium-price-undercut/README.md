@@ -17,7 +17,7 @@ For every day `i` report the wait until it is undercut: `j - i`, where `j` is th
 smallest index greater than `i` with `prices[j] < prices[i]`. Report `0` for a
 day that is never undercut, including the last day of the series.
 
-Constraints: `1 <= n <= 250000`, `n` equals the length of `prices`, and every
+Constraints: `1 <= n <= 500000`, `n` equals the length of `prices`, and every
 settlement price fits in a signed 32-bit integer and may be negative.
 
 ## Input

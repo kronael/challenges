@@ -15,7 +15,7 @@ DNA = "ACGT"
 LOWER = "abcdefghijklmnopqrstuvwxyz"
 PROTEIN = "ARNDCQEGHILKMFPSTWYV"
 RNA = "ACGU"
-EXPECTED_DIGEST = "5cf47dec2cfc79493c55390833f330f8ecb9d6ee32ac5999ed20371318a0c935"
+EXPECTED_DIGEST = "5e537e34c471c94a96bef21df1bfc2fff0cc0885da0a9d3be10979cbe8160cd2"
 
 
 class Rng:
@@ -726,7 +726,7 @@ def build_58(name: str, rng: Rng) -> dict[str, Any]:
 
 
 def build_59(name: str, rng: Rng) -> dict[str, Any]:
-    n = 250_000
+    n = 500_000
     prices: list[int] = []
     if name == "09_large_rising_ramp":
         # Every session settles above the one before it, all values distinct, so
