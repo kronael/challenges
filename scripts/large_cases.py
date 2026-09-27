@@ -15,7 +15,7 @@ DNA = "ACGT"
 LOWER = "abcdefghijklmnopqrstuvwxyz"
 PROTEIN = "ARNDCQEGHILKMFPSTWYV"
 RNA = "ACGU"
-EXPECTED_DIGEST = "c32fcbad1e880c767ac26ce52e3894c65811bc1d097d9a9c5caeec64222c372c"
+EXPECTED_DIGEST = "79871e81b187a3b7d890b8c707318d51677365218db57baa4b34ef31cbb67151"
 
 
 class Rng:
@@ -243,7 +243,7 @@ def build_18(name: str, rng: Rng) -> dict[str, Any]:
 
 
 def build_19(name: str, rng: Rng) -> dict[str, Any]:
-    n = 10_000
+    n = 20_000
     edges = [[i, i + 1, rng.integer(1, 1_000)] for i in range(n - 1)]
     target = 200_000 if name == "09_large_random" else 300_000
     while len(edges) < target:
