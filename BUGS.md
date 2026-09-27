@@ -163,17 +163,16 @@ decision) or BY-DESIGN (accepted variance).
   in CLAUDE.md: move `input_parse` out of `solution.c` into a harness file the
   solver does not edit, and have `lint()` refuse code that runs before `main`
   (constructors, `.init_array` sections, Go `init`) in the edited files.
-- **VEC-LINT-TEXT-ONLY** (LOW, hardening) — Record-only. `lint()` in
-  `scripts/vec_check.py` regex-scans the text of every file under the solver
-  directory, so it cannot see what only the language resolves: a C keyword or
-  attribute name built by token pasting or named by a macro
-  (`#define T target` then `__attribute__((T("avx512f")))`), a trigraph or
-  digraph `#pragma`, a file outside the directory that a C `#include`, a Rust
-  `include!` or `#[path]`, a Cargo `[lib] path`, or a Go `replace` pulls in, and
-  the code of a Cargo or Go dependency. The build itself is open too (not
-  tried): a solver Makefile can override the `main` recipe that
-  `shared/c/io.mk` defines, and a `.cargo/config.toml` can set
-  `build.rustc-wrapper`. Each takes deliberate construction. **Fix:** grade the
-  preprocessed C (`cc -E` with the build's flags, system headers dropped), and
-  refuse include paths that leave the directory, recipe overrides, and cargo
-  config files.
+- **VEC-LINT-TEXT-ONLY** (LOW, hardening) — Record-only, no sound fix for the
+  remainder. `lint()` in `scripts/vec_check.py` reads only the solver
+  directory, so it cannot see the code of a Cargo or Go dependency the build
+  pulls in and compiles: the assembly, target pragma, or build script the
+  solver's own files may not carry can live in a dependency instead. Closing
+  it means vendoring and scanning the whole dependency graph, or trusting it —
+  out of scope. The in-directory escapes the entry once listed are now refused:
+  the C is scanned after `cc -E` (so token-pasted keywords, macro-named
+  attributes, and trigraph/digraph pragmas are seen post-expansion, and an
+  outside `#include` is scanned wherever it resolves while `<...>` system
+  headers stay exempt), and `include!`/`#[path]`/Cargo `[lib] path`/Go
+  `replace` reaching outside, a `.cargo/config`, and a solver Makefile
+  overriding a `shared/c/io.mk` or `shared/vec.mk` recipe are refused.
