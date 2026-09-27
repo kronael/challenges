@@ -15,7 +15,7 @@ DNA = "ACGT"
 LOWER = "abcdefghijklmnopqrstuvwxyz"
 PROTEIN = "ARNDCQEGHILKMFPSTWYV"
 RNA = "ACGU"
-EXPECTED_DIGEST = "6197a7838be0f5bde48db0b06d9ba6dfa239ae8f2511796457c539825f0eb22b"
+EXPECTED_DIGEST = "508713c327799eed2c3dd74368733fb07a9707acc325e6559e016d686d6534b7"
 
 
 class Rng:
@@ -462,10 +462,10 @@ def build_43(name: str, rng: Rng) -> dict[str, Any]:
     if name == "09_large_deep_book":
         orders = []
         buy_count = 0
-        while len(orders) < 200_000:
+        while len(orders) < 500_000:
             if len(orders) % 11 == 10:
                 orders.append(
-                    {"side": "sell", "price": 950_001, "qty": 7, "type": "limit"}
+                    {"side": "sell", "price": 875_001, "qty": 7, "type": "limit"}
                 )
             else:
                 orders.append(

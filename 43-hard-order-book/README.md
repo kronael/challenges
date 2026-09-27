@@ -38,7 +38,7 @@ The two order types differ only in how far they are willing to match:
   remainder is **discarded**, never rested. (Its `price` field is ignored; cases
   use `0`.)
 
-Constraints: up to `2·10⁵` orders; prices and quantities are positive integers
+Constraints: up to `5·10⁵` orders; prices and quantities are positive integers
 fitting in a signed 32-bit integer (a market order's price may be `0`).
 
 ## Input
