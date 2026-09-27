@@ -220,7 +220,10 @@ before the next seed. Configured repeat runs share one aggregate time budget. A
 timeout, runtime error, or mismatch fails the target.
 The runner terminates the whole process group, then kills it 2s later, so the
 benchmark can **never hang** regardless of what the binary does.
-Defaults: **5s** Rust/Go, **10s** Python. Override: `make bench TIMEOUT=30`.
+Defaults: **5s** Rust/Go/C, **10s** Python. Override: `make bench TIMEOUT=30`.
+Rust `make bench` times the debug build on purpose: the complexity walls do not
+depend on optimization. 13, 17, 44, and 46 time release, the one program their
+`make vec` grades.
 
 I/O `golden/` has `all: test` and adds a `regen` target to regenerate tracked
 small `.out` files. API, sys, and vec challenges use targets specific to their test style;
@@ -254,7 +257,8 @@ materializes these cases ephemerally.
 
 - **py** — `uv run` (pytest, ruff); no venv to manage.
 - **go** — stdlib `go test`.
-- **rs** — `cargo test`. io: `src/main.rs` is the timed binary; sys: `src/bin/bench.rs`.
+- **rs** — `cargo test`. io: `src/main.rs` is the timed binary, a debug build
+  except in 13, 17, 44, and 46; sys: `src/bin/bench.rs`, a release build.
 - **c** — `cc -std=c11`, no dependencies. io: `./run_tests` drives `../cases`,
   `./main` is the timed binary; sys: `./stress` and `./benchmark`. `lint`
   recompiles everything with `-Wpedantic -Wshadow -Werror`.
