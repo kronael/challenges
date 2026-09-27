@@ -15,7 +15,7 @@ DNA = "ACGT"
 LOWER = "abcdefghijklmnopqrstuvwxyz"
 PROTEIN = "ARNDCQEGHILKMFPSTWYV"
 RNA = "ACGU"
-EXPECTED_DIGEST = "79871e81b187a3b7d890b8c707318d51677365218db57baa4b34ef31cbb67151"
+EXPECTED_DIGEST = "8df8e2eb50e2c92cad9b43ed156f1c1cd2fa180a88b66d65f494abc0c8714427"
 
 
 class Rng:
@@ -313,12 +313,12 @@ def build_25(name: str, rng: Rng) -> dict[str, Any]:
 
 
 def build_26(name: str, rng: Rng) -> dict[str, Any]:
-    n = 300_000
+    n = 500_000
     initial = [rng.integer(-1_000, 1_000) for _ in range(n)]
     if name == "09_large_mixed":
         queries = []
         for i in range(n):
-            if i % 2 == 0:
+            if i % 3 == 0:
                 queries.append(["update", rng.integer(1, n), rng.integer(-1_000, 1_000)])
             else:
                 queries.append(["sum", n])
