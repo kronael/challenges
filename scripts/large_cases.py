@@ -15,7 +15,7 @@ DNA = "ACGT"
 LOWER = "abcdefghijklmnopqrstuvwxyz"
 PROTEIN = "ARNDCQEGHILKMFPSTWYV"
 RNA = "ACGU"
-EXPECTED_DIGEST = "0ad3035dff3c71846edc7612402691a4fe58f5a8827624e1bfb24200e4a84578"
+EXPECTED_DIGEST = "6c1c100fd5c69ef5e2f10c90133b4580427c082ca1738a21fa2da635dda064c2"
 
 
 class Rng:
@@ -136,7 +136,7 @@ def build_08(name: str, rng: Rng) -> dict[str, Any]:
 
 
 def build_09(name: str, rng: Rng) -> dict[str, Any]:
-    n = 200_000
+    n = 800_000
     if name == "09_large_reversed":
         arr = list(range(2 * n, n, -1))
     else:
