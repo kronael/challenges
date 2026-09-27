@@ -44,6 +44,20 @@ decision) or BY-DESIGN (accepted variance).
   split path is exercised only by `make bench`, because `n=20` already costs
   ~4 s of `rotten`'s Python runtime in the small suite. **Fix:** owner's call on
   the rotten-runtime trade-off.
+- **11-INPUT-KEY-NAMES-METHOD** (LOW, docs) — DEFERRED, needs sign-off.
+  `11-medium-friend-groups`'s input key `unions` (README.md:27, every
+  `cases/*.in`) names the merge operation of the structure the hints teach,
+  while the README prose says "friendships"; CLAUDE.md counts names as part of
+  the prompt. The key is read by golden, rotten, all four solver scaffolds, and
+  `scripts/large_cases.py`. **Fix:** a coordinated rename (e.g. `friendships`)
+  across those files and the README, with a digest refreeze. Found 2026-09-26.
+- **22-API-NAME-SIEVE** (LOW, docs) — DEFERRED, needs sign-off.
+  `22-medium-unbounded-sequences` asks for `sieve(nums)` / Go `Sieve`
+  (README.md:18), which yields the primes among an ascending stream; the name
+  states the method for doing it. The name is fixed by `python/main.py`,
+  `go/solution.go`, both test suites, golden, and `hints/02.md`. **Fix:** owner
+  rules it by design (the classic name of the exercise) or renames it (e.g.
+  `keep_primes`) across those files. Found 2026-09-26.
 - **41-STRAY-RUFF-CACHE** (LOW, resource) — DEFERRED. `41-hard-ordered-set-queries/.ruff_cache/`
   sits at the challenge root instead of inside a language dir. It is gitignored,
   so it never reaches git and does not block a release. **Fix:** manual cleanup
