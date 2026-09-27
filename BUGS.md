@@ -99,6 +99,16 @@ decision) or BY-DESIGN (accepted variance).
   grades scalar. Every separate scalar pass and every scalar floating-point add
   still counts. **Fix (optional):** tell apart stack slots that hold spilled
   vectors, which needs data flow the tracer does not track.
+- **VEC-WORK-BEFORE-SOLVE** (MED, grading) — BY-DESIGN. `scripts/vec_check.py`
+  traces only `solve`, so work the program does before `solve` is entered is
+  not graded. The solver edits the code that runs then: C's `input_parse` lives
+  in `solution.c`, a C `__attribute__((constructor))` or a Go `init` runs
+  before `main`, and Rust's `src/main.rs` and Go's `main.go` sit beside the
+  edited file. Any of them can compute the answer for `solve` to copy out, or
+  start a thread or process that finishes it before `solve` starts; the grader
+  stops other threads and refuses other processes only from `solve`'s entry.
+  Owner's ruling (2026-09-27): not worth a contract change; the level does not
+  police work done outside `solve`.
 
 ## Status — 2026-08-24 — found during the numbering/reference sweep
 
@@ -151,18 +161,6 @@ decision) or BY-DESIGN (accepted variance).
 
 ## vec grader
 
-- **VEC-WORK-BEFORE-SOLVE** (MED, grading) — Record-only, needs the owner's
-  decision. `scripts/vec_check.py` traces only `solve`, so work the program
-  does before `solve` is entered is not graded. The solver edits the code that
-  runs then: C's `input_parse` lives in `solution.c`, a C
-  `__attribute__((constructor))` or a Go `init` runs before `main`, and Rust's
-  `src/main.rs` and Go's `main.go` sit beside the edited file. Any of them can
-  compute the answer for `solve` to copy out, or start a thread or process
-  that finishes it before `solve` starts; the grader stops other threads and
-  refuses other processes only from `solve`'s entry. **Fix:** a contract change
-  in CLAUDE.md: move `input_parse` out of `solution.c` into a harness file the
-  solver does not edit, and have `lint()` refuse code that runs before `main`
-  (constructors, `.init_array` sections, Go `init`) in the edited files.
 - **VEC-LINT-TEXT-ONLY** (LOW, hardening) — Record-only, no sound fix for the
   remainder. `lint()` in `scripts/vec_check.py` reads only the solver
   directory, so it cannot see the code of a Cargo or Go dependency the build
