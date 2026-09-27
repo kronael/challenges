@@ -1,13 +1,13 @@
 # 02 — Easy — Modular Power
 
-**Task**: Compute `(base^exp) mod m` where `exp` can be up to 10^18.
+**Task**: Compute `base^exp` modulo `mod`, where `exp` can be up to 10^18.
 
 **Difficulty**: easy
 **Time estimate**: ~20 min
 
 ## Problem
 
-Given three integers `base`, `exp`, and `mod`, compute `(base^exp) mod m`.
+Given three integers `base`, `exp`, and `mod`, compute `base^exp` modulo `mod`.
 
 When `exp = 0`, return `1 % mod`. This is `0` when `mod = 1` and `1`
 otherwise, including when `base = 0`.
@@ -22,7 +22,7 @@ Constraints: `0 ≤ base, exp ≤ 10^18`, `1 ≤ mod ≤ 10^18`.
 
 ## Output
 
-A single integer: `(base^exp) mod m`.
+A single integer: `base^exp` modulo `mod`.
 
 ## Examples
 
