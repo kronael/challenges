@@ -15,7 +15,7 @@ DNA = "ACGT"
 LOWER = "abcdefghijklmnopqrstuvwxyz"
 PROTEIN = "ARNDCQEGHILKMFPSTWYV"
 RNA = "ACGU"
-EXPECTED_DIGEST = "508713c327799eed2c3dd74368733fb07a9707acc325e6559e016d686d6534b7"
+EXPECTED_DIGEST = "8af8f4adbd04fe1c906019a241d5a6a5dedb76d2f08210b490507479f157560a"
 
 
 class Rng:
@@ -616,8 +616,8 @@ def build_51(name: str, rng: Rng) -> dict[str, Any]:
 
 
 def build_52(name: str, rng: Rng) -> dict[str, Any]:
-    size = 12 if name == "09_large_twelve" else 13
-    low = 1 if name == "09_large_twelve" else -3
+    size = 14 if name == "09_large_fourteen" else 13
+    low = 1 if name == "09_large_fourteen" else -3
     return {
         "costs": [[rng.integer(low, 100) for _ in range(size)] for _ in range(size)]
     }
@@ -1111,7 +1111,7 @@ NAMES = {
     "49-hard-gene-region-decoder": ("09_large_three_regions", "10_large_four_regions"),
     "50-hard-tree-sequence-likelihood": ("09_large_balanced", "10_large_balanced_sites"),
     "51-hard-deadline-scheduler": ("09_large_clock_jump", "10_large_replacements"),
-    "52-hard-service-pairing": ("09_large_twelve", "10_large_thirteen"),
+    "52-hard-service-pairing": ("09_large_fourteen", "10_large_thirteen"),
     "53-hard-circular-genome-distance": ("09_large_same", "10_large_singletons"),
     "54-hard-spectrum-peptide-recovery": ("09_large_six_masses", "10_large_seven_masses"),
     "55-hard-changing-network-queries": ("09_large_path", "10_large_star"),
