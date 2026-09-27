@@ -27,11 +27,12 @@ The functions and the values they produce:
   sequences, yielding `f(x₀,y₀), f(x₁,y₁), …`.
 - `unfold(f, seed)` — repeatedly apply `f` to the current state: `f(state)`
   returns `(value, next_state)` to emit `value` and continue, or `None` to stop.
+  In Go, `f` returns `(value, next_state, ok)`, and `ok == false` stops.
 
-This is a Python thinking exercise, not a JSON stdin/stdout challenge. There are
-no case files, no large-case benchmark, and no hidden reference answer in the
-solver scaffold. The tests in `python/` and `go/` describe the contract; the
-implementation belongs in the track you pick (`python/main.py` or
+This is a thinking exercise in Python or Go, not a JSON stdin/stdout challenge.
+There are no case files, no large-case benchmark, and no hidden reference answer
+in the solver scaffold. The tests in `python/` and `go/` describe the contract;
+the implementation belongs in the track you pick (`python/main.py` or
 `go/solution.go`).
 
 ## Run
