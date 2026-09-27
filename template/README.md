@@ -42,6 +42,10 @@ make -C rust test
 make -C rust bench
 make -C go test
 make -C go bench
+make -C c test
+make -C c bench
 make -C python test
 make -C python bench
 ```
+
+Stuck? See `hints/01.md`.
