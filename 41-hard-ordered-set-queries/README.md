@@ -38,7 +38,7 @@ insert 3,1,7,4; search4→1; search5→0; insert2; range_count(2,5)→3; delete3
   → 1 0 3 2
 ```
 
-**Example 2** — operations on an empty list, then a degenerate range.
+**Example 2** — queries on an empty set, then the same queries after one insert.
 ```
 search0→0; range_count(-10,10)→0; insert0; search0→1; range_count(-10,10)→1
   → 0 0 1 1
