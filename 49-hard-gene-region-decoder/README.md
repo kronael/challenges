@@ -8,9 +8,9 @@ scored state model.
 
 ## Problem
 
-Given a DNA sequence and a scored state model, return the most likely state at
-every base. A state can represent a biological region such as coding DNA,
-non-coding DNA, or a frame-specific segment.
+Given a DNA sequence and a scored state model, return the state at every base
+along the highest-scoring state path. A state can represent a biological region
+such as coding DNA, non-coding DNA, or a frame-specific segment.
 
 The model contains:
 
