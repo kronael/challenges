@@ -93,7 +93,7 @@ Harness is **editor + `make test`**. Each challenge has its own dir
 **sys challenges** (29–34): Python is inappropriate (GIL prevents real concurrency).
 Use **`golden/main.c`** as the reference implementation instead of `main.py`.
 `golden/main.c` contains the complete algorithm + a pthreads stress test in one file.
-`golden/Makefile` builds with `gcc -std=c11 -O2 -pthread` and `make test` runs `./main`.
+`golden/Makefile` builds with `cc -std=c11 -O2 -pthread` and `make test` runs `./main`.
 Their `c/` solver dir keeps `solution.h` + `solution.c` (types and lifecycle
 complete, every concurrent operation stubbed to `abort()`), plus a finished
 `stress.c` and `bench.c`.
@@ -171,7 +171,7 @@ scripts/bench.py        ephemeral generation, oracle comparison, and timeout run
 NN-level-slug/
   README.md              problem statement, constraints, I/O, examples
   hints/                 01.md, 02.md, … — one spoiler per file, sources last
-  cases/                 tracked small NN.in / NN.out fixtures (io only)
+  cases/                 tracked small NN.in / NN.out fixtures (io and vec only)
   vec.mk                 make vec's traced fixture and unit of work (vec level only)
   vec.in · vec.out       traced fixture outside cases/ (13, 17, 44, 46)
   golden/  main.py · test_solution.py · Makefile · pyproject.toml   (fast reference; C if vec level)
@@ -225,8 +225,9 @@ Rust `make bench` times the debug build on purpose: the complexity walls do not
 depend on optimization. 13, 17, 44, and 46 time release, the one program their
 `make vec` grades.
 
-I/O `golden/` has `all: test` and adds a `regen` target to regenerate tracked
-small `.out` files. API, sys, and vec challenges use targets specific to their test style;
+A Python I/O `golden/` has `all: test`; a C one (13, 17, 44, 46) keeps the
+`shared/c/io.mk` targets. Both add a `regen` target to regenerate tracked `.out`
+files. API, sys, and vec challenges use targets specific to their test style;
 check their README and `make help` instead of assuming this table applies.
 
 ## Test case coverage
@@ -263,8 +264,8 @@ materializes these cases ephemerally.
   `./main` is the timed binary; sys: `./stress` and `./benchmark`. `lint`
   recompiles everything with `-Wpedantic -Wshadow -Werror`.
 
-Per-challenge language set is in the README catalog (most are `py go rs`; some
-hard io and the sys ones drop a language).
+Per-challenge language set is in the README catalog (most are `py go rs c`; the
+api, sys, and vec ones drop some).
 
 ## Adding an I/O challenge
 
