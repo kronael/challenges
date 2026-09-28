@@ -25,8 +25,6 @@ benchmark-margin wording.
 What remains below is DEFERRED (needs a frozen-digest change or an owner naming
 decision) or BY-DESIGN (accepted variance).
 
-### Deferred — need a spec/digest decision or coordinated rename
-
 ### By design — accepted variance, no change
 
 - **60-TITLE-LEAKS-TERM** (LOW, design) — BY-DESIGN. `60-medium-venue-ancestor`'s
