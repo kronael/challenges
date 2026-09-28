@@ -4,7 +4,7 @@ import (
 	"sync/atomic"
 )
 
-// SpscQueue is a single-producer single-consumer ring buffer of capacity N.
+// SpscQueue is a single-producer single-consumer queue of capacity N.
 // N must be a power of two.
 type SpscQueue struct {
 	head atomic.Uint64
