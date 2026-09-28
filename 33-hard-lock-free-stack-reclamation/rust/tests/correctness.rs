@@ -49,8 +49,8 @@ fn no_use_after_free_no_leak() {
                 let mut local_popped = 0u64;
                 // Mixed pattern: push-heavy threads grow the stack while
                 // pop-heavy threads recycle nodes, maximising the chance that a
-                // node is reclaimed while a peer still holds a hazard pointer
-                // into it (the use-after-free / ABA window).
+                // node is reclaimed while a peer still holds a pointer into it
+                // (the use-after-free / ABA window).
                 let pop_heavy = thread_id % 2 == 0;
                 for i in 0..OPS {
                     if pop_heavy {
@@ -90,7 +90,7 @@ fn no_use_after_free_no_leak() {
         "popped {total_popped} of {total_pushed} — lost or duplicated nodes"
     );
 
-    // Drop the stack to flush any retired-but-not-yet-freed nodes.
+    // Drop the stack to free every node it still holds.
     drop(Arc::try_unwrap(stack).ok().expect("stack still shared"));
 
     let constructs = CONSTRUCTS.load(Ordering::Relaxed);
