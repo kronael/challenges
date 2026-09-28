@@ -4,10 +4,10 @@ from itertools import islice
 from main import (
     collatz,
     fibonacci,
+    keep_primes,
     naturals,
     primes,
     running_average,
-    sieve,
     unfold,
     zipWith,
 )
@@ -22,11 +22,11 @@ def test_primes():
     assert list(islice(primes(), 10)) == [2, 3, 5, 7, 11, 13, 17, 19, 23, 29]
 
 
-def test_sieve_directly():
-    assert list(islice(sieve(naturals(2)), 6)) == [2, 3, 5, 7, 11, 13]
-    # sieve must consume its argument, not hardcode an endless 2.. stream: fed a
-    # finite stream it yields only the primes within it, then stops.
-    assert list(islice(sieve(iter(range(2, 13))), 20)) == [2, 3, 5, 7, 11]
+def test_keep_primes_directly():
+    assert list(islice(keep_primes(naturals(2)), 6)) == [2, 3, 5, 7, 11, 13]
+    # keep_primes must consume its argument, not hardcode an endless 2.. stream:
+    # fed a finite stream it yields only the primes within it, then stops.
+    assert list(islice(keep_primes(iter(range(2, 13))), 20)) == [2, 3, 5, 7, 11]
 
 
 def test_fibonacci():

@@ -62,10 +62,10 @@ func TestPrimes(t *testing.T) {
 	equalInts(t, take(Primes(), 10), []int{2, 3, 5, 7, 11, 13, 17, 19, 23, 29})
 }
 
-func TestSieveDirectly(t *testing.T) {
-	equalInts(t, take(Sieve(Naturals(2)), 6), []int{2, 3, 5, 7, 11, 13})
-	// sieve must consume its argument, not hardcode an endless 2.. stream: fed a
-	// finite stream it yields only the primes within it, then stops.
+func TestKeepPrimesDirectly(t *testing.T) {
+	equalInts(t, take(KeepPrimes(Naturals(2)), 6), []int{2, 3, 5, 7, 11, 13})
+	// KeepPrimes must consume its argument, not hardcode an endless 2.. stream:
+	// fed a finite stream it yields only the primes within it, then stops.
 	finite := func(yield func(int) bool) {
 		for v := 2; v <= 12; v++ {
 			if !yield(v) {
@@ -73,7 +73,7 @@ func TestSieveDirectly(t *testing.T) {
 			}
 		}
 	}
-	equalInts(t, take(Sieve(finite), 20), []int{2, 3, 5, 7, 11})
+	equalInts(t, take(KeepPrimes(finite), 20), []int{2, 3, 5, 7, 11})
 }
 
 func TestFibonacci(t *testing.T) {

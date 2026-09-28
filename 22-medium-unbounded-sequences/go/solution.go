@@ -8,11 +8,11 @@ func Naturals(start int) iter.Seq[int] {
 	panic("Naturals: not implemented")
 }
 
-// Sieve takes an ascending stream of integers ≥ 2 and yields the primes among
-// them, in order.
-func Sieve(nums iter.Seq[int]) iter.Seq[int] {
+// KeepPrimes takes an ascending stream of integers ≥ 2 and yields the primes
+// among them, in order.
+func KeepPrimes(nums iter.Seq[int]) iter.Seq[int] {
 	_ = nums
-	panic("Sieve: not implemented")
+	panic("KeepPrimes: not implemented")
 }
 
 // Primes yields 2, 3, 5, 7, 11, … forever.

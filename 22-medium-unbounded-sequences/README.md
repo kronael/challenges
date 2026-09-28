@@ -15,8 +15,8 @@ many values to request.
 The functions and the values they produce:
 
 - `naturals(start=0)` — `start, start+1, start+2, …` forever.
-- `sieve(nums)` — given an ascending stream of integers `≥ 2`, yield the primes
-  among them, in order.
+- `keep_primes(nums)` — given an ascending stream of integers `≥ 2`, yield the
+  primes among them, in order.
 - `primes()` — `2, 3, 5, 7, 11, …` forever.
 - `fibonacci()` — `0, 1, 1, 2, 3, 5, 8, …` forever.
 - `running_average(nums)` — for input `x₀, x₁, x₂, …` yield the average of every

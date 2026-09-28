@@ -7,7 +7,7 @@ import main
 def test_scaffold_exports_expected_functions():
     for name in [
         "naturals",
-        "sieve",
+        "keep_primes",
         "primes",
         "fibonacci",
         "running_average",
@@ -21,7 +21,8 @@ def test_scaffold_exports_expected_functions():
 def test_scaffold_signatures_match_readme():
     assert str(inspect.signature(main.naturals)) == "(start: int = 0) -> Iterator[int]"
     assert (
-        str(inspect.signature(main.sieve)) == "(nums: Iterator[int]) -> Iterator[int]"
+        str(inspect.signature(main.keep_primes))
+        == "(nums: Iterator[int]) -> Iterator[int]"
     )
     assert str(inspect.signature(main.primes)) == "() -> Iterator[int]"
     assert str(inspect.signature(main.fibonacci)) == "() -> Iterator[int]"
@@ -46,9 +47,9 @@ def test_primes_first_eight():
     assert list(islice(main.primes(), 8)) == [2, 3, 5, 7, 11, 13, 17, 19]
 
 
-def test_sieve_keeps_only_primes_from_stream():
-    assert list(islice(main.sieve(main.naturals(2)), 6)) == [2, 3, 5, 7, 11, 13]
-    assert list(main.sieve(iter([2, 3, 4, 5, 6, 7, 8, 9]))) == [2, 3, 5, 7]
+def test_keep_primes_yields_only_primes_from_stream():
+    assert list(islice(main.keep_primes(main.naturals(2)), 6)) == [2, 3, 5, 7, 11, 13]
+    assert list(main.keep_primes(iter([2, 3, 4, 5, 6, 7, 8, 9]))) == [2, 3, 5, 7]
 
 
 def test_fibonacci_first_ten():

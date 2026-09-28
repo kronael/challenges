@@ -5,7 +5,7 @@ def naturals(start: int = 0) -> Iterator[int]:
     """Infinite generator of naturals from start: start, start+1, start+2, ..."""
 
 
-def sieve(nums: Iterator[int]) -> Iterator[int]:
+def keep_primes(nums: Iterator[int]) -> Iterator[int]:
     """Given an ascending stream of ints >= 2, yield the primes among them, in order."""
 
 

@@ -9,7 +9,7 @@ def naturals(start: int = 0) -> Iterator[int]:
         n += 1
 
 
-def sieve(nums: Iterator[int]) -> Iterator[int]:
+def keep_primes(nums: Iterator[int]) -> Iterator[int]:
     """Given an ascending stream of ints >= 2, yield the primes among them, in order."""
     known = []
     for n in nums:
@@ -20,7 +20,7 @@ def sieve(nums: Iterator[int]) -> Iterator[int]:
 
 def primes() -> Iterator[int]:
     """Infinite generator of primes: 2, 3, 5, 7, 11, ..."""
-    return sieve(naturals(2))
+    return keep_primes(naturals(2))
 
 
 def fibonacci() -> Iterator[int]:
