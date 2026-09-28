@@ -22,8 +22,7 @@ fixes (53/55/56), the 55 offline-hint and 56 collinear rewordings, the 49–52
 README headers, the 07/10/45 hint-source/complexity touch-ups, and the 59/60/63
 benchmark-margin wording.
 
-What remains below is DEFERRED (needs a frozen-digest change or an owner naming
-decision) or BY-DESIGN (accepted variance).
+What remains below is BY-DESIGN (accepted variance).
 
 ### By design — accepted variance, no change
 
