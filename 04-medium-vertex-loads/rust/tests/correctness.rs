@@ -1,5 +1,5 @@
-use edge_costs::{solve, Input};
 use std::{fs, path::PathBuf};
+use vertex_loads::{solve, Input};
 
 #[test]
 fn cases() {

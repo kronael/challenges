@@ -27,12 +27,6 @@ decision) or BY-DESIGN (accepted variance).
 
 ### Deferred — need a spec/digest decision or coordinated rename
 
-- **04-SLUG-TITLE-MISMATCH** (MED, docs) — DEFERRED. `04-medium-edge-costs`'s
-  README title and catalog row say "Vertex Load Assignment," and the problem
-  assigns loads to vertices over unit edges — the slug "edge-costs" matches
-  neither. **Fix:** a coordinated rename across the directory slug, README,
-  catalog row, and `scripts/large_cases.py` recipe context (owner picks the
-  canonical name first).
 - **58-BENCH-REWARDS-SORT-ON-SEEDED-RECIPES** (LOW, bench) — BY-DESIGN. On
   `58-medium-kth-worst-fill`'s two seeded recipes, a full `sorted()` beats the
   intended selection. This is exactly why the README states a bare O(n)

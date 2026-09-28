@@ -116,7 +116,7 @@ implementation burden, and the constraints enforced by `make bench`.
 | [01](01-easy-max-subarray/) | Maximum Subarray | easy | py go rs c | test bench |
 | [02](02-easy-mod-exp/) | Modular Power | easy | py go rs c | test bench |
 | [03](03-easy-max-drawdown/) | Max Drawdown | easy | py go rs c | test bench |
-| [04](04-medium-edge-costs/) | Vertex Load Assignment | medium | py go rs c | test bench |
+| [04](04-medium-vertex-loads/) | Vertex Load Assignment | medium | py go rs c | test bench |
 | [05](05-medium-price-streak/) | Price Streak | medium | py go rs c | test bench |
 | [06](06-medium-edit-distance/) | Edit Distance | medium | py go rs c | test bench |
 | [07](07-medium-coin-change/) | Coin Change | medium | py go rs c | test bench |

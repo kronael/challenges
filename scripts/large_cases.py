@@ -15,7 +15,7 @@ DNA = "ACGT"
 LOWER = "abcdefghijklmnopqrstuvwxyz"
 PROTEIN = "ARNDCQEGHILKMFPSTWYV"
 RNA = "ACGU"
-EXPECTED_DIGEST = "5e537e34c471c94a96bef21df1bfc2fff0cc0885da0a9d3be10979cbe8160cd2"
+EXPECTED_DIGEST = "9f25d5552684c2ce6bfdc3b1cb95ff8a5ef22a72e57d9e41e709c9d4bc409695"
 
 
 class Rng:
@@ -1009,7 +1009,7 @@ BUILDERS: dict[str, Callable[[str, Rng], dict[str, Any]]] = {
     "01-easy-max-subarray": build_01,
     "02-easy-mod-exp": build_02,
     "03-easy-max-drawdown": build_03,
-    "04-medium-edge-costs": build_04,
+    "04-medium-vertex-loads": build_04,
     "05-medium-price-streak": build_05,
     "06-medium-edit-distance": build_06,
     "07-medium-coin-change": build_07,
@@ -1068,7 +1068,7 @@ NAMES = {
     "01-easy-max-subarray": ("09_large_random", "10_large_negative"),
     "02-easy-mod-exp": ("09_large_exp", "10_large_base"),
     "03-easy-max-drawdown": ("09_large_decline", "10_large_random"),
-    "04-medium-edge-costs": ("09_large_path", "10_large_star", "11_large_caterpillar"),
+    "04-medium-vertex-loads": ("09_large_path", "10_large_star", "11_large_caterpillar"),
     "05-medium-price-streak": ("09_large_increasing", "10_large_random"),
     "06-medium-edit-distance": ("09_large_random", "10_large_binary"),
     "07-medium-coin-change": ("09_large_amount", "10_large_sparse"),
