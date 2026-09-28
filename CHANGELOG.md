@@ -2,6 +2,27 @@
 
 All notable changes to this challenge bench are recorded here.
 
+## [v0.1.10] — 2026-09-28
+
+> challenges v0.1.10 — no vec level where SIMD is free
+>
+> 17 drops `make vec`: its textbook solution already grades vectorized with no
+> SIMD code, so the level asked for nothing.
+>
+> • 17 is an ordinary io challenge again: `make test` and `make bench`
+> • 13, 44, and 46 keep `make vec`; their plain solutions grade scalar
+>
+> Full notes below.
+
+### Changed
+
+- 17 loses its vec level: `vec.mk`, `vec.in`, and `vec.out` are gone, its
+  golden is the Python reference again, its solver Makefiles are the io ones
+  (Rust `make bench` times the debug build), and its README and hints drop
+  level 3.
+- `VEC-WORK-BEFORE-SOLVE` is ruled by design: `make vec` grades `solve` and
+  does not police work done before it.
+
 ## [v0.1.9] — 2026-09-27
 
 > challenges v0.1.9 — every bench wall holds against native code
