@@ -10,12 +10,12 @@ void barrier_init(SpinBarrier *b, int n) {
 	}
 	b->n = n;
 	atomic_store_explicit(&b->count, n, memory_order_relaxed);
-	atomic_store_explicit(&b->sense, 0, memory_order_relaxed);
+	atomic_store_explicit(&b->phase, 0, memory_order_relaxed);
 }
 
-void barrier_wait(SpinBarrier *b, int *local_sense) {
+void barrier_wait(SpinBarrier *b, int *local_phase) {
 	(void)b;
-	(void)local_sense;
+	(void)local_phase;
 	fprintf(stderr, "barrier_wait: not implemented\n");
 	abort();
 }

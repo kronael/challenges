@@ -3,12 +3,12 @@ use std::sync::atomic::{AtomicBool, AtomicUsize};
 pub struct Barrier {
     n: usize,
     count: AtomicUsize,
-    sense: AtomicBool,
+    phase: AtomicBool,
 }
 
 pub struct Waiter<'a> {
     barrier: &'a Barrier,
-    local_sense: bool,
+    local_phase: bool,
 }
 
 impl Barrier {
@@ -17,14 +17,14 @@ impl Barrier {
         Barrier {
             n,
             count: AtomicUsize::new(n),
-            sense: AtomicBool::new(false),
+            phase: AtomicBool::new(false),
         }
     }
 
     pub fn waiter(&self) -> Waiter<'_> {
         Waiter {
             barrier: self,
-            local_sense: false,
+            local_phase: false,
         }
     }
 }
@@ -34,8 +34,8 @@ impl Waiter<'_> {
         let _ = (
             self.barrier.n,
             &self.barrier.count,
-            &self.barrier.sense,
-            self.local_sense,
+            &self.barrier.phase,
+            self.local_phase,
         );
         todo!()
     }

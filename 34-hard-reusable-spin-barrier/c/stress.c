@@ -24,11 +24,11 @@ typedef struct {
 
 static void *worker(void *p) {
 	const Args *args = (const Args *)p;
-	int local_sense = 0;
+	int local_phase = 0;
 	for (long round = 0; round < ROUNDS; round++) {
-		barrier_wait(&barrier, &local_sense);
+		barrier_wait(&barrier, &local_phase);
 		atomic_store_explicit(&slots[args->id], round, memory_order_relaxed);
-		barrier_wait(&barrier, &local_sense);
+		barrier_wait(&barrier, &local_phase);
 		for (int i = 0; i < N; i++) {
 			if (atomic_load_explicit(&slots[i], memory_order_relaxed) != round) {
 				atomic_fetch_add_explicit(&early, 1, memory_order_relaxed);

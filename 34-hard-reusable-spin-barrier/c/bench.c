@@ -14,9 +14,9 @@ static SpinBarrier barrier;
 
 static void *worker(void *p) {
 	(void)p;
-	int local_sense = 0;
+	int local_phase = 0;
 	for (long round = 0; round < ROUNDS; round++) {
-		barrier_wait(&barrier, &local_sense);
+		barrier_wait(&barrier, &local_phase);
 	}
 	return NULL;
 }

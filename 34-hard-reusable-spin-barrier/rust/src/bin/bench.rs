@@ -29,6 +29,6 @@ fn main() {
     let elapsed = start.elapsed();
 
     let rate = ROUNDS as f64 / elapsed.as_secs_f64() / 1e6;
-    println!("sense-barrier: {N} threads, {ROUNDS} rounds in {elapsed:.3?}");
-    println!("sense-barrier: {rate:.2} Mrounds/s");
+    println!("barrier: {N} threads, {ROUNDS} rounds in {elapsed:.3?}");
+    println!("barrier: {rate:.2} Mrounds/s");
 }

@@ -5,12 +5,12 @@ import "sync/atomic"
 type Barrier struct {
 	n     uint64
 	count atomic.Uint64
-	sense atomic.Bool
+	phase atomic.Bool
 }
 
 type Waiter struct {
 	barrier    *Barrier
-	localSense bool
+	localPhase bool
 }
 
 func New(n int) *Barrier {
