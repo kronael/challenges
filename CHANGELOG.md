@@ -2,6 +2,39 @@
 
 All notable changes to this challenge bench are recorded here.
 
+## [v0.1.11] — 2026-09-28
+
+> challenges v0.1.11 — no name gives the method away
+>
+> Every name a solver sees now names the task, never the technique: slugs,
+> input keys, API names, Go modules, Rust crates, and systems stub types.
+>
+> • 04 is `vertex-loads`, 19 is `cheapest-road-network`
+> • 16 Go modules and Rust crates renamed from `kmp`, `dijkstra`, … to task names
+> • 11's input key is `friendships`, 22's API is `keep_primes`
+> • 29–34 stubs drop `Vyukov`, `Seqlock`, `Chase-Lev`, `hazard`, and `sense`
+> • 13 more hint chains end on a Sources file
+>
+> Full notes below.
+
+### Changed
+
+- Slugs: `04-medium-edge-costs` → `04-medium-vertex-loads`, `19-medium-mst` →
+  `19-medium-cheapest-road-network`.
+- Go module and Rust crate names of 10, 11, 12, 14, 15, 16, 18, 19, 23, 26,
+  30, 32, 33, 34, 35, 41, and 42 name the task instead of the method.
+- 11's input key `unions` → `friendships`; 22's API `sieve`/`Sieve` →
+  `keep_primes`/`KeepPrimes`.
+- Systems stubs: 29 `VyukovQueue` → `MpscQueue`, 30 `Seqlock` →
+  `TickSnapshot`, 34's `sense` → `phase`, and bench labels and comments in
+  29–34 no longer name a technique; 30's stub drops its step-by-step protocol
+  notes.
+- 16's README states the follow-up bound O(|T| + |P|).
+- Hints of 03, 04, 09, 14, 15, 16, 23, 24, 25, 35, 38, 39, and 43 end on a
+  Sources file.
+- `BUGS.md`: the 41 and 46 bench walls, 58's sort, and 62's fixture gap are
+  ruled by design.
+
 ## [v0.1.10] — 2026-09-28
 
 > challenges v0.1.10 — no vec level where SIMD is free
