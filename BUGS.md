@@ -27,17 +27,6 @@ decision) or BY-DESIGN (accepted variance).
 
 ### Deferred — need a spec/digest decision or coordinated rename
 
-- **58-BENCH-REWARDS-SORT-ON-SEEDED-RECIPES** (LOW, bench) — BY-DESIGN. On
-  `58-medium-kth-worst-fill`'s two seeded recipes, a full `sorted()` beats the
-  intended selection. This is exactly why the README states a bare O(n)
-  time / O(1)-space follow-up rather than leaning on `make bench`, and
-  `hints/04.md` says so. **Fix (optional):** a recipe shaped to also punish a
-  full sort (digest refreeze).
-- **62-SMALL-FIXTURE-COVERAGE-GAP** (LOW, test) — DEFERRED. The largest tracked
-  small fixture in `62-hard-neutral-basket` is `n=17`; the `middle = 19/19`
-  split path is exercised only by `make bench`, because `n=20` already costs
-  ~4 s of `rotten`'s Python runtime in the small suite. **Fix:** owner's call on
-  the rotten-runtime trade-off.
 - **41-STRAY-RUFF-CACHE** (LOW, resource) — DEFERRED. `41-hard-ordered-set-queries/.ruff_cache/`
   sits at the challenge root instead of inside a language dir. It is gitignored,
   so it never reaches git and does not block a release. **Fix:** manual cleanup
@@ -98,6 +87,30 @@ decision) or BY-DESIGN (accepted variance).
   2026-09-27). Owner's ruling (2026-09-28): the README's bare O(|T| + |P|)
   time follow-up now carries the requirement; `make bench` times only the
   character loop.
+- **58-BENCH-REWARDS-SORT-ON-SEEDED-RECIPES** (LOW, bench) — BY-DESIGN. On
+  `58-medium-kth-worst-fill`'s two seeded recipes, a full `sorted()` beats the
+  intended selection; the README's bare O(n) time / O(1)-space follow-up
+  carries the requirement instead of `make bench`, and `hints/04.md` says so.
+  Owner's ruling (2026-09-28): accepted; no recipe shaped to punish a sort.
+- **62-SMALL-FIXTURE-COVERAGE-GAP** (LOW, test) — BY-DESIGN. The largest tracked
+  small fixture in `62-hard-neutral-basket` is `n=17`; the `middle = 19/19`
+  split path is exercised only by `make bench`, because `n=20` already costs
+  ~4 s of `rotten`'s Python runtime in the small suite. Owner's ruling
+  (2026-09-28): accepted; the small suite stays fast.
+- **46-BENCH-WALL-UNDER-2X** (LOW, design) — BY-DESIGN. A native control of
+  `rotten/` (guide × window × base, `-O3 -march=native`) takes 7.7 s CPU a case
+  on both recipes, 1.54× the 5 s budget. A 2× wall needs about 1.3·10⁶ bases,
+  where the Go sliding window of `hints/06.md` stops fitting the budget, and
+  the same triple loop with the window loop innermost vectorizes to 1.0 s a
+  case (golden 0.9 s), so no genome length separates it from the golden
+  (measured 2026-09-27). Owner's ruling (2026-09-28): accept the 1.5× wall and
+  the swapped-loop pass.
+- **41-RANGE-WALL-UNDER-2X** (LOW, design) — BY-DESIGN. `10_large_range`
+  (3·10⁵ inserts, then 5·10⁴ narrow range counts) holds a native control of
+  `rotten/` to 8.7 s CPU at `-O3 -march=native`, 1.74× the 5 s budget, while
+  the Python golden spends about 10 µs an operation (3.1 s), so no mix within
+  a third of the 10 s Python timeout reaches a 2× wall (measured 2026-09-27).
+  Owner's ruling (2026-09-28): accept the 1.74× wall.
 
 ## Status — 2026-08-24 — found during the numbering/reference sweep
 
@@ -112,27 +125,6 @@ decision) or BY-DESIGN (accepted variance).
   problems. Do NOT fabricate citations. (Case-number bands like `58/13_i32_bounds.in`
   and `04/12–20.in` were also reviewed and are intentional/harmless — every
   `.in` is paired and each challenge has ≥8 small cases — so they are not logged.)
-
-## make bench walls
-
-- **46-BENCH-WALL-UNDER-2X** (LOW, design) — deferred, trade-off. A native
-  control of `rotten/` (guide × window × base, `-O3 -march=native`) takes 7.7 s
-  CPU a case on both recipes, 1.54× the 5 s budget. A 2× wall needs about
-  1.3·10⁶ bases, where the Go sliding window of `hints/06.md` (3.6 s a case at
-  10⁶) passes 4.7 s and stops fitting the budget; C's takes 2.3 s. The same
-  triple loop with the window loop innermost (one pass per guide base, adding
-  into a byte counter per window) does the same O(guides × genome × L)
-  comparisons, vectorizes 32 windows at a time, and takes 1.0 s a case (golden
-  0.9 s), so no genome length separates it from the golden; `make vec` was not
-  run on it. **Fix:** owner's call — accept the 1.5× wall and the swapped-loop
-  pass, or reshape the level. No test — design. Measured 2026-09-27.
-- **41-RANGE-WALL-UNDER-2X** (LOW, design) — deferred, trade-off.
-  `10_large_range` (3·10⁵ inserts, then 5·10⁴ narrow range counts) holds a
-  native control of `rotten/` to 8.7 s CPU at `-O3 -march=native`, 1.74× the
-  5 s budget, while the Python golden takes 3.1 s. The golden spends about
-  10 µs on an insert and on a narrow range count, so no mix of the two that
-  keeps it within a third of the 10 s Python timeout reached a 2× wall.
-  **Fix (optional):** a faster golden. No test — design. Measured 2026-09-27.
 
 ## vec grader
 
