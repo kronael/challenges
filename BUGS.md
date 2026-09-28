@@ -27,11 +27,6 @@ decision) or BY-DESIGN (accepted variance).
 
 ### Deferred — need a spec/digest decision or coordinated rename
 
-- **41-STRAY-RUFF-CACHE** (LOW, resource) — DEFERRED. `41-hard-ordered-set-queries/.ruff_cache/`
-  sits at the challenge root instead of inside a language dir. It is gitignored,
-  so it never reaches git and does not block a release. **Fix:** manual cleanup
-  — repo policy bars recursive removal, so it is left for the owner.
-
 ### By design — accepted variance, no change
 
 - **60-TITLE-LEAKS-TERM** (LOW, design) — BY-DESIGN. `60-medium-venue-ancestor`'s
