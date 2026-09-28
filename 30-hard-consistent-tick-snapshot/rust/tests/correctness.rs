@@ -1,4 +1,4 @@
-use consistent_tick_snapshot::Seqlock;
+use consistent_tick_snapshot::TickSnapshot;
 use std::sync::atomic::AtomicBool;
 use std::sync::atomic::AtomicU64;
 use std::sync::atomic::Ordering;
@@ -32,7 +32,7 @@ fn check_consistent(buf: &[u8; 64]) -> Option<u64> {
 
 #[test]
 fn no_torn_reads() {
-    let lock = Arc::new(Seqlock::new());
+    let snapshot = Arc::new(TickSnapshot::new());
     let torn = Arc::new(AtomicU64::new(0));
     // Highest fully-consistent value any reader observed; used to prove the
     // writer actually made progress, so a no-op writer cannot pass the test.
@@ -41,14 +41,14 @@ fn no_torn_reads() {
     let barrier = Arc::new(Barrier::new(READERS + 1));
 
     let writer = {
-        let lock = Arc::clone(&lock);
+        let snapshot = Arc::clone(&snapshot);
         let stop = Arc::clone(&stop);
         let barrier = Arc::clone(&barrier);
         thread::spawn(move || {
             barrier.wait();
             let mut counter = 1u64;
             while !stop.load(Ordering::Relaxed) {
-                lock.write(&pack(counter));
+                snapshot.write(&pack(counter));
                 counter = counter.wrapping_add(1);
             }
             counter
@@ -57,7 +57,7 @@ fn no_torn_reads() {
 
     let readers: Vec<_> = (0..READERS)
         .map(|_| {
-            let lock = Arc::clone(&lock);
+            let snapshot = Arc::clone(&snapshot);
             let torn = Arc::clone(&torn);
             let max_seen = Arc::clone(&max_seen);
             let barrier = Arc::clone(&barrier);
@@ -66,7 +66,7 @@ fn no_torn_reads() {
                 let mut local_max = 0u64;
                 barrier.wait();
                 for _ in 0..READER_ITERS {
-                    while !lock.read(&mut buf) {
+                    while !snapshot.read(&mut buf) {
                         std::hint::spin_loop();
                     }
                     match check_consistent(&buf) {
@@ -90,7 +90,7 @@ fn no_torn_reads() {
     assert_eq!(
         torn.load(Ordering::Relaxed),
         0,
-        "torn reads detected — payload tore between epochs"
+        "torn reads detected — payload tore between ticks"
     );
     // Sanity: the writer cycled and readers observed real, advancing values.
     // Guards against a degenerate impl that always reports the same payload.

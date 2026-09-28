@@ -52,7 +52,7 @@ func TestNoTornReads(t *testing.T) {
 		t.Skip("skipping stress test in short mode")
 	}
 
-	lock := &Seqlock{}
+	snapshot := &TickSnapshot{}
 	var tornCount atomic.Int64
 	var maxSeen atomic.Uint64
 	done := make(chan struct{})
@@ -63,7 +63,7 @@ func TestNoTornReads(t *testing.T) {
 		defer close(writerDone)
 		for counter := uint64(0); ; counter++ {
 			payload := pack(counter)
-			lock.Write(&payload)
+			snapshot.Write(&payload)
 			select {
 			case <-done:
 				return
@@ -79,7 +79,7 @@ func TestNoTornReads(t *testing.T) {
 			var buf [64]byte
 			var localMax uint64
 			for range readerIters {
-				for !lock.Read(&buf) {
+				for !snapshot.Read(&buf) {
 					// retry
 				}
 				if value, ok := checkConsistent(&buf); ok {
@@ -110,7 +110,7 @@ func TestNoTornReads(t *testing.T) {
 }
 
 func BenchmarkRead(b *testing.B) {
-	lock := &Seqlock{}
+	snapshot := &TickSnapshot{}
 	counter := uint64(0)
 	done := make(chan struct{})
 	writerDone := make(chan struct{})
@@ -122,7 +122,7 @@ func BenchmarkRead(b *testing.B) {
 				return
 			default:
 				payload := pack(counter)
-				lock.Write(&payload)
+				snapshot.Write(&payload)
 				counter++
 			}
 		}
@@ -131,7 +131,7 @@ func BenchmarkRead(b *testing.B) {
 	b.ResetTimer()
 	var buf [64]byte
 	for range b.N {
-		for !lock.Read(&buf) {
+		for !snapshot.Read(&buf) {
 		}
 	}
 	close(done)

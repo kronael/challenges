@@ -5,32 +5,26 @@ import (
 	"unsafe"
 )
 
-// Seqlock protects a 64-byte payload with a sequence counter.
-// Even seq = no write in progress; odd seq = write in progress.
-type Seqlock struct {
+// TickSnapshot holds a 64-byte payload that one writer overwrites while many
+// readers copy it.
+type TickSnapshot struct {
 	seq  atomic.Uint64
 	_    [56]byte        // pad seq to its own cache line
 	data [64]byte        // payload; accessed only through unsafe in Write/Read
 	_    [0]atomic.Int32 // prevent direct struct-copy of data
 }
 
-// Write stores buf into the payload using the seqlock protocol.
+// Write stores buf into the payload.
 // Must be called from exactly one goroutine at a time.
-func (seqlock *Seqlock) Write(buf *[64]byte) {
-	// 1. seq++ (make odd — write in progress)
-	// 2. atomic.StorePointer / copy data
-	// 3. seq++ (make even — write done)
+func (snapshot *TickSnapshot) Write(buf *[64]byte) {
 	_ = buf
-	_ = unsafe.Pointer(&seqlock.data)
+	_ = unsafe.Pointer(&snapshot.data)
 	panic("Write: not implemented")
 }
 
 // Read attempts to copy the payload into out.
 // Returns false if a concurrent write was detected; caller must retry.
-func (seqlock *Seqlock) Read(out *[64]byte) bool {
-	// 1. load seq; if odd, return false
-	// 2. copy data
-	// 3. load seq again; if changed, return false
+func (snapshot *TickSnapshot) Read(out *[64]byte) bool {
 	_ = out
 	panic("Read: not implemented")
 }

@@ -1,5 +1,5 @@
 // The writer stamps one counter into all eight u64 slots of the payload, so any
-// snapshot whose slots disagree was assembled from two different epochs.
+// snapshot whose slots disagree was assembled from two different ticks.
 // max_seen proves the readers observed real, advancing values, so a writer that
 // never publishes cannot pass by keeping the payload trivially consistent.
 
@@ -14,7 +14,7 @@
 #define READER_ITERS 2000000u
 #define SLOTS (TICK_BYTES / (int)sizeof(uint64_t))
 
-static Seqlock lock;
+static TickSnapshot snapshot;
 static pthread_barrier_t start;
 static _Atomic int stop = 0;
 static _Atomic uint64_t torn = 0;
@@ -51,7 +51,7 @@ static void *writer_fn(void *arg) {
 	uint64_t counter = 1;
 	while (atomic_load_explicit(&stop, memory_order_relaxed) == 0) {
 		pack(buf, counter);
-		seqlock_write(&lock, buf);
+		snapshot_write(&snapshot, buf);
 		counter++;
 	}
 	atomic_store_explicit(&written, counter, memory_order_relaxed);
@@ -64,7 +64,7 @@ static void *reader_fn(void *arg) {
 	uint64_t local_max = 0;
 	pthread_barrier_wait(&start);
 	for (unsigned i = 0; i < READER_ITERS; i++) {
-		while (!seqlock_read(&lock, buf)) {
+		while (!snapshot_read(&snapshot, buf)) {
 		}
 		uint64_t value;
 		if (!consistent_value(buf, &value)) {
@@ -82,7 +82,7 @@ static void *reader_fn(void *arg) {
 }
 
 int main(void) {
-	seqlock_init(&lock);
+	snapshot_init(&snapshot);
 	pthread_barrier_init(&start, NULL, READERS + 1);
 
 	pthread_t writer;
@@ -106,7 +106,7 @@ int main(void) {
 
 	uint64_t tears = atomic_load_explicit(&torn, memory_order_relaxed);
 	if (tears != 0) {
-		fprintf(stderr, "FAIL: %llu torn reads — payload tore between epochs\n",
+		fprintf(stderr, "FAIL: %llu torn reads — payload tore between ticks\n",
 			(unsigned long long)tears);
 		return 1;
 	}
