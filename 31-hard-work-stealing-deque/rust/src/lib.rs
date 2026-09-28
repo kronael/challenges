@@ -10,8 +10,6 @@ pub enum Steal<T> {
 
 // The stub compiles but panics at runtime — replace the bodies of push/pop/steal.
 //
-// Reference: "Dynamic Circular Work-Stealing Deque" — Chase & Lev, SPAA 2005.
-//
 // Rules:
 //   - push() and pop() are called only from the owner thread.
 //   - steal() may be called from any number of thief threads simultaneously.
@@ -55,8 +53,8 @@ pub struct Deque<T: Send> {
     buffer: AtomicPtr<Buffer<T>>,
 }
 
-// SAFETY: Deque is designed for concurrent owner+thief access; the Chase-Lev
-// protocol ensures safe sharing when push/pop are restricted to one thread.
+// SAFETY: Deque is designed for concurrent owner+thief access; sharing is safe
+// when push/pop are restricted to one thread.
 unsafe impl<T: Send> Send for Deque<T> {}
 unsafe impl<T: Send> Sync for Deque<T> {}
 
@@ -71,17 +69,17 @@ impl<T: Send> Deque<T> {
 
     /// Push a value onto the bottom. Owner thread only.
     pub fn push(&self, _value: T) {
-        todo!("implement Chase-Lev push")
+        todo!("implement push")
     }
 
     /// Pop a value from the bottom. Owner thread only.
     pub fn pop(&self) -> Option<T> {
-        todo!("implement Chase-Lev pop")
+        todo!("implement pop")
     }
 
     /// Steal a value from the top. Any thread.
     pub fn steal(&self) -> Steal<T> {
-        todo!("implement Chase-Lev steal")
+        todo!("implement steal")
     }
 }
 

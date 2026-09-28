@@ -46,7 +46,7 @@ fn stress_work_stealing() {
         .collect();
 
     // Owner: interleave pushes with its own pops so the bottom hovers near the
-    // top, maximising the single-element pop-vs-steal race the CAS must resolve.
+    // top, maximising the single-element pop-vs-steal race.
     let mut owner_popped = Vec::new();
     barrier.wait();
     for task in 1..=TASKS {
