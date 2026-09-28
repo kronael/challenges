@@ -2,12 +2,12 @@ import json
 import sys
 
 
-def solve(n, unions, queries):
+def solve(n, friendships, queries):
     # Naive relabeling: each person carries a component label; a union rescans all
-    # n people and relabels one whole group into the other. Correct, but O(unions*n)
-    # — it TIMEOUTs on the large cases (the trap).
+    # n people and relabels one whole group into the other. Correct, but
+    # O(friendships*n) — it TIMEOUTs on the large cases (the trap).
     comp = list(range(n))
-    for a, b in unions:
+    for a, b in friendships:
         ca, cb = comp[a], comp[b]
         if ca == cb:
             continue
@@ -19,7 +19,7 @@ def solve(n, unions, queries):
 
 def main():
     obj = json.load(sys.stdin)
-    print(*solve(obj["n"], obj["unions"], obj["queries"]))
+    print(*solve(obj["n"], obj["friendships"], obj["queries"]))
 
 
 if __name__ == "__main__":

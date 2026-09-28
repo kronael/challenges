@@ -1,6 +1,6 @@
 package main
 
-func solve(n int, unions, queries [][]int) []int {
-	_, _, _ = n, unions, queries
+func solve(n int, friendships, queries [][]int) []int {
+	_, _, _ = n, friendships, queries
 	return nil
 }

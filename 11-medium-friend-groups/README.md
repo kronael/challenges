@@ -24,7 +24,7 @@ person twice.
 ## Input
 
 ```json
-{"n": 5, "unions": [[0,1],[1,2],[3,4]], "queries": [[0,2],[0,3],[3,4]]}
+{"n": 5, "friendships": [[0,1],[1,2],[3,4]], "queries": [[0,2],[0,3],[3,4]]}
 ```
 
 ## Output
@@ -35,12 +35,12 @@ One value per query on a single line: `1` if the pair shares a component, else `
 
 **Example 1** — connectivity is transitive across a chain of friendships
 ```
-n=5, unions [0,1][1,2][3,4], queries [0,2][0,3][3,4] → 1 0 1
+n=5, friendships [0,1][1,2][3,4], queries [0,2][0,3][3,4] → 1 0 1
 ```
 
 **Example 2** — separate components stay separate
 ```
-n=3, unions [], queries [0,1] → 0
+n=3, friendships [], queries [0,1] → 0
 ```
 
 ## Run

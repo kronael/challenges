@@ -3,11 +3,11 @@ use serde::Deserialize;
 #[derive(Deserialize)]
 pub struct Input {
     pub n: usize,
-    pub unions: Vec<[usize; 2]>,
+    pub friendships: Vec<[usize; 2]>,
     pub queries: Vec<[usize; 2]>,
 }
 
-pub fn solve(n: usize, unions: &[[usize; 2]], queries: &[[usize; 2]]) -> Vec<u8> {
-    let _ = (n, unions, queries);
+pub fn solve(n: usize, friendships: &[[usize; 2]], queries: &[[usize; 2]]) -> Vec<u8> {
+    let _ = (n, friendships, queries);
     todo!()
 }

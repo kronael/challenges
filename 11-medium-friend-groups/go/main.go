@@ -10,9 +10,9 @@ import (
 )
 
 type input struct {
-	N       int     `json:"n"`
-	Unions  [][]int `json:"unions"`
-	Queries [][]int `json:"queries"`
+	N           int     `json:"n"`
+	Friendships [][]int `json:"friendships"`
+	Queries     [][]int `json:"queries"`
 }
 
 func main() {
@@ -21,7 +21,7 @@ func main() {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
-	out := solve(in.N, in.Unions, in.Queries)
+	out := solve(in.N, in.Friendships, in.Queries)
 	parts := make([]string, len(out))
 	for i, v := range out {
 		parts[i] = strconv.Itoa(v)

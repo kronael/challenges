@@ -2,7 +2,7 @@ import json
 import sys
 
 
-def solve(n, unions, queries):
+def solve(n, friendships, queries):
     parent = list(range(n))
     rank = [0] * n
 
@@ -24,14 +24,14 @@ def solve(n, unions, queries):
         if rank[ra] == rank[rb]:
             rank[ra] += 1
 
-    for a, b in unions:
+    for a, b in friendships:
         union(a, b)
     return [1 if find(u) == find(v) else 0 for u, v in queries]
 
 
 def main():
     obj = json.load(sys.stdin)
-    print(*solve(obj["n"], obj["unions"], obj["queries"]))
+    print(*solve(obj["n"], obj["friendships"], obj["queries"]))
 
 
 if __name__ == "__main__":

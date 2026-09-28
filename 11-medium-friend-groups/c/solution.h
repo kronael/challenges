@@ -13,8 +13,8 @@ typedef struct {
 
 typedef struct {
 	int n;
-	Pair *unions;
-	size_t unions_len;
+	Pair *friendships;
+	size_t friendships_len;
 	Pair *queries;
 	size_t queries_len;
 } Input;

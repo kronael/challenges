@@ -23,7 +23,7 @@ fn cases() {
             .collect();
         let p: Input = serde_json::from_str(&src).unwrap();
         assert_eq!(
-            solve(p.n, &p.unions, &p.queries),
+            solve(p.n, &p.friendships, &p.queries),
             want,
             "{:?}",
             inp.file_name().unwrap()

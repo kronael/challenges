@@ -15,7 +15,7 @@ DNA = "ACGT"
 LOWER = "abcdefghijklmnopqrstuvwxyz"
 PROTEIN = "ARNDCQEGHILKMFPSTWYV"
 RNA = "ACGU"
-EXPECTED_DIGEST = "9f25d5552684c2ce6bfdc3b1cb95ff8a5ef22a72e57d9e41e709c9d4bc409695"
+EXPECTED_DIGEST = "77fca8d6db78dd369be73ede7960e3882819c47e2578c4dc64fd571c5414bdf0"
 
 
 class Rng:
@@ -162,16 +162,16 @@ def build_10(name: str, rng: Rng) -> dict[str, Any]:
 def build_11(name: str, rng: Rng) -> dict[str, Any]:
     n = 500_000
     if name == "09_large_random":
-        unions = [
+        friendships = [
             [rng.integer(0, n - 1), rng.integer(0, n - 1)] for _ in range(n)
         ]
         queries = [
             [rng.integer(0, n - 1), rng.integer(0, n - 1)] for _ in range(n)
         ]
     else:
-        unions = [[i, i + 1] for i in range(n - 1)]
+        friendships = [[i, i + 1] for i in range(n - 1)]
         queries = [[0, rng.integer(0, n - 1)] for _ in range(n)]
-    return {"n": n, "unions": unions, "queries": queries}
+    return {"n": n, "friendships": friendships, "queries": queries}
 
 
 def build_12(name: str, rng: Rng) -> dict[str, Any]:

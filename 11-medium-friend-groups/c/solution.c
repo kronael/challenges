@@ -15,16 +15,16 @@ static Pair *parse_pairs(const JsonValue *arr, size_t *len) {
 
 void input_parse(const JsonValue *root, Input *in) {
 	in->n = (int)json_int(json_get(root, "n"));
-	in->unions = parse_pairs(json_get(root, "unions"), &in->unions_len);
+	in->friendships = parse_pairs(json_get(root, "friendships"), &in->friendships_len);
 	in->queries = parse_pairs(json_get(root, "queries"), &in->queries_len);
 }
 
 void input_free(Input *in) {
-	free(in->unions);
+	free(in->friendships);
 	free(in->queries);
-	in->unions = NULL;
+	in->friendships = NULL;
 	in->queries = NULL;
-	in->unions_len = 0;
+	in->friendships_len = 0;
 	in->queries_len = 0;
 }
 

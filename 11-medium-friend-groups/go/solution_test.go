@@ -49,7 +49,7 @@ func TestCases(t *testing.T) {
 				want = append(want, v)
 			}
 
-			got := solve(in.N, in.Unions, in.Queries)
+			got := solve(in.N, in.Friendships, in.Queries)
 			if len(got) != len(want) {
 				t.Fatalf("got %v want %v", got, want)
 			}
