@@ -1,4 +1,4 @@
-use matrix_exp::{solve, Input};
+use huge_fibonacci::{solve, Input};
 use std::io::{self, Read};
 
 fn main() {

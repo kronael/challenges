@@ -1,4 +1,4 @@
-use segment_tree::{solve, Input};
+use dynamic_range_sums::{solve, Input};
 use std::io::{self, Read};
 
 fn main() {

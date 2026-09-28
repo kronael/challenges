@@ -1,4 +1,4 @@
-use sense_barrier::Barrier;
+use reusable_spin_barrier::Barrier;
 use std::sync::atomic::AtomicU64;
 use std::sync::atomic::Ordering;
 use std::sync::Arc;

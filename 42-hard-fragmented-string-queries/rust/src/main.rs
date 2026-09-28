@@ -1,4 +1,4 @@
-use rope::{solve, Input};
+use fragmented_string_queries::{solve, Input};
 use std::io::{self, Read};
 
 fn main() {

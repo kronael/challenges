@@ -1,5 +1,5 @@
 use std::{fs, path::PathBuf};
-use toposort::{solve, Input};
+use task_ordering::{solve, Input};
 
 #[test]
 fn cases() {

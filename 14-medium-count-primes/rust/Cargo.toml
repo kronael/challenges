@@ -1,5 +1,5 @@
 [package]
-name = "prime-sieve"
+name = "count-primes"
 version = "0.1.0"
 edition = "2021"
 

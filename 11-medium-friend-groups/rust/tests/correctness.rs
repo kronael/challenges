@@ -1,5 +1,5 @@
+use friend_groups::{solve, Input};
 use std::{fs, path::PathBuf};
-use union_find::{solve, Input};
 
 #[test]
 fn cases() {

@@ -1,3 +1,3 @@
-module binary-search-answer
+module textbook-split
 
 go 1.27.1

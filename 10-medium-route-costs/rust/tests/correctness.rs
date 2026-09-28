@@ -1,4 +1,4 @@
-use dijkstra::{solve, Input};
+use route_costs::{solve, Input};
 use std::{fs, path::PathBuf};
 
 #[test]

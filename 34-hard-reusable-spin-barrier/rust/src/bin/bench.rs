@@ -1,5 +1,5 @@
 // Throughput bench: N threads hammer the barrier. std only.
-use sense_barrier::Barrier;
+use reusable_spin_barrier::Barrier;
 use std::sync::Arc;
 use std::thread;
 use std::time::Instant;

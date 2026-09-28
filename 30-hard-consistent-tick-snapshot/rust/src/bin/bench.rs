@@ -1,5 +1,5 @@
 // Throughput bench: one writer stamps the payload while readers spin. std only.
-use seqlock::Seqlock;
+use consistent_tick_snapshot::Seqlock;
 use std::sync::atomic::AtomicBool;
 use std::sync::atomic::Ordering;
 use std::sync::Arc;

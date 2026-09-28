@@ -1,5 +1,5 @@
-use binary_search_answer::{solve, Input};
 use std::io::{self, Read};
+use textbook_split::{solve, Input};
 
 fn main() {
     let mut buf = String::new();

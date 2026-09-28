@@ -1,4 +1,4 @@
-use fenwick_tree::{solve, Input};
+use dynamic_prefix_sums::{solve, Input};
 use std::{fs, path::PathBuf};
 
 #[test]

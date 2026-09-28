@@ -1,5 +1,5 @@
-use kmp::{solve, Input};
 use std::{fs, path::PathBuf};
+use string_search::{solve, Input};
 
 #[test]
 fn cases() {

@@ -1,5 +1,5 @@
+use search_suggestions::{solve, Input};
 use std::{fs, path::PathBuf};
-use trie_autocomplete::{solve, Input};
 
 #[test]
 fn cases() {

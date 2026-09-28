@@ -1,3 +1,3 @@
-module union-find
+module friend-groups
 
 go 1.27.1

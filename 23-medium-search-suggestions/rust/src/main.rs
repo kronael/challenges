@@ -1,5 +1,5 @@
+use search_suggestions::{solve, Input};
 use std::io::{self, Read};
-use trie_autocomplete::{solve, Input};
 
 fn main() {
     let mut buf = String::new();

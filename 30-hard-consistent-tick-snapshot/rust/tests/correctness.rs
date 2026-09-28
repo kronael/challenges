@@ -1,4 +1,4 @@
-use seqlock::Seqlock;
+use consistent_tick_snapshot::Seqlock;
 use std::sync::atomic::AtomicBool;
 use std::sync::atomic::AtomicU64;
 use std::sync::atomic::Ordering;

@@ -1,5 +1,5 @@
 use std::io::{self, Read};
-use toposort::{solve, Input};
+use task_ordering::{solve, Input};
 
 fn main() {
     let mut buf = String::new();

@@ -1,5 +1,5 @@
 [package]
-name = "dijkstra"
+name = "route-costs"
 version = "0.1.0"
 edition = "2021"
 

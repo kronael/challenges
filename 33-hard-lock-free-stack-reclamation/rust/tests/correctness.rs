@@ -1,4 +1,4 @@
-use hazard_stack::Stack;
+use lock_free_stack_reclamation::Stack;
 use std::sync::atomic::AtomicI64;
 use std::sync::atomic::AtomicU64;
 use std::sync::atomic::Ordering;

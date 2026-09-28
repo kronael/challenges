@@ -1,4 +1,4 @@
-use dijkstra::{solve, Input};
+use route_costs::{solve, Input};
 use std::io::{self, Read};
 
 fn main() {

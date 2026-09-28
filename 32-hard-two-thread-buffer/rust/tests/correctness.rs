@@ -1,7 +1,7 @@
-use spsc_ring_buffer::SpscQueue;
 use std::sync::Arc;
 use std::sync::Barrier;
 use std::thread;
+use two_thread_buffer::SpscQueue;
 
 const MESSAGES: u64 = 10_000_000;
 const CAP: usize = 4096;

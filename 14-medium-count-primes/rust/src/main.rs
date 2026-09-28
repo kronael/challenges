@@ -1,4 +1,4 @@
-use prime_sieve::{solve, Input};
+use count_primes::{solve, Input};
 use std::io::{self, Read};
 
 fn main() {

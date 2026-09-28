@@ -1,9 +1,9 @@
 // Throughput bench: producer pushes, dedicated consumer drains. std only.
-use spsc_ring_buffer::SpscQueue;
 use std::sync::Arc;
 use std::sync::Barrier;
 use std::thread;
 use std::time::Instant;
+use two_thread_buffer::SpscQueue;
 
 const MESSAGES: u64 = 50_000_000;
 const CAP: usize = 4096;

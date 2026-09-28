@@ -1,5 +1,5 @@
-use binary_search_answer::{solve, Input};
 use std::{fs, path::PathBuf};
+use textbook_split::{solve, Input};
 
 #[test]
 fn cases() {

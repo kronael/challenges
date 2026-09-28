@@ -1,5 +1,5 @@
+use friend_groups::{solve, Input};
 use std::io::{self, Read};
-use union_find::{solve, Input};
 
 fn main() {
     let mut buf = String::new();

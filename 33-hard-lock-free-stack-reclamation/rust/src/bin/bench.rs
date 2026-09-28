@@ -1,5 +1,5 @@
 // Throughput bench: 16 threads each push+pop. std only.
-use hazard_stack::Stack;
+use lock_free_stack_reclamation::Stack;
 use std::sync::atomic::AtomicU64;
 use std::sync::atomic::Ordering;
 use std::sync::Arc;

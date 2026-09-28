@@ -1,4 +1,4 @@
-use prime_sieve::{solve, Input};
+use count_primes::{solve, Input};
 use std::{fs, path::PathBuf};
 
 #[test]

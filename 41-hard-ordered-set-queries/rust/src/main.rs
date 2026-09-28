@@ -1,4 +1,4 @@
-use skip_list::{solve, Input};
+use ordered_set_queries::{solve, Input};
 use std::io::{self, Read};
 
 fn main() {

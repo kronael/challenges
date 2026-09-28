@@ -1,5 +1,5 @@
 [package]
-name = "hazard-stack"
+name = "lock-free-stack-reclamation"
 version = "0.1.0"
 edition = "2021"
 

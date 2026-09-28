@@ -1,5 +1,5 @@
-use kmp::{solve, Input};
 use std::io::{self, Read};
+use string_search::{solve, Input};
 
 fn main() {
     let mut buf = String::new();
