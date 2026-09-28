@@ -89,6 +89,15 @@ decision) or BY-DESIGN (accepted variance).
   stops other threads and refuses other processes only from `solve`'s entry.
   Owner's ruling (2026-09-27): not worth a contract change; the level does not
   police work done outside `solve`.
+- **16-LIBRARY-COMPARE-CLEARS-BENCH** (MED, design) — BY-DESIGN.
+  `16-medium-string-search`'s wall holds only against the character by
+  character loop in `rotten/main.py:6`. The same O(|T|·|P|) scan written with a
+  library compare clears `make bench` at the README maximum: C `memcmp` takes
+  0.5–0.8 s CPU a case, Python `text.startswith(pattern, i)` at most 1.5 s, and
+  a 2× wall against `memcmp` needs |T|·|P| about 15× larger (measured
+  2026-09-27). Owner's ruling (2026-09-28): the README's bare O(|T| + |P|)
+  time follow-up now carries the requirement; `make bench` times only the
+  character loop.
 
 ## Status — 2026-08-24 — found during the numbering/reference sweep
 
@@ -106,20 +115,6 @@ decision) or BY-DESIGN (accepted variance).
 
 ## make bench walls
 
-- **16-LIBRARY-COMPARE-CLEARS-BENCH** (MED, design) — needs sign-off.
-  `16-medium-string-search`'s wall holds only against the character by
-  character loop in `rotten/main.py:6`. The same O(|T|·|P|) scan written with a
-  library compare clears `make bench` on both recipes at the README maximum
-  (|T| = 3·10⁶, |P| = 1.5·10⁴): C `memcmp` takes 0.5–0.8 s CPU a case at `-O2`
-  and `-O3 -march=native`, and Python `text.startswith(pattern, i)` takes 1.5 s
-  on `09_large_allmatch` and 0.17 s on `10_large_nearmiss`, where CPython
-  compares the last character first. Rust slice `==` and Go string `==` reach
-  the same library compare (not timed). The character loop in C takes 11.7 s
-  at `-O2`. A 2× wall against `memcmp` needs |T|·|P| about 15× larger, and
-  the golden already prints 3·10⁶ positions on allmatch. **Fix:** owner's call —
-  a bare time bound in the README (the CLAUDE.md exception; this is the
-  measurement it asks for), or accept that 16 times only the character loop.
-  No test — design. Measured 2026-09-27.
 - **46-BENCH-WALL-UNDER-2X** (LOW, design) — deferred, trade-off. A native
   control of `rotten/` (guide × window × base, `-O3 -march=native`) takes 7.7 s
   CPU a case on both recipes, 1.54× the 5 s budget. A 2× wall needs about

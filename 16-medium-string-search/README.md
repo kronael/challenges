@@ -14,6 +14,8 @@ Constraints: `|T|` is at most `3 * 10^6` and `|P|` is at most `1.5 * 10^4`. Both
 strings contain printable ASCII characters, including spaces. `pattern` may be
 empty; report no positions.
 
+Follow-up: solve it in O(|T| + |P|) time.
+
 ## Input
 
 ```json
