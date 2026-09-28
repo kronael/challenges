@@ -111,20 +111,9 @@ decision) or BY-DESIGN (accepted variance).
   the Python golden spends about 10 µs an operation (3.1 s), so no mix within
   a third of the 10 s Python timeout reaches a 2× wall (measured 2026-09-27).
   Owner's ruling (2026-09-28): accept the 1.74× wall.
-
-## Status — 2026-08-24 — found during the numbering/reference sweep
-
-- **HINTS-MISSING-SOURCES-FILE** (LOW, docs) — Record-only. Thirteen challenges'
-  `hints/` end with a `# Complexity` file and have no `# Sources` file at all:
-  03, 04, 09, 14, 15, 16, 23, 24, 25, 35, 38, 39, 43. CLAUDE.md says a hint
-  chain ends with a Sources file holding solution-bearing attribution. Several of
-  these are classic problems with citable sources (e.g. 24 LRU cache, 14 sieve,
-  25 running median); others may be original and legitimately source-less.
-  **Fix:** owner decides per challenge — add an accurate Sources file where a
-  real citation exists, or accept Complexity-last for genuinely source-less
-  problems. Do NOT fabricate citations. (Case-number bands like `58/13_i32_bounds.in`
-  and `04/12–20.in` were also reviewed and are intentional/harmless — every
-  `.in` is paired and each challenge has ≥8 small cases — so they are not logged.)
+- **CASE-NUMBER-BANDS** (LOW, test) — BY-DESIGN. Case-number bands like
+  `58/13_i32_bounds.in` and `04/12–20.in` are intentional: every `.in` is
+  paired and each challenge has ≥8 small cases.
 
 ## vec grader
 
