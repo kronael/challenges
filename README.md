@@ -131,7 +131,7 @@ implementation burden, and the constraints enforced by `make bench`.
 | [16](16-medium-string-search/) | String Search | medium | py go rs c | test bench |
 | [17](17-medium-knapsack/) | 0/1 Knapsack | medium | py go rs c | test bench |
 | [18](18-medium-task-ordering/) | Task Ordering | medium | py go rs c | test bench |
-| [19](19-medium-mst/) | Cheapest Road Network | medium | py go rs c | test bench |
+| [19](19-medium-cheapest-road-network/) | Cheapest Road Network | medium | py go rs c | test bench |
 | [20](20-medium-lcs/) | Longest Common Subsequence | medium | py go rs c | test bench |
 | [21](21-medium-constraint-puzzles/) | Constraint Puzzles | medium | py go | test |
 | [22](22-medium-unbounded-sequences/) | Unbounded Sequences | medium | py go | test |

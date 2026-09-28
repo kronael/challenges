@@ -15,7 +15,7 @@ DNA = "ACGT"
 LOWER = "abcdefghijklmnopqrstuvwxyz"
 PROTEIN = "ARNDCQEGHILKMFPSTWYV"
 RNA = "ACGU"
-EXPECTED_DIGEST = "77fca8d6db78dd369be73ede7960e3882819c47e2578c4dc64fd571c5414bdf0"
+EXPECTED_DIGEST = "ef24f839b0a81967ded49114c1310a8f71373ed9278f39c0dc722d6292daabe6"
 
 
 class Rng:
@@ -1024,7 +1024,7 @@ BUILDERS: dict[str, Callable[[str, Rng], dict[str, Any]]] = {
     "16-medium-string-search": build_16,
     "17-medium-knapsack": build_17,
     "18-medium-task-ordering": build_18,
-    "19-medium-mst": build_19,
+    "19-medium-cheapest-road-network": build_19,
     "20-medium-lcs": build_20,
     "23-medium-search-suggestions": build_23,
     "24-medium-lru-cache": build_24,
@@ -1083,7 +1083,7 @@ NAMES = {
     "16-medium-string-search": ("09_large_allmatch", "10_large_nearmiss"),
     "17-medium-knapsack": ("09_large_random", "10_large_small_weights"),
     "18-medium-task-ordering": ("09_large_dag", "10_large_path"),
-    "19-medium-mst": ("09_large_random", "10_large_chain"),
+    "19-medium-cheapest-road-network": ("09_large_random", "10_large_chain"),
     "20-medium-lcs": ("09_large_dna", "10_large_binary"),
     "23-medium-search-suggestions": ("09_large_dense", "10_large_wide"),
     "24-medium-lru-cache": ("09_large_mixed", "10_large_thrash"),

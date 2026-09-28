@@ -1,5 +1,5 @@
 [package]
-name = "mst"
+name = "cheapest-road-network"
 version = "0.1.0"
 edition = "2021"
 

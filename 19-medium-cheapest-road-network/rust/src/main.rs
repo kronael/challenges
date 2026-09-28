@@ -1,4 +1,4 @@
-use mst::{solve, Input};
+use cheapest_road_network::{solve, Input};
 use std::io::{self, Read};
 
 fn main() {
