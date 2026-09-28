@@ -1,7 +1,7 @@
 // Throughput bench: N producers push, one consumer drains. std only.
 use mpsc_queue::MpscQueue;
 use mpsc_queue::PopResult;
-use mpsc_queue::VyukovQueue;
+use mpsc_queue::Queue;
 use std::sync::Arc;
 use std::sync::Barrier;
 use std::thread;
@@ -12,7 +12,7 @@ const PER_PRODUCER: u64 = 2_000_000;
 
 fn main() {
     let total = PRODUCERS as u64 * PER_PRODUCER;
-    let queue = Arc::new(VyukovQueue::<u64>::new());
+    let queue = Arc::new(MpscQueue::<u64>::new());
     let barrier = Arc::new(Barrier::new(PRODUCERS + 1));
 
     let producers: Vec<_> = (0..PRODUCERS)

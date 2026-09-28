@@ -9,7 +9,7 @@ const producers = 8
 const msgsPerProducer = 100_000
 
 func TestStressMpsc(t *testing.T) {
-	queue := NewVyukovQueue()
+	queue := NewMpscQueue()
 
 	var wg sync.WaitGroup
 	barrier := make(chan struct{})
@@ -69,7 +69,7 @@ func TestStressMpsc(t *testing.T) {
 }
 
 func BenchmarkPushPop(b *testing.B) {
-	queue := NewVyukovQueue()
+	queue := NewMpscQueue()
 	done := make(chan struct{})
 
 	go func() {

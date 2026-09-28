@@ -1,6 +1,6 @@
 use mpsc_queue::MpscQueue;
 use mpsc_queue::PopResult;
-use mpsc_queue::VyukovQueue;
+use mpsc_queue::Queue;
 use std::sync::Arc;
 use std::sync::Barrier;
 use std::thread;
@@ -14,7 +14,7 @@ const MSGS: u64 = 100_000;
 // lost+duplicated pair that would leave the sum unchanged.
 #[test]
 fn stress_mpsc() {
-    let queue = Arc::new(VyukovQueue::<u64>::new());
+    let queue = Arc::new(MpscQueue::<u64>::new());
     let barrier = Arc::new(Barrier::new(PRODUCERS + 1));
 
     let handles: Vec<_> = (0..PRODUCERS)

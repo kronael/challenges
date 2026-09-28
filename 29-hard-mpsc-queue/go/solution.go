@@ -11,8 +11,8 @@ type PopResult struct {
 	State int // 0=Item, 1=Empty, 2=Retry
 }
 
-// MpscQueue is the interface a solver must satisfy.
-type MpscQueue interface {
+// Queue is the interface a solver must satisfy.
+type Queue interface {
 	Push(value uint64)
 	TryPop() PopResult
 }
@@ -25,28 +25,28 @@ type node struct {
 	value uint64
 }
 
-// VyukovQueue is the Vyukov non-intrusive MPSC queue stub.
-// head is the tail of the list (producers swap it); tail is the consumer end.
-type VyukovQueue struct {
+// MpscQueue is the multi-producer single-consumer queue stub.
+// head is the producer end of the list; tail is the consumer end.
+type MpscQueue struct {
 	head atomic.Pointer[node]
 	_    [56]byte // padding to push tail to a separate cache line
 	tail *node
 }
 
-// NewVyukovQueue allocates a VyukovQueue with a sentinel stub node.
-func NewVyukovQueue() *VyukovQueue {
+// NewMpscQueue allocates an MpscQueue with a sentinel stub node.
+func NewMpscQueue() *MpscQueue {
 	stub := &node{}
-	q := &VyukovQueue{tail: stub}
+	q := &MpscQueue{tail: stub}
 	q.head.Store(stub)
 	return q
 }
 
-func (q *VyukovQueue) Push(value uint64) {
+func (q *MpscQueue) Push(value uint64) {
 	_ = value
 	panic("Push: not implemented")
 }
 
-func (q *VyukovQueue) TryPop() PopResult {
+func (q *MpscQueue) TryPop() PopResult {
 	panic("TryPop: not implemented")
 }
 
